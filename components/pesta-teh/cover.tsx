@@ -61,7 +61,9 @@ export function Cover({
     playClick();
     if (reduced) return onOpen();
     setOpening(true);
-    timer.current = setTimeout(onOpen, 2300);
+    // Urutan: flap buka (0.35-0.95) -> kertas naik (0.95-2.1) -> hold (2.1-2.8)
+    // -> zoom-in halus ke halaman utama (2.8-3.7) -> halaman utama tampil.
+    timer.current = setTimeout(onOpen, 3700);
   }
 
   const fade = (delay: number) => ({
@@ -88,6 +90,15 @@ export function Cover({
             className="fixed inset-0 z-50 overflow-hidden bg-(--theme-bg) [container-type:size]"
             exit={{ opacity: 0 }}
             transition={{ duration: 0.7, ease: EASE }}
+            animate={
+              opening
+                ? {
+                    scale: 1.22,
+                    opacity: 0,
+                    transition: { duration: 0.9, delay: 2.8, ease: [0.65, 0, 0.35, 1] },
+                  }
+                : { scale: 1, opacity: 1 }
+            }
           >
             <motion.h1
               className={`absolute inset-x-0 z-10 text-center text-[min(7cqw,32px)] text-(--theme-muted) ${SCRIPT}`}
@@ -110,7 +121,7 @@ export function Cover({
                       initial={{ opacity: 0, scaleY: 0.85 }}
                       animate={{ opacity: 1, scaleY: 1 }}
                       style={{ transformOrigin: "50% 88%" }}
-                      transition={{ duration: 0.5, delay: 0.35, ease: EASE }}
+                      transition={{ duration: 0.6, delay: 0.35, ease: "easeOut" }}
                     >
                       <Image
                         src={envelopeOpen.src}
@@ -123,9 +134,9 @@ export function Cover({
                     {/* kartu undangan naik keluar amplop */}
                     <motion.div
                       className="absolute top-[48%] left-[10%] w-[80%]"
-                      initial={{ y: "30%", opacity: 0 }}
-                      animate={{ y: "-62%", opacity: 1 }}
-                      transition={{ duration: 1, delay: 0.95, ease: EASE }}
+                      initial={{ y: "30%", opacity: 0, scale: 0.97 }}
+                      animate={{ y: "-62%", opacity: 1, scale: 1 }}
+                      transition={{ duration: 1.15, delay: 0.95, ease: [0.22, 1, 0.36, 1] }}
                     >
                       <div className="bg-white px-4 pt-5 pb-6 text-center shadow-lg">
                         <p className={`text-[20px] text-(--theme-muted) ${SCRIPT}`}>{COPY.invited}</p>
@@ -137,14 +148,21 @@ export function Cover({
                         </p>
                       </div>
                     </motion.div>
-                    {/* kantong amplop (depan) */}
-                    <Image
-                      src={envelopePocket.src}
-                      alt=""
-                      fill
-                      sizes="300px"
-                      className="object-contain"
-                    />
+                    {/* kantong amplop (depan) — muncul halus, bukan pop */}
+                    <motion.div
+                      className="absolute inset-0"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      transition={{ duration: 0.4, delay: 0.3, ease: "easeOut" }}
+                    >
+                      <Image
+                        src={envelopePocket.src}
+                        alt=""
+                        fill
+                        sizes="300px"
+                        className="object-contain"
+                      />
+                    </motion.div>
                   </>
                 )}
 

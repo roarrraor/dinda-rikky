@@ -1,6 +1,6 @@
 "use client";
 
-import { MotionConfig } from "motion/react";
+import { MotionConfig, motion } from "motion/react";
 import { useEffect, useMemo, useState } from "react";
 import { COPY, ID, PALETTE, paletteVars, type WeddingData } from "@/lib/pesta-teh/data";
 import { displayName, formatDate } from "@/lib/pesta-teh/format";
@@ -114,7 +114,12 @@ export function WeddingPestaTeh({ data, guestName }: { data: WeddingData; guestN
             audioUrl={data.musicUrl}
             style={paletteVars(PALETTE)}
           >
-          <main className="relative overflow-clip">
+          <motion.main
+            className="relative overflow-clip"
+            initial={{ opacity: 0, scale: 0.97 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.9, ease: "easeOut" }}
+          >
             <TableSection first={first} second={second} date={data.date} venue={events[0]?.venue || data.venue} />
             <BurstSection date={data.date} />
             <SalamSection
@@ -147,7 +152,7 @@ export function WeddingPestaTeh({ data, guestName }: { data: WeddingData; guestN
               isMuslimGreeting={data.isMuslimGreeting}
               hashtag={data.hashtag}
             />
-          </main>
+          </motion.main>
           </Cover>
         </div>
       </div>

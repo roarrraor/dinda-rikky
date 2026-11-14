@@ -63,13 +63,11 @@ export function TableSection({
               className="object-contain drop-shadow-[0_8px_10px_rgb(0_0_0/0.25)]"
             />
             <div className="absolute top-[14%] left-[9%] h-[56%] w-[82%] rotate-3 bg-white px-[6%] pt-[9%] text-center shadow-md">
-              <p className={`text-[min(4.6cqw,19px)] text-(--theme-muted) ${SCRIPT}`}>{COPY.invited}</p>
+              <p className={`text-[min(4.2cqw,17px)] text-(--theme-muted) ${SCRIPT}`}>{COPY.invited}</p>
               <p
-                className={`mt-[4%] text-[min(6.6cqw,24px)] leading-[1.05] text-(--theme-muted) wrap-break-word ${SCRIPT}`}
+                className={`mt-[5%] text-[min(5.8cqw,24px)] leading-[1.1] whitespace-nowrap text-(--theme-muted) ${SCRIPT}`}
               >
-                {first}
-                <br />
-                <span className="pl-[18%]">&amp; {second}</span>
+                {first} &amp; {second}
               </p>
             </div>
             <Image src={envelopePocket.src} alt="" fill sizes="220px" className="object-contain" />
@@ -89,16 +87,12 @@ export function TableSection({
               sizes="200px"
               className="object-contain drop-shadow-[0_10px_12px_rgb(0_0_0/0.3)]"
             />
-            <div className={`absolute inset-[22%] text-(--theme-muted) ${SCRIPT}`}>
-              <p className="absolute top-[6%] left-[4%] text-[min(6.4cqw,27px)] leading-none">
-                {formatDate(date, "DD")}
-              </p>
-              <p className="absolute inset-x-0 top-1/2 -translate-y-1/2 text-center text-[min(7.4cqw,31px)] leading-none">
-                {formatDate(date, "MMMM")}
-              </p>
-              <p className="absolute right-[2%] bottom-[6%] text-[min(5.4cqw,23px)] leading-none">
-                {formatDate(date, "YYYY")}
-              </p>
+            <div
+              className={`absolute inset-[18%] flex flex-col items-center justify-center text-center text-(--theme-muted) ${SCRIPT}`}
+            >
+              <p className="text-[min(5.2cqw,22px)] leading-[1.15]">{formatDate(date, "DD")}</p>
+              <p className="text-[min(6.6cqw,28px)] leading-[1.15]">{formatDate(date, "MMMM")}</p>
+              <p className="text-[min(5.2cqw,22px)] leading-[1.15]">{formatDate(date, "YYYY")}</p>
             </div>
           </div>
         </Drop>
