@@ -46,6 +46,12 @@ alter table public.wedding_settings enable row level security;
 -- Policy untuk peran anon (publishable key): tamu boleh baca + kirim
 -- ucapan, kirim RSVP, dan baca data undangan. Tanpa policy update/delete,
 -- anon tidak bisa mengubah atau menghapus apa pun.
+-- (DROP dulu supaya file ini aman dijalankan ulang.)
+drop policy if exists "tamu boleh baca ucapan" on public.wishes;
+drop policy if exists "tamu boleh kirim ucapan" on public.wishes;
+drop policy if exists "tamu boleh kirim rsvp" on public.rsvps;
+drop policy if exists "tamu boleh baca data undangan" on public.wedding_settings;
+
 create policy "tamu boleh baca ucapan"
   on public.wishes for select to anon using (true);
 
