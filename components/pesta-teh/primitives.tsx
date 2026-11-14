@@ -231,16 +231,21 @@ export function SectionTitle({
   kicker,
   children,
   light = false,
+  plain = false,
 }: {
   kicker?: string;
   children: ReactNode;
   light?: boolean;
+  /** plain: judul pakai Marcellus (kapital tegas) supaya gampang dibaca, bukan script */
+  plain?: boolean;
 }) {
   return (
     <div className="text-center">
       {kicker && <p className={KICKER}>{kicker}</p>}
       <h2
-        className={`mt-1 text-[32px] ${light ? "text-(--theme-surface)" : "text-(--theme-muted)"} ${SCRIPT}`}
+        className={`mt-1 text-[32px] ${light ? "text-(--theme-surface)" : "text-(--theme-muted)"} ${
+          plain ? "font-marcellus text-[30px] tracking-[0.06em]" : SCRIPT
+        }`}
       >
         {children}
       </h2>

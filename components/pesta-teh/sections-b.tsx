@@ -56,16 +56,6 @@ function Chevrons({ className = "", down = false }: { className?: string; down?:
   );
 }
 
-function ChevronColumn({ className = "" }: { className?: string }) {
-  return (
-    <div aria-hidden className={`absolute flex flex-col items-center gap-5 text-(--theme-accent) ${className}`}>
-      {[0, 1, 2].map((i) => (
-        <Chevrons key={i} down className="-my-2" />
-      ))}
-    </div>
-  );
-}
-
 /* ---------- Mempelai ---------- */
 
 function PhotoFrame({ src, alt }: { src: string; alt: string }) {
@@ -86,10 +76,6 @@ function PhotoFrame({ src, alt }: { src: string; alt: string }) {
             </pattern>
           </defs>
           <path d={PHOTO_FRAME_PATH} fill={`url(#${id}-g)`} stroke="var(--theme-accent)" strokeWidth="0.6" />
-          <ellipse
-            cx="50" cy="55" rx="41.5" ry="46.5" fill="none" stroke="white" strokeWidth="1.4"
-            strokeDasharray="0.1 2.4" strokeLinecap="round"
-          />
           <ellipse cx="50" cy="55" rx="38.5" ry="43.5" fill="white" />
         </svg>
         <div
@@ -137,12 +123,10 @@ function PersonCard({ p, showPhoto, mirror }: { p: Person; showPhoto: boolean; m
       )}
       <Reveal className={`relative ${showPhoto ? "-mt-[34cqw]" : ""}`}>
         <div
-          className={`relative rounded-t-full bg-(--pt-pink)/70 px-[12%] pb-[26cqw] text-center outline outline-white -outline-offset-8 ${
+          className={`relative rounded-t-full bg-(--pt-pink)/70 px-[12%] pb-[26cqw] text-center ${
             showPhoto ? "pt-[38cqw]" : "pt-[22cqw]"
           }`}
         >
-          <ChevronColumn className="top-[46%] left-[4%]" />
-          <ChevronColumn className="top-[46%] right-[4%]" />
           <Stagger delay={0.2}>
             <p className="flex items-center justify-center gap-2 text-(--theme-accent)">
               <Chevrons />
