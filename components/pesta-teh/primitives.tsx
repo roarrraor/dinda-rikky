@@ -8,7 +8,7 @@ import { ASSETS, type ArtKey } from "@/lib/pesta-teh/data";
 export const EASE = [0.22, 1, 0.36, 1] as const;
 
 // Kelas tipografi
-export const SCRIPT = "font-pinyon font-normal leading-[1.2]";
+export const SCRIPT = "font-great-vibes font-normal leading-[1.2]";
 export const HAND = "font-caveat";
 export const LABEL = "font-marcellus uppercase tracking-[0.2em]";
 export const KICKER = `${LABEL} text-[11px] text-(--theme-accent)`;
@@ -240,7 +240,7 @@ export function SectionTitle({
     <div className="text-center">
       {kicker && <p className={KICKER}>{kicker}</p>}
       <h2
-        className={`mt-1 text-[32px] ${light ? "text-(--theme-surface)" : "text-(--theme-text)"} ${SCRIPT}`}
+        className={`mt-1 text-[32px] ${light ? "text-(--theme-surface)" : "text-(--theme-muted)"} ${SCRIPT}`}
       >
         {children}
       </h2>

@@ -4,7 +4,6 @@
   --font-sans: var(--ff-manrope), system-ui, sans-serif;
   --font-manrope: var(--ff-manrope), system-ui, sans-serif;
   --font-cormorant: var(--ff-cormorant), Georgia, serif;
-  --font-pinyon: var(--ff-pinyon), cursive;
   --font-marcellus: var(--ff-marcellus), serif;
   --font-caveat: var(--ff-caveat), cursive;
   --font-great-vibes: var(--ff-great-vibes), cursive;
@@ -20,12 +19,6 @@ html {
 body {
   background: #ffffff;
   color: #3f4a2c;
-}
-
-/* tema Pesta Teh memakai Pinyon Script yang miring tipis */
-.font-pinyon {
-  font-size-adjust: 0.46;
-  font-style: italic;
 }
 
 .hide-scrollbar {

@@ -63,9 +63,9 @@ export function TableSection({
               className="object-contain drop-shadow-[0_8px_10px_rgb(0_0_0/0.25)]"
             />
             <div className="absolute top-[14%] left-[9%] h-[56%] w-[82%] rotate-3 bg-white px-[6%] pt-[9%] text-center shadow-md">
-              <p className={`text-[min(4.6cqw,19px)] text-(--theme-text) ${SCRIPT}`}>{COPY.invited}</p>
+              <p className={`text-[min(4.6cqw,19px)] text-(--theme-muted) ${SCRIPT}`}>{COPY.invited}</p>
               <p
-                className={`mt-[4%] text-[min(6.6cqw,24px)] leading-[1.05] text-(--theme-text) wrap-break-word ${SCRIPT}`}
+                className={`mt-[4%] text-[min(6.6cqw,24px)] leading-[1.05] text-(--theme-muted) wrap-break-word ${SCRIPT}`}
               >
                 {first}
                 <br />
@@ -89,7 +89,7 @@ export function TableSection({
               sizes="200px"
               className="object-contain drop-shadow-[0_10px_12px_rgb(0_0_0/0.3)]"
             />
-            <div className={`absolute inset-[22%] text-(--theme-text) ${SCRIPT}`}>
+            <div className={`absolute inset-[22%] text-(--theme-muted) ${SCRIPT}`}>
               <p className="absolute top-[6%] left-[4%] text-[min(6.4cqw,27px)] leading-none">
                 {formatDate(date, "DD")}
               </p>
@@ -111,7 +111,7 @@ export function TableSection({
             href="#pt-location"
             className="flex aspect-[345/435] flex-col items-center bg-white px-[7%] pt-[12%] text-center shadow-[0_10px_18px_-8px_rgb(0_0_0/0.45)]"
           >
-            <p className={`text-[min(8cqw,28px)] text-(--theme-text) ${SCRIPT}`}>{COPY.location}</p>
+            <p className={`text-[min(8cqw,28px)] text-(--theme-muted) ${SCRIPT}`}>{COPY.location}</p>
             <div className="relative mt-[6%] w-full" style={{ aspectRatio: `${venueArt.width} / ${venueArt.height}` }}>
               <Image src={venueArt.src} alt="" fill sizes="200px" className="object-contain" />
             </div>

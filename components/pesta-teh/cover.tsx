@@ -90,7 +90,7 @@ export function Cover({
             transition={{ duration: 0.7, ease: EASE }}
           >
             <motion.h1
-              className={`absolute right-[13cqw] z-10 text-[min(7cqw,32px)] text-(--theme-text) ${SCRIPT}`}
+              className={`absolute right-[13cqw] z-10 text-[min(7cqw,32px)] text-(--theme-muted) ${SCRIPT}`}
               style={{ bottom: "calc(50cqh + 29cqw)" }}
               {...fade(0.3)}
             >
@@ -128,8 +128,8 @@ export function Cover({
                       transition={{ duration: 1, delay: 0.95, ease: EASE }}
                     >
                       <div className="bg-white px-4 pt-5 pb-6 text-center shadow-lg">
-                        <p className={`text-[20px] text-(--theme-text) ${SCRIPT}`}>{COPY.invited}</p>
-                        <p className={`text-[26px] text-(--theme-text) ${SCRIPT}`}>
+                        <p className={`text-[20px] text-(--theme-muted) ${SCRIPT}`}>{COPY.invited}</p>
+                        <p className={`text-[26px] text-(--theme-muted) ${SCRIPT}`}>
                           {first} &amp; {second}
                         </p>
                         <p className={`mt-1 text-[9px] text-(--theme-accent) ${LABEL}`}>

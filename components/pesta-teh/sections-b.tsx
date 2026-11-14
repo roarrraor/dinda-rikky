@@ -151,7 +151,7 @@ function PersonCard({ p, showPhoto, mirror }: { p: Person; showPhoto: boolean; m
               </span>
               <Chevrons />
             </p>
-            <h3 className={`mt-1 text-[44px] text-(--theme-text) wrap-break-word ${SCRIPT}`}>
+            <h3 className={`mt-1 text-[44px] text-(--theme-primary) wrap-break-word ${SCRIPT}`}>
               {displayName(p.name, p.nickname)}
             </h3>
             <p className={`text-[12px] text-(--theme-text) wrap-break-word ${LABEL}`}>{p.name}</p>
@@ -353,7 +353,7 @@ export function SaveDateSection({
   return (
     <section id="pt-save-date" className="@container relative overflow-hidden bg-white pt-8 pb-12">
       <Reveal className="px-5">
-        <h2 className={`text-[min(14cqw,44px)] leading-[1.05] text-(--theme-text) ${SCRIPT}`}>
+        <h2 className={`text-[min(14cqw,44px)] leading-[1.05] text-(--theme-muted) ${SCRIPT}`}>
           Save The
           <span className="block pl-[11cqw]">Date</span>
         </h2>
@@ -489,7 +489,7 @@ export function RundownSection({
               <span className={`text-[10px] text-(--theme-text)/70 ${LABEL}`}>{COPY.rundownKicker}</span>
               <Chevrons />
             </p>
-            <h2 className={`mt-1 text-[32px] text-(--theme-text) ${SCRIPT}`}>{COPY.rundownTitle}</h2>
+            <h2 className={`mt-1 text-[32px] text-(--theme-muted) ${SCRIPT}`}>{COPY.rundownTitle}</h2>
           </Reveal>
           <ol className="mt-6">
             {items.map((r, i) => {

@@ -6,7 +6,6 @@ import {
   Great_Vibes,
   Manrope,
   Marcellus,
-  Pinyon_Script,
 } from "next/font/google";
 import "./globals.css";
 
@@ -18,7 +17,6 @@ const cormorant = Cormorant_Garamond({
   variable: "--ff-cormorant",
   display: "swap",
 });
-const pinyon = Pinyon_Script({ subsets: ["latin"], weight: "400", variable: "--ff-pinyon", display: "swap" });
 const marcellus = Marcellus({ subsets: ["latin"], weight: "400", variable: "--ff-marcellus", display: "swap" });
 const caveat = Caveat({ subsets: ["latin"], variable: "--ff-caveat", display: "swap" });
 const greatVibes = Great_Vibes({ subsets: ["latin"], weight: "400", variable: "--ff-great-vibes", display: "swap" });
@@ -60,7 +58,7 @@ export const viewport: Viewport = {
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
-  const fonts = [manrope, cormorant, pinyon, marcellus, caveat, greatVibes, amiri].map((f) => f.variable).join(" ");
+  const fonts = [manrope, cormorant, marcellus, caveat, greatVibes, amiri].map((f) => f.variable).join(" ");
   return (
     <html lang="id" className={`${fonts} h-full`}>
       <body className="h-full font-sans antialiased">{children}</body>

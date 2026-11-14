@@ -52,7 +52,7 @@ export function StorySection({
                 </div>
               )}
               {s.date && <p className={KICKER}>{s.date}</p>}
-              <h3 className={`mt-1 text-[28px] text-(--theme-text) wrap-break-word ${SCRIPT}`}>{s.title}</h3>
+              <h3 className={`mt-1 text-[28px] text-(--theme-primary) wrap-break-word ${SCRIPT}`}>{s.title}</h3>
               <div
                 className={`mt-1 wrap-break-word [&_a]:underline [&_li]:ml-5 [&_ol]:list-decimal [&_ul]:list-disc [&>*+*]:mt-2 ${BODY}`}
                 dangerouslySetInnerHTML={{ __html: sanitizeRichText(s.description) }}
@@ -315,7 +315,7 @@ export function RsvpSection({
         {done ? (
           <div className="py-2 text-center">
             <CheckCircle2 size={34} fill="currentColor" stroke="white" className="mx-auto text-(--theme-primary)" />
-            <p className={`mt-2 text-[32px] text-(--theme-text) ${SCRIPT}`}>{t.thanks}</p>
+            <p className={`mt-2 text-[32px] text-(--theme-primary) ${SCRIPT}`}>{t.thanks}</p>
             <p className={BODY}>
               {showRsvp && form.attendance === "hadir"
                 ? t.received(form.pax, form.eventChoices ? form.events : null)
@@ -661,7 +661,7 @@ export function ClosingSection({
                 {ID.closing.wassalam}
               </p>
             )}
-            <p className={`mt-3 text-[min(7.5cqw,26px)] text-(--theme-text) wrap-break-word ${SCRIPT}`}>
+            <p className={`mt-3 text-[min(7.5cqw,26px)] text-(--theme-muted) wrap-break-word ${SCRIPT}`}>
               {first} &amp; {second}
             </p>
             {tag && (
