@@ -7,6 +7,7 @@ type WishRow = {
   id: string;
   name: string;
   message: string;
+  sticker: string | null;
   attendance: string | null;
   parent_id: string | null;
   created_at: string;
@@ -16,6 +17,7 @@ type PublicWish = {
   id: string;
   name: string;
   message: string;
+  sticker: string | null;
   attendance: string | null;
   createdAt: string;
   replies: { id: string; name: string; message: string }[];
@@ -38,12 +40,25 @@ export async function GET(req: Request) {
     return NextResponse.json(NOT_CONFIGURED, { status: 503 });
   }
 
-  const { data, error } = await supabase
+  let { data, error } = await supabase
     .from("wishes")
-    .select("id, name, message, attendance, parent_id, created_at")
+    .select("id, name, message, sticker, attendance, parent_id, created_at")
     .eq("slug", slug)
     .order("created_at", { ascending: false })
     .limit(200);
+
+  // Kalau kolom `sticker` belum ada (migrasi 0002 belum dijalankan),
+  // baca ulang tanpa stiker supaya list tetap muncul.
+  if (error && error.message.includes("sticker")) {
+    const retry = await supabase
+      .from("wishes")
+      .select("id, name, message, attendance, parent_id, created_at")
+      .eq("slug", slug)
+      .order("created_at", { ascending: false })
+      .limit(200);
+    data = retry.data as typeof data;
+    error = retry.error;
+  }
 
   if (error) {
     console.error("[wishes] select gagal:", error.message);
@@ -59,6 +74,7 @@ export async function GET(req: Request) {
       id: row.id,
       name: row.name,
       message: row.message,
+      sticker: row.sticker ?? null,
       attendance: row.attendance,
       createdAt: row.created_at,
       replies: [],

@@ -12,6 +12,8 @@ export interface RsvpForm {
   maxPax: number;
   message: string;
   setMessage: (v: string) => void;
+  sticker: string;
+  setSticker: (v: string) => void;
   category: string;
   setCategory: (v: string) => void;
   showCategory: boolean;
@@ -37,6 +39,7 @@ export function useRsvpForm(opts: {
   const [attendance, setAttendance] = useState<"hadir" | "tidak">("hadir");
   const [pax, setPax] = useState(1);
   const [message, setMessage] = useState("");
+  const [sticker, setSticker] = useState("");
   const [category, setCategory] = useState("");
   const [events, setEvents] = useState<string[]>(opts.eventChoices ?? []);
   const [submitting, setSubmitting] = useState(false);
@@ -57,10 +60,12 @@ export function useRsvpForm(opts: {
           category,
           events,
           message: o?.customMessage ?? message,
+          sticker,
         }),
       });
       if (!res.ok) throw new Error("Gagal mengirim");
       setMessage("");
+      setSticker("");
       return true;
     } catch {
       setError("Gagal mengirim, coba lagi.");
@@ -80,6 +85,8 @@ export function useRsvpForm(opts: {
     maxPax: opts.maxPax ?? 5,
     message,
     setMessage,
+    sticker,
+    setSticker,
     category,
     setCategory,
     showCategory: false,

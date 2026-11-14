@@ -1,11 +1,12 @@
 import { NextResponse } from "next/server";
 import { getSupabase } from "@/lib/supabase-server";
+import { isStickerKey } from "@/lib/pesta-teh/stickers";
 
 const NOT_CONFIGURED = { ok: false, error: "Database belum dikonfigurasi" };
 
 /**
  * POST /api/rsvp — simpan RSVP + ucapan tamu ke Supabase.
- * Body: { slug, name, attendance ("hadir"|"tidak"|null), pax, category, events[], message }
+ * Body: { slug, name, attendance ("hadir"|"tidak"|null), pax, category, events[], message, sticker }
  * Satu kiriman = satu baris di `rsvps`, dan kalau ada pesan juga satu baris di `wishes`.
  */
 export async function POST(req: Request) {
@@ -29,6 +30,8 @@ export async function POST(req: Request) {
     : [];
   const category = typeof body?.category === "string" && body.category.trim() ? body.category.trim() : null;
   const message = typeof body?.message === "string" ? body.message.trim() : "";
+  const rawSticker = typeof body?.sticker === "string" ? body.sticker.trim() : "";
+  const sticker = isStickerKey(rawSticker) ? rawSticker : "";
 
   const { error: rsvpError } = await supabase.from("rsvps").insert({
     slug,
@@ -45,15 +48,23 @@ export async function POST(req: Request) {
   }
 
   if (message) {
-    const { error: wishError } = await supabase.from("wishes").insert({
+    const wishRow = {
       slug,
       name,
       message,
+      sticker: sticker || null,
       attendance,
       pax,
       events,
       category,
-    });
+    };
+    let { error: wishError } = await supabase.from("wishes").insert(wishRow);
+    // Kalau kolom `sticker` belum ada (migrasi 0002 belum dijalankan),
+    // kirim ulang tanpa stiker supaya ucapan tetap tersimpan.
+    if (wishError && wishError.message.includes("sticker")) {
+      const { sticker: _dropped, ...rowWithoutSticker } = wishRow;
+      ({ error: wishError } = await supabase.from("wishes").insert(rowWithoutSticker));
+    }
     if (wishError) {
       console.error("[rsvp] insert wishes gagal:", wishError.message);
       return NextResponse.json({ ok: false, error: "Gagal menyimpan ucapan" }, { status: 500 });

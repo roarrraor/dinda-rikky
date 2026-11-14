@@ -152,6 +152,7 @@ export const ID = {
       `Kehadiran ${pax} orang${events?.length ? ` di ${events.join(" dan ")}` : ""} sudah kami terima.`,
     wishReceived: "Doa dan ucapanmu sudah kami terima.",
     again: "Kirim lagi",
+    alreadySent: "Satu browser hanya bisa mengirim satu ucapan.",
     name: "Nama lengkap",
     nameLabel: "Nama",
     attendance: "Kehadiran",

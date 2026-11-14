@@ -2,8 +2,9 @@
 
 import Image from "next/image";
 import { useEffect, useState, type FormEvent } from "react";
-import { Camera, CheckCircle2, Copy, Images } from "lucide-react";
+import { Camera, CheckCircle2, Copy, Images, Smile, X } from "lucide-react";
 import { ASSETS, COPY, ID, GUEST_CATEGORIES } from "@/lib/pesta-teh/data";
+import { STICKERS, stickerSrc } from "@/lib/pesta-teh/stickers";
 import { formatDate } from "@/lib/pesta-teh/format";
 import { sanitizeRichText } from "@/lib/pesta-teh/sanitize";
 import { useRsvpForm, type RsvpForm } from "./use-rsvp-form";
@@ -249,6 +250,7 @@ interface WishRow {
   id?: string;
   name: string;
   message: string;
+  sticker?: string | null;
   createdAt: string;
   replies?: { id: string; name: string; message: string }[];
 }
@@ -271,16 +273,36 @@ export function RsvpSection({
   const [done, setDone] = useState(false);
   const [wishes, setWishes] = useState<WishRow[]>([]);
   const [refresh, setRefresh] = useState(0);
+  // Satu browser hanya bisa mengirim satu ucapan: tandanya disimpan di
+  // localStorage, jadi tamu yang sudah kirim tidak bisa kirim lagi dari
+  // browser yang sama (tetap bisa dari browser/HP lain — ini pembatas
+  // ringan, bukan pengaman anti-spam).
+  const sentKey = `dinda-rikky-wish-sent:${slug}`;
+  const [alreadySent, setAlreadySent] = useState(false);
+  const [pickerOpen, setPickerOpen] = useState(false);
+  useEffect(() => {
+    try {
+      setAlreadySent(localStorage.getItem(sentKey) === "1");
+    } catch {
+      /* abaikan kalau localStorage tidak tersedia */
+    }
+  }, [sentKey]);
 
   async function onSubmit(e: FormEvent) {
     e.preventDefault();
-    if (!slug || !form.name.trim()) return;
+    if (!slug || !form.name.trim() || alreadySent) return;
     const hasWish = showWishes && !!form.message.trim();
     const ok = showRsvp
       ? await form.submit(showWishes ? undefined : { customMessage: "" })
       : await form.submit({ skipRsvp: true });
     if (ok) {
       setDone(true);
+      try {
+        localStorage.setItem(sentKey, "1");
+      } catch {
+        /* abaikan */
+      }
+      setAlreadySent(true);
       if (hasWish) setRefresh((n) => n + 1);
     }
   }
@@ -312,7 +334,7 @@ export function RsvpSection({
       </Reveal>
 
       <ScallopCard className="mt-12">
-        {done ? (
+        {done || alreadySent ? (
           <div className="py-2 text-center">
             <CheckCircle2 size={34} fill="currentColor" stroke="white" className="mx-auto text-(--theme-primary)" />
             <p className={`mt-2 text-[32px] text-(--theme-primary) ${SCRIPT}`}>{t.thanks}</p>
@@ -321,13 +343,16 @@ export function RsvpSection({
                 ? t.received(form.pax, form.eventChoices ? form.events : null)
                 : t.wishReceived}
             </p>
-            <button
-              type="button"
-              onClick={() => setDone(false)}
-              className="mt-3 font-cormorant text-[16px] font-semibold underline underline-offset-4 cursor-pointer"
-            >
-              {t.again}
-            </button>
+            {alreadySent && <p className={`${BODY} mt-1`}>{t.alreadySent}</p>}
+            {!alreadySent && (
+              <button
+                type="button"
+                onClick={() => setDone(false)}
+                className="mt-3 font-cormorant text-[16px] font-semibold underline underline-offset-4 cursor-pointer"
+              >
+                {t.again}
+              </button>
+            )}
           </div>
         ) : (
           <form onSubmit={onSubmit} className="space-y-3 text-left">
@@ -421,6 +446,58 @@ export function RsvpSection({
                 className={`${FIELD} resize-none`}
               />
             )}
+            {showWishes && (
+              <div className="relative">
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setPickerOpen((o) => !o)}
+                    aria-expanded={pickerOpen}
+                    className="flex items-center gap-2 rounded-full border border-(--pt-sage) bg-white px-3.5 py-2 font-cormorant text-[16px] font-semibold text-(--theme-text) cursor-pointer"
+                  >
+                    {form.sticker && stickerSrc(form.sticker) ? (
+                      <Image src={stickerSrc(form.sticker)!} alt="" width={24} height={24} className="size-6" />
+                    ) : (
+                      <Smile size={18} className="text-(--theme-primary)" />
+                    )}
+                    {form.sticker ? "Ganti stiker" : "Pilih stiker"}
+                  </button>
+                  {form.sticker && (
+                    <button
+                      type="button"
+                      onClick={() => form.setSticker("")}
+                      aria-label="Hapus stiker pilihan"
+                      className="grid size-8 place-items-center rounded-full border border-(--pt-sage) bg-white text-(--theme-text) cursor-pointer"
+                    >
+                      <X size={15} />
+                    </button>
+                  )}
+                </div>
+                {pickerOpen && (
+                  <div className="absolute right-0 bottom-full left-0 z-20 mb-2 rounded-2xl bg-white p-3 shadow-[0_16px_32px_-12px_rgb(63_74_44/0.45)] ring-1 ring-(--pt-sage)/60">
+                    <p className="font-cormorant text-[16px] font-semibold text-(--theme-text)">
+                      Pilih stiker untuk ucapanmu
+                    </p>
+                    <div className="mt-2 grid max-h-48 grid-cols-4 gap-2 overflow-y-auto pr-1">
+                      {STICKERS.map((s) => (
+                        <button
+                          key={s.key}
+                          type="button"
+                          onClick={() => form.setSticker(s.key)}
+                          aria-label={s.label}
+                          title={s.label}
+                          className={`grid aspect-square place-items-center rounded-xl bg-(--theme-surface) p-1.5 cursor-pointer ${
+                            form.sticker === s.key ? "ring-2 ring-(--theme-primary)" : "ring-1 ring-(--pt-sage)/50"
+                          }`}
+                        >
+                          <Image src={s.src} alt={s.label} width={52} height={52} className="h-full w-full object-contain" />
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
             {form.error && (
               <p className="font-cormorant text-[15px] font-semibold text-(--theme-primary)">{form.error}</p>
             )}
@@ -432,7 +509,7 @@ export function RsvpSection({
       </ScallopCard>
 
       {showWishes && wishes.length > 0 && (
-        <ul className="mt-8 max-h-[26rem] space-y-4 overflow-y-auto overscroll-contain px-1 pr-1">
+        <ul className="mt-8 max-h-[36rem] space-y-4 overflow-y-auto overscroll-contain px-1 pr-1">
           {wishes.map((w, i) => (
             <li
               key={w.id || i}
@@ -449,6 +526,17 @@ export function RsvpSection({
               <p className="mt-1.5 font-cormorant text-[16px] leading-relaxed whitespace-pre-line wrap-break-word text-(--theme-text)/90">
                 {w.message}
               </p>
+              {w.sticker && stickerSrc(w.sticker) && (
+                <span className="mt-3 flex justify-center">
+                  <Image
+                    src={stickerSrc(w.sticker)!}
+                    alt=""
+                    width={96}
+                    height={96}
+                    className="h-24 w-auto"
+                  />
+                </span>
+              )}
               {w.replies?.map((r) => (
                 <p
                   key={r.id}

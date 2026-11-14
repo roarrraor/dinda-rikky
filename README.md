@@ -107,3 +107,22 @@ Buka `/admin` dan masuk dengan password dari `ADMIN_PASSWORD`. Di sana bisa:
   `wedding_settings` dan langsung dipakai halaman utama.
 - **Ucapan** — lihat ucapan terbaru dan hapus yang tidak diinginkan.
 - **RSVP** — lihat daftar konfirmasi kehadiran tamu (read-only).
+
+### Stiker ucapan
+
+Tamu bisa memilih satu stiker saat mengirim ucapan (opsional). Stiker
+muncul di tengah kartu ucapan, di bawah teks.
+
+- File gambar: `public/assets/stickers/` (PNG transparan, 512x512).
+  Set awal: `s1-hati.png`, `s2-cincin.png`, `s3-kue.png`, `s4-teko.png`.
+- Daftar opsi: `lib/pesta-teh/stickers.ts` (`STICKERS`). Untuk menambah
+  opsi baru, taruh file PNG-nya di folder itu lalu tambah satu entri
+  di `STICKERS` — tidak perlu migrasi.
+- Kolom database: `wishes.sticker` menyimpan key stiker (mis. `"hati"`).
+  Jalankan `supabase/migrations/0002_wish_sticker.sql` di SQL Editor
+  sekali saja. Kalau migrasi ini belum dijalankan, ucapan tetap
+  tersimpan dan tampil — hanya tanpa stiker.
+- Satu browser hanya bisa mengirim satu ucapan (ditandai di
+  `localStorage` dengan key `dinda-rikky-wish-sent:<slug>`). List ucapan
+  menampilkan maksimal 200 ucapan terbaru di dalam kotak yang bisa
+  di-scroll (kira-kira 5 kartu terlihat sekaligus).
