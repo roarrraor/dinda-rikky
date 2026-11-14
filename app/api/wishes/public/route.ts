@@ -80,14 +80,18 @@ export async function GET(req: Request) {
       replies: [],
     });
   }
+  // Ucapan utama: terbaru dulu (rows sudah terurut created_at desc).
+  for (const row of rows) {
+    const item = byId.get(row.id);
+    if (!item) continue;
+    if (!row.parent_id) top.push(item);
+  }
   // Balasan tampil kronologis (paling lama dulu) di bawah induknya.
   for (const row of [...rows].reverse()) {
     const item = byId.get(row.id);
     if (!item) continue;
     if (row.parent_id && byId.has(row.parent_id)) {
       byId.get(row.parent_id)!.replies.push({ id: item.id, name: item.name, message: item.message });
-    } else if (!row.parent_id) {
-      top.push(item);
     }
   }
 

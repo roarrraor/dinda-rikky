@@ -353,9 +353,9 @@ export function SaveDateSection({
   return (
     <section id="pt-save-date" className="@container relative overflow-hidden bg-white pt-8 pb-12">
       <Reveal className="px-5">
-        <h2 className={`text-[min(14cqw,44px)] leading-[1.05] text-(--theme-muted) ${SCRIPT}`}>
+        <h2 className={`text-center text-[min(14cqw,44px)] leading-[1.05] text-(--theme-muted) ${SCRIPT}`}>
           Save The
-          <span className="block pl-[11cqw]">Date</span>
+          <span className="block">Date</span>
         </h2>
       </Reveal>
 
@@ -507,7 +507,7 @@ export function RundownSection({
                     <span className="grid size-6 shrink-0 place-items-center rounded-full bg-(--theme-surface) text-(--theme-accent) ring-1 ring-(--theme-accent)/50">
                       <Icon size={12} fill="currentColor" />
                     </span>
-                    <span className={`text-[24px] leading-none font-bold ${HAND}`}>{r.time}</span>
+                    <span className="font-cormorant text-[24px] leading-none font-semibold tracking-[0.06em]">{r.time}</span>
                   </p>
                   <p
                     className={`mx-auto mt-1.5 max-w-64 text-[11px] leading-snug text-(--theme-text) wrap-break-word ${LABEL} tracking-[0.16em]`}

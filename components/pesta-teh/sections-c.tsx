@@ -753,7 +753,7 @@ export function ClosingSection({
               {first} &amp; {second}
             </p>
             {tag && (
-              <p className={`mt-1 text-[10px] text-(--theme-accent) ${LABEL} tracking-[0.12em] wrap-break-word`}>
+              <p className="mt-1 font-marcellus text-[10px] tracking-[0.12em] text-(--theme-accent) wrap-break-word">
                 #{tag}
               </p>
             )}
@@ -772,6 +772,9 @@ export function ClosingSection({
         />
       </Drop>
       <Art art="orchid" className="-right-[1cqw] bottom-[6cqw] z-20 w-[11cqw]" delay={1} />
+      <p className="relative z-10 mt-12 text-center font-cormorant text-[13px] leading-snug text-white/85">
+        Dibuat dengan ♥ untuk momen yang tak terlupakan.
+      </p>
     </section>
   );
 }
