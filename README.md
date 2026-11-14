@@ -68,15 +68,19 @@ Tanpa konfigurasi di bawah, form RSVP/ucapan akan menampilkan pesan
 
 Buat project di https://supabase.com/dashboard, lalu catat:
 - **Project URL** (`SUPABASE_URL`)
+- **publishable key** (`SUPABASE_ANON_KEY`) — ada di Project Settings → API.
+  Key ini cukup supaya form RSVP & list ucapan berfungsi.
 - **service_role key** (`SUPABASE_SERVICE_ROLE_KEY`) — ada di
-  Project Settings → API. Kunci ini rahasia, hanya dipakai server-side.
+  Project Settings → API. OPSIONAL, hanya dipakai halaman `/admin`.
+  Kunci ini rahasia, hanya dipakai server-side.
 
 ### 2. Jalankan migrasi
 
 Di Supabase Dashboard → SQL Editor, jalankan isi file
 `supabase/migrations/0001_wedding.sql` (membuat tabel `wishes`, `rsvps`,
-dan `wedding_settings` dengan Row Level Security aktif tanpa policy anon —
-akses database hanya lewat API route dengan service_role key).
+dan `wedding_settings` dengan Row Level Security + policy untuk tamu:
+tamu boleh membaca ucapan, mengirim ucapan/RSVP, dan membaca data
+undangan — tapi tidak bisa mengubah atau menghapus apa pun).
 
 ### 3. Isi environment
 
@@ -84,9 +88,11 @@ akses database hanya lewat API route dengan service_role key).
 cp .env.example .env.local
 ```
 
-Isi `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, dan `ADMIN_PASSWORD`
-(password untuk masuk ke halaman admin). Restart `npm run dev` setelah
-mengubah `.env.local`.
+Isi `SUPABASE_URL`, `SUPABASE_ANON_KEY`, dan `ADMIN_PASSWORD`
+(password untuk masuk ke halaman admin). `SUPABASE_SERVICE_ROLE_KEY`
+hanya perlu diisi kalau mau memakai semua fitur `/admin`. Restart
+`npm run dev` setelah mengubah `.env.local`. Di Vercel, isi env var yang
+sama di Settings → Environment Variables lalu redeploy.
 
 ### 4. (Opsional) Seed ucapan contoh
 

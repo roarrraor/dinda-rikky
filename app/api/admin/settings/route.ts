@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { isAdminLoggedIn } from "@/lib/admin-auth";
-import { getSupabase } from "@/lib/supabase-server";
+import { getServiceSupabase } from "@/lib/supabase-server";
 import { getWeddingData, getWeddingSettings } from "@/lib/pesta-teh/settings";
 
 /** Field WeddingData yang bisa diubah dari halaman /admin. */
@@ -43,14 +43,18 @@ export async function GET() {
 /**
  * POST /api/admin/settings — simpan field-field di atas sebagai satu baris
  * wedding_settings key='wedding' (merge dengan yang sudah tersimpan).
+ * Butuh service key (anon tidak boleh menulis pengaturan).
  */
 export async function POST(req: Request) {
   if (!(await isAdminLoggedIn())) {
     return NextResponse.json({ ok: false, error: "Tidak login" }, { status: 401 });
   }
-  const supabase = getSupabase();
+  const supabase = getServiceSupabase();
   if (!supabase) {
-    return NextResponse.json({ ok: false, error: "Database belum dikonfigurasi" }, { status: 503 });
+    return NextResponse.json(
+      { ok: false, error: "Ubah data undangan butuh SUPABASE_SERVICE_ROLE_KEY" },
+      { status: 503 },
+    );
   }
   const body = await req.json().catch(() => null);
   if (!body || typeof body !== "object" || Array.isArray(body)) {

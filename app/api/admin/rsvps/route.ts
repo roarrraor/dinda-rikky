@@ -1,15 +1,18 @@
 import { NextResponse } from "next/server";
 import { isAdminLoggedIn } from "@/lib/admin-auth";
-import { getSupabase } from "@/lib/supabase-server";
+import { getServiceSupabase } from "@/lib/supabase-server";
 
-/** GET /api/admin/rsvps — daftar RSVP (read-only), terbaru dulu. */
+/** GET /api/admin/rsvps — daftar RSVP (read-only), terbaru dulu. Butuh service key. */
 export async function GET() {
   if (!(await isAdminLoggedIn())) {
     return NextResponse.json({ ok: false, error: "Tidak login" }, { status: 401 });
   }
-  const supabase = getSupabase();
+  const supabase = getServiceSupabase();
   if (!supabase) {
-    return NextResponse.json({ ok: false, error: "Database belum dikonfigurasi" }, { status: 503 });
+    return NextResponse.json(
+      { ok: false, error: "Daftar RSVP butuh SUPABASE_SERVICE_ROLE_KEY" },
+      { status: 503 },
+    );
   }
   const { data, error } = await supabase
     .from("rsvps")

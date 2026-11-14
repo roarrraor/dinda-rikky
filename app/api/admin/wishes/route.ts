@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { isAdminLoggedIn } from "@/lib/admin-auth";
-import { getSupabase } from "@/lib/supabase-server";
+import { getServiceSupabase, getSupabase } from "@/lib/supabase-server";
 
 /** GET /api/admin/wishes — daftar ucapan (termasuk balasan), terbaru dulu. */
 export async function GET() {
@@ -23,14 +23,17 @@ export async function GET() {
   return NextResponse.json({ ok: true, data: data ?? [] });
 }
 
-/** DELETE /api/admin/wishes?id= — hapus satu ucapan (balasannya ikut terhapus). */
+/** DELETE /api/admin/wishes?id= — hapus satu ucapan (balasannya ikut terhapus). Butuh service key. */
 export async function DELETE(req: Request) {
   if (!(await isAdminLoggedIn())) {
     return NextResponse.json({ ok: false, error: "Tidak login" }, { status: 401 });
   }
-  const supabase = getSupabase();
+  const supabase = getServiceSupabase();
   if (!supabase) {
-    return NextResponse.json({ ok: false, error: "Database belum dikonfigurasi" }, { status: 503 });
+    return NextResponse.json(
+      { ok: false, error: "Hapus ucapan butuh SUPABASE_SERVICE_ROLE_KEY" },
+      { status: 503 },
+    );
   }
   const id = new URL(req.url).searchParams.get("id")?.trim() ?? "";
   if (!id) {

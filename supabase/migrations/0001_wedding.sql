@@ -1,9 +1,12 @@
 -- Migrasi awal: tabel ucapan, RSVP, dan pengaturan undangan.
 -- Jalankan di Supabase Dashboard -> SQL Editor (sekali saja).
 --
--- RLS diaktifkan di semua tabel TANPA policy untuk peran anon:
--- tidak ada akses langsung dari browser. Semua baca/tulis lewat
--- API route Next.js yang memakai service_role key.
+-- RLS diaktifkan di semua tabel. Peran anon (publishable key) hanya boleh:
+--   - baca ucapan (wishes) + tulis ucapan baru,
+--   - tulis RSVP baru,
+--   - baca pengaturan undangan (data yang memang tampil di situs).
+-- Semua tulis/hapus lain (ubah data undangan, hapus ucapan, baca daftar
+-- RSVP) hanya bisa lewat service_role key dari API route /admin.
 
 create table if not exists public.wishes (
   id uuid primary key default gen_random_uuid(),
@@ -39,6 +42,21 @@ create table if not exists public.wedding_settings (
 alter table public.wishes enable row level security;
 alter table public.rsvps enable row level security;
 alter table public.wedding_settings enable row level security;
+
+-- Policy untuk peran anon (publishable key): tamu boleh baca + kirim
+-- ucapan, kirim RSVP, dan baca data undangan. Tanpa policy update/delete,
+-- anon tidak bisa mengubah atau menghapus apa pun.
+create policy "tamu boleh baca ucapan"
+  on public.wishes for select to anon using (true);
+
+create policy "tamu boleh kirim ucapan"
+  on public.wishes for insert to anon with check (true);
+
+create policy "tamu boleh kirim rsvp"
+  on public.rsvps for insert to anon with check (true);
+
+create policy "tamu boleh baca data undangan"
+  on public.wedding_settings for select to anon using (true);
 
 create index if not exists wishes_slug_created_at_idx
   on public.wishes (slug, created_at desc);
