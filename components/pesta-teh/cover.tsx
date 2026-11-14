@@ -195,9 +195,11 @@ export function Cover({
             {/* bunga kiri-atas & kanan-bawah: tepat di sudut amplop.
                 Amplop: lebar 68cqw (15-83cqw), tinggi 51.9cqw (715x546),
                 tepi atas di 50cqh-25.9cqw, tepi bawah di 50cqh+26cqw dari atas.
-                Bunga 25x43.3cqw (386x669), dipusatkan tepat di tiap sudut. */}
+                Bunga 25x43.3cqw (386x669). Bunga atas menggantung dari sudut
+                kiri-atas (pucuknya nempel di tepi atas amplop), bunga bawah
+                dipusatkan di sudut kanan-bawah. */}
             {[
-              { key: "tl", className: "left-[2.5cqw]", top: "calc(50cqh - 47.6cqw)", flip: false, delay: 0.8 },
+              { key: "tl", className: "left-[2.5cqw]", top: "calc(50cqh - 29cqw)", flip: false, delay: 0.8 },
               { key: "br", className: "left-[70.5cqw]", top: "calc(50cqh + 4.4cqw)", flip: true, delay: 1 },
             ].map((f) => (
               <motion.div
