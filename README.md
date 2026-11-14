@@ -1,13 +1,8 @@
-# kalabertemu.id/pesta-teh — rekonstruksi Next.js
-
-Source aslinya hilang, jadi project ini **direkonstruksi dari mirror hasil build** (`kalabertemu_id.zip`):
-HTML hasil SSR + JS chunk yang sudah di-compile (komponen `WeddingPestaTeh`, data demo, teks, palet, aset).
-
 ## Jalankan
 
 ```bash
 npm install
-npm run dev        # http://localhost:3000/pesta-teh
+npm run dev      
 npm run build && npm start
 ```
 
