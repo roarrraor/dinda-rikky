@@ -1,6 +1,5 @@
 /**
- * Data & konstanta tema "Pesta Teh".
- * Direkonstruksi dari bundel JS hasil build kalabertemu.id (chunk 7392 & 9233).
+ * Data & konstanta undangan pernikahan Dinda & Rikky.
  */
 
 const asset = (file: string, width: number, height: number) => ({
@@ -174,7 +173,7 @@ export const GUEST_CATEGORIES = [
   { value: "teman", label: "Teman" },
 ];
 
-/** Data demo yang dipakai halaman /pesta-teh (fungsi `tu()` di bundel asli) */
+/** Data undangan yang dipakai halaman utama (/) */
 export interface WeddingData {
   id: string;
   slug: string;
@@ -227,8 +226,8 @@ export interface WeddingData {
   musicUrl?: string;
 }
 
-const groom = "Ahmad Rizky, S.Kom.";
-const bride = "Amira Salwa, S.Pd.";
+const groom = "Rikky Arisendi";
+const bride = "Dinda Intan Pratiwi";
 
 const story = [
   {
@@ -251,8 +250,8 @@ const story = [
   },
 ];
 
-// Di mirror hanya gallery-1 & gallery-2 yang berhasil ter-crawl.
-// Aslinya ada gallery-1 s/d gallery-5 — tambahkan file-nya lalu uncomment baris di bawah.
+// Foto galeri: tambah file gallery-3.webp dst ke public/assets/illustrations/
+// lalu uncomment baris di bawah.
 const galleryPhotos = [
   "/assets/illustrations/gallery-1.webp",
   "/assets/illustrations/gallery-2.webp",
@@ -261,15 +260,14 @@ const galleryPhotos = [
   // "/assets/illustrations/gallery-5.webp",
 ];
 
-export const DEMO_WEDDING: WeddingData = {
+export const WEDDING: WeddingData = {
   id: "bbbbbbbb-0000-0000-0000-000000000001",
-  slug: "rizky-amira",
+  slug: "dinda-rikky",
   groom,
   bride,
-  groomNickname: "Rizky",
-  brideNickname: "Amira",
-  groomInstagram: "rizky.pratama_",
-  brideInstagram: "amira.salwa",
+  groomNickname: "Rikky",
+  brideNickname: "Dinda",
+  nameOrder: "bride-first",
   groomPhoto: "/assets/illustrations/groom.webp",
   bridePhoto: "/assets/illustrations/bride.webp",
   fatherGroom: "H. Pratama Wibowo",
@@ -296,7 +294,7 @@ export const DEMO_WEDDING: WeddingData = {
   qrisPhoto: "/assets/illustrations/qris.webp",
   giftAddress: "Jl. H. Pratama Wibowo No.12, Kebayoran Baru, Jakarta Selatan 12110",
   giftReceiver: groom,
-  hashtag: "RizkyAmira2025",
+  hashtag: "DindaRikky",
   story: story.map((s) => ({ ...s, photoUrl: null })),
   photos: galleryPhotos,
   gifts: [

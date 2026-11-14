@@ -1,54 +1,59 @@
+# Undangan Pernikahan Digital — Dinda & Rikky
+
+Website undangan pernikahan Dinda Intan Pratiwi & Rikky Arisendi.
+Satu halaman utama: amplop pembuka, meja teh, salam, mempelai, save the date,
+susunan acara, kisah, dress code, galeri, photobooth, RSVP & doa, tanda kasih,
+dan penutup.
+
 ## Jalankan
 
 ```bash
 npm install
-npm run dev      
+npm run dev      # http://localhost:3000
 npm run build && npm start
 ```
 
-Next.js 15 (App Router) · React 19 · Tailwind CSS v4 · motion (framer-motion) · dayjs · lucide-react.
-Font diambil via `next/font/google` (butuh internet saat build).
+Next.js 15 (App Router) · React 19 · Tailwind CSS v4 · motion (framer-motion) ·
+dayjs · lucide-react. Font diambil via `next/font/google` (butuh internet saat build).
 
-- `/pesta-teh` → halaman demo (nama tamu: `/pesta-teh?to=Budi`)
-- `/preview/pesta-teh` → redirect ke `/pesta-teh` (URL lama di mirror)
+Nama tamu di cover bisa dikirim lewat query: `/?to=Budi`.
 
 ## Struktur
 
 ```
-app/pesta-teh/page.tsx          halaman demo
-app/api/{wishes/public,photobox,rsvp}   endpoint (stub)
+app/page.tsx                    halaman utama (undangan)
+app/layout.tsx                  metadata & font
+app/api/{wishes/public,photobox,rsvp}   endpoint (stub, lihat catatan di bawah)
 components/pesta-teh/
   wedding-pesta-teh.tsx         komponen utama (susun semua section)
-  phone-frame.tsx               bingkai HP + panel kiri (desktop)
   cover.tsx                     amplop (drag / ketuk untuk buka)
   sections-a.tsx                meja teh, burst foto, salam
   sections-b.tsx                mempelai, save the date, susunan acara
   sections-c.tsx                kisah, dress code, galeri, photobooth, RSVP, hadiah, penutup
   primitives.tsx                animasi & elemen dekoratif
-lib/pesta-teh/data.ts           aset, palet, teks, DATA DEMO (Rizky & Amira)
-public/assets/                  gambar dari mirror
+lib/pesta-teh/data.ts           aset, palet, teks, data pernikahan
+public/assets/                  gambar undangan
 ```
 
-Mau pakai untuk pasangan lain: ganti objek `DEMO_WEDDING` di `lib/pesta-teh/data.ts`
-(atau kirim objek `WeddingData` dari database ke `<WeddingPestaTeh data={...} />`).
+## Ganti data pernikahan
 
-## Yang TIDAK ikut ter-capture di mirror (perlu kamu lengkapi)
+Semua data ada di `lib/pesta-teh/data.ts` (objek `WEDDING`):
+
+- Nama mempelai, nama orang tua, urutan anak, foto mempelai
+- Tanggal, tempat akad & resepsi, alamat, link Google Maps
+- Susunan acara (`rundown`), kisah (`story`), foto galeri (`photos`)
+- Rekening hadiah (`gifts`), foto QRIS (`qrisPhoto`), alamat kirim kado
+- Hashtag, dress code, musik (`musicUrl`)
+
+Foto: taruh file di `public/assets/illustrations/` atau `public/assets/pesta-teh/`,
+lalu ubah path-nya di `data.ts`.
+
+## Yang masih perlu dilengkapi
 
 | Item | Keadaan |
 |---|---|
-| `public/assets/bgm.mp3` | Di mirror cuma file kosong (49 byte). Taruh lagu aslimu di path ini. |
-| Font | File `.woff2` di mirror cuma stub. Dipakai Google Fonts dengan nama yang sama dari CSS asli (Cormorant Garamond, Pinyon Script, Marcellus, Caveat, Great Vibes, Amiri, Manrope). |
-| `gallery-3/4/5.webp` | Hanya `gallery-1` & `gallery-2` yang ada. Uncomment barisnya di `data.ts` kalau file-nya ketemu. |
-| Photobooth (kamera + galeri foto tamu) | Kode kamera/upload tidak ada di mirror. Tombol hanya membuka dialog placeholder. `/api/photobox` = stub. |
-| RSVP / ucapan | UI lengkap, tapi pada halaman demo form sengaja nonaktif (sama seperti aslinya). `/api/rsvp` = stub, belum menyimpan. `/api/wishes/public` mengembalikan snapshot ucapan dari mirror. |
-| Konfirmasi tanda kasih (form transfer) | Aslinya hanya muncul untuk slug tertentu; tidak direkonstruksi. |
-| `/themes`, `/order` | Halaman lain di situsmu, bukan bagian dari pesta-teh. Tombol "Katalog Tema" & "Order Sekarang" masih mengarah ke sana. |
-
-## Catatan jujur soal akurasi
-
-- Struktur, ukuran, posisi (cqw/%), warna, animasi, dan teks diambil langsung dari kode hasil build, jadi harusnya sangat mirip.
-- Ikon aslinya Iconsax; di sini diganti lucide-react (mirip, tidak identik).
-- Beberapa util kecil ditulis ulang karena kodenya ada di chunk yang tidak ikut ter-capture: sanitizer teks kisah, hook RSVP,
-  footer credit di bawah halaman penutup, daftar kategori tamu. Semua ditandai komentar di kodenya.
-- Sudah dicek: typecheck lolos, `next build` sukses, SSR `/pesta-teh` memuat teks & struktur yang sama dengan mirror.
-  Belum dibandingkan visual pixel-per-pixel dengan situs live, jadi bandingkan di browser dulu.
+| `public/assets/bgm.mp3` | Masih file kosong. Taruh lagu pernikahan di path ini. |
+| Tanggal, tempat, orang tua, rekening | Masih data contoh — ganti dengan data asli di `data.ts`. |
+| RSVP & ucapan (`/api/rsvp`, `/api/wishes/public`) | Masih stub: tidak menyimpan apa pun. Sambungkan ke database (mis. Supabase/Postgres) supaya ucapan tamu tersimpan dan tampil. Ucapan yang tampil sekarang adalah contoh dari `lib/pesta-teh/wishes.json`. |
+| Photobox (`/api/photobox`) | Masih stub: belum menyimpan foto tamu. |
+| Foto mempelai & galeri | Masih gambar ilustrasi contoh — ganti dengan foto asli. |

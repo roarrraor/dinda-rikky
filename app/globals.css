@@ -35,12 +35,3 @@ body {
 .hide-scrollbar::-webkit-scrollbar {
   display: none;
 }
-
-/* ukuran HP hanya di desktop; di mobile undangan full-screen */
-@media (min-width: 1024px) {
-  .phone-shell-native {
-    zoom: var(--phone-zoom, 1);
-    width: 422px;
-    height: 876px;
-  }
-}

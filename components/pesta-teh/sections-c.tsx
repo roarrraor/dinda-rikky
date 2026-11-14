@@ -6,7 +6,6 @@ import { Camera, CheckCircle2, Copy, Images } from "lucide-react";
 import { ASSETS, COPY, ID, GUEST_CATEGORIES } from "@/lib/pesta-teh/data";
 import { formatDate } from "@/lib/pesta-teh/format";
 import { sanitizeRichText } from "@/lib/pesta-teh/sanitize";
-import { usePreview } from "./preview-context";
 import { useRsvpForm, type RsvpForm } from "./use-rsvp-form";
 import { Lightbox } from "./lightbox";
 import {
@@ -268,7 +267,6 @@ export function RsvpSection({
   showRsvp: boolean;
   showWishes: boolean;
 }) {
-  const isPreview = usePreview();
   const t = ID.rsvp;
   const [done, setDone] = useState(false);
   const [wishes, setWishes] = useState<WishRow[]>([]);
@@ -276,7 +274,7 @@ export function RsvpSection({
 
   async function onSubmit(e: FormEvent) {
     e.preventDefault();
-    if (isPreview || !slug || !form.name.trim()) return;
+    if (!slug || !form.name.trim()) return;
     const hasWish = showWishes && !!form.message.trim();
     const ok = showRsvp
       ? await form.submit(showWishes ? undefined : { customMessage: "" })
@@ -686,12 +684,6 @@ export function ClosingSection({
         />
       </Drop>
       <Art art="orchid" className="-right-[1cqw] bottom-[6cqw] z-20 w-[11cqw]" delay={1} />
-
-      <div className="absolute inset-x-0 bottom-0 z-30 bg-white/90">
-        <p className="py-1 text-center font-cormorant text-[11px] tracking-wide text-(--theme-muted)">
-          kalabertemu.id
-        </p>
-      </div>
     </section>
   );
 }

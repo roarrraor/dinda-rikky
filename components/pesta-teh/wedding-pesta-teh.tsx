@@ -6,7 +6,6 @@ import { COPY, ID, PALETTE, paletteVars, type WeddingData } from "@/lib/pesta-te
 import { displayName, formatDate } from "@/lib/pesta-teh/format";
 import { buildEvents } from "@/lib/pesta-teh/events";
 import { Cover } from "./cover";
-import { PhoneFrame } from "./phone-frame";
 import { BurstSection, SalamSection, TableSection } from "./sections-a";
 import { CoupleSection, RundownSection, SaveDateSection, type Person } from "./sections-b";
 import {
@@ -81,29 +80,20 @@ export function WeddingPestaTeh({ data, guestName }: { data: WeddingData; guestN
 
   return (
     <MotionConfig reducedMotion="user">
-      <PhoneFrame
-        names={[first, second]}
-        first={first}
-        second={second}
-        date={data.date}
-        venue={data.venue}
-        groomPhoto={data.groomPhoto}
-        bridePhoto={data.bridePhoto}
-        groomName={data.groom}
-        brideName={data.bride}
-        bgColor={PALETTE.bg}
-        panelBgColor={PALETTE.primary}
-      >
-        <Cover
-          first={first}
-          second={second}
-          date={data.date}
-          guestName={guestName}
-          opened={opened}
-          onOpen={() => setOpened(true)}
-          audioUrl={data.musicUrl}
-          style={paletteVars(PALETTE)}
-        >
+      <div className="min-h-dvh bg-[#EFEAE3]">
+        {/* transform di sini bikin overlay cover (position: fixed) nempel ke kolom ini,
+            bukan ke viewport — jadi di desktop amplop tetap selebar kolom undangan */}
+        <div className="mx-auto min-h-dvh w-full max-w-[480px] bg-white shadow-[0_0_60px_rgba(0,0,0,0.10)] [transform:translateZ(0)]">
+          <Cover
+            first={first}
+            second={second}
+            date={data.date}
+            guestName={guestName}
+            opened={opened}
+            onOpen={() => setOpened(true)}
+            audioUrl={data.musicUrl}
+            style={paletteVars(PALETTE)}
+          >
           <main className="relative overflow-clip">
             <TableSection first={first} second={second} date={data.date} venue={events[0]?.venue || data.venue} />
             <BurstSection date={data.date} />
@@ -138,8 +128,9 @@ export function WeddingPestaTeh({ data, guestName }: { data: WeddingData; guestN
               hashtag={data.hashtag}
             />
           </main>
-        </Cover>
-      </PhoneFrame>
+          </Cover>
+        </div>
+      </div>
     </MotionConfig>
   );
 }

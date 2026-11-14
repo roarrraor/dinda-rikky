@@ -30,31 +30,26 @@ const amiri = Amiri({
 });
 
 export const metadata: Metadata = {
-  title: "kalabertemu.id - Undangan Pernikahan Digital",
+  title: "The Wedding of Dinda & Rikky",
   description:
-    "Buat undangan pernikahan digital yang elegan, interaktif, dan mudah dibagikan. Pilih dari berbagai tema cantik mulai Rp 39.000.",
-  authors: [{ name: "kalabertemu.id", url: "https://kalabertemu.id" }],
+    "Undangan pernikahan digital Dinda Intan Pratiwi & Rikky Arisendi. Kami mengundang Bapak/Ibu/Saudara/i untuk hadir di hari bahagia kami.",
   keywords: [
     "undangan pernikahan digital",
     "undangan digital",
     "wedding invitation",
-    "kalabertemu.id",
+    "Dinda & Rikky",
     "undangan online",
   ],
   openGraph: {
-    title: "kalabertemu.id - Undangan Pernikahan Digital",
+    title: "The Wedding of Dinda & Rikky",
     description:
-      "Buat undangan pernikahan digital yang elegan, interaktif, dan mudah dibagikan. Pilih dari berbagai tema cantik mulai Rp 39.000.",
-    url: "https://kalabertemu.id",
-    siteName: "kalabertemu.id",
+      "Undangan pernikahan digital Dinda Intan Pratiwi & Rikky Arisendi. Kami mengundang Bapak/Ibu/Saudara/i untuk hadir di hari bahagia kami.",
     locale: "id_ID",
     type: "website",
-    images: [{ url: "https://kalabertemu.id/assets/img-share-cover.jpg", width: 1200, height: 630 }],
   },
   twitter: {
     card: "summary_large_image",
-    site: "@kalabertemu",
-    title: "kalabertemu.id - Undangan Pernikahan Digital",
+    title: "The Wedding of Dinda & Rikky",
   },
 };
 
