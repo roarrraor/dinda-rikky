@@ -9,6 +9,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@supabase/supabase-js": "^2.119.0",
     "dayjs": "^1.11.13",
     "lucide-react": "^0.468.0",
     "motion": "^11.15.0",

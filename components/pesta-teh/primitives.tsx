@@ -240,7 +240,7 @@ export function SectionTitle({
     <div className="text-center">
       {kicker && <p className={KICKER}>{kicker}</p>}
       <h2
-        className={`mt-1 text-[40px] ${light ? "text-(--theme-surface)" : "text-(--theme-muted)"} ${SCRIPT}`}
+        className={`mt-1 text-[32px] ${light ? "text-(--theme-surface)" : "text-(--theme-text)"} ${SCRIPT}`}
       >
         {children}
       </h2>

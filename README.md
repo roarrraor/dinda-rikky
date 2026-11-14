@@ -54,6 +54,50 @@ lalu ubah path-nya di `data.ts`.
 |---|---|
 | `public/assets/bgm.mp3` | Masih file kosong. Taruh lagu pernikahan di path ini. |
 | Tanggal, tempat, orang tua, rekening | Masih data contoh — ganti dengan data asli di `data.ts`. |
-| RSVP & ucapan (`/api/rsvp`, `/api/wishes/public`) | Masih stub: tidak menyimpan apa pun. Sambungkan ke database (mis. Supabase/Postgres) supaya ucapan tamu tersimpan dan tampil. Ucapan yang tampil sekarang adalah contoh dari `lib/pesta-teh/wishes.json`. |
+| RSVP & ucapan (`/api/rsvp`, `/api/wishes/public`) | Tersimpan di Supabase (lihat "Database & Admin" di bawah). Tanpa env yang dikonfigurasi, form menampilkan "Database belum dikonfigurasi" dan tidak menyimpan apa pun. |
 | Photobox (`/api/photobox`) | Masih stub: belum menyimpan foto tamu. |
 | Foto mempelai & galeri | Masih gambar ilustrasi contoh — ganti dengan foto asli. |
+
+## Database & Admin (Supabase)
+
+RSVP, ucapan, dan data undangan disimpan di Supabase (Postgres, free tier).
+Tanpa konfigurasi di bawah, form RSVP/ucapan akan menampilkan pesan
+"Database belum dikonfigurasi" dan ucapan tidak tersimpan.
+
+### 1. Buat project Supabase gratis
+
+Buat project di https://supabase.com/dashboard, lalu catat:
+- **Project URL** (`SUPABASE_URL`)
+- **service_role key** (`SUPABASE_SERVICE_ROLE_KEY`) — ada di
+  Project Settings → API. Kunci ini rahasia, hanya dipakai server-side.
+
+### 2. Jalankan migrasi
+
+Di Supabase Dashboard → SQL Editor, jalankan isi file
+`supabase/migrations/0001_wedding.sql` (membuat tabel `wishes`, `rsvps`,
+dan `wedding_settings` dengan Row Level Security aktif tanpa policy anon —
+akses database hanya lewat API route dengan service_role key).
+
+### 3. Isi environment
+
+```bash
+cp .env.example .env.local
+```
+
+Isi `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, dan `ADMIN_PASSWORD`
+(password untuk masuk ke halaman admin). Restart `npm run dev` setelah
+mengubah `.env.local`.
+
+### 4. (Opsional) Seed ucapan contoh
+
+Jalankan isi `supabase/seed-wishes.sql` di SQL Editor untuk mengisi tabel
+`wishes` dengan 13 ucapan contoh dari `lib/pesta-teh/wishes.json`.
+
+### 5. Buka halaman admin
+
+Buka `/admin` dan masuk dengan password dari `ADMIN_PASSWORD`. Di sana bisa:
+- **Data Undangan** — ubah nama mempelai, tanggal, tempat, orang tua,
+  hashtag, dress code, alamat kado, dll. Tersimpan di tabel
+  `wedding_settings` dan langsung dipakai halaman utama.
+- **Ucapan** — lihat ucapan terbaru dan hapus yang tidak diinginkan.
+- **RSVP** — lihat daftar konfirmasi kehadiran tamu (read-only).

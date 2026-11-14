@@ -52,7 +52,7 @@ export function StorySection({
                 </div>
               )}
               {s.date && <p className={KICKER}>{s.date}</p>}
-              <h3 className={`mt-1 text-[32px] text-(--theme-primary) wrap-break-word ${SCRIPT}`}>{s.title}</h3>
+              <h3 className={`mt-1 text-[28px] text-(--theme-text) wrap-break-word ${SCRIPT}`}>{s.title}</h3>
               <div
                 className={`mt-1 wrap-break-word [&_a]:underline [&_li]:ml-5 [&_ol]:list-decimal [&_ul]:list-disc [&>*+*]:mt-2 ${BODY}`}
                 dangerouslySetInnerHTML={{ __html: sanitizeRichText(s.description) }}
@@ -315,7 +315,7 @@ export function RsvpSection({
         {done ? (
           <div className="py-2 text-center">
             <CheckCircle2 size={34} fill="currentColor" stroke="white" className="mx-auto text-(--theme-primary)" />
-            <p className={`mt-2 text-[40px] text-(--theme-primary) ${SCRIPT}`}>{t.thanks}</p>
+            <p className={`mt-2 text-[32px] text-(--theme-text) ${SCRIPT}`}>{t.thanks}</p>
             <p className={BODY}>
               {showRsvp && form.attendance === "hadir"
                 ? t.received(form.pax, form.eventChoices ? form.events : null)
@@ -432,27 +432,27 @@ export function RsvpSection({
       </ScallopCard>
 
       {showWishes && wishes.length > 0 && (
-        <ul className="mt-8 max-h-[26rem] space-y-3 overflow-y-auto overscroll-contain px-1 pr-1">
+        <ul className="mt-8 max-h-[26rem] space-y-4 overflow-y-auto overscroll-contain px-1 pr-1">
           {wishes.map((w, i) => (
             <li
               key={w.id || i}
-              className="border-l-4 border-(--theme-accent) bg-white px-4 py-3 shadow-[0_4px_10px_-4px_rgb(63_74_44/0.3)]"
+              className="rounded-[20px] bg-(--theme-surface) px-5 py-4 shadow-[0_8px_18px_-10px_rgb(63_74_44/0.45)]"
             >
               <p className="flex items-baseline justify-between gap-3">
-                <span className="min-w-0 font-cormorant text-[17px] font-bold text-(--theme-primary) wrap-break-word">
+                <span className={`min-w-0 text-[26px] leading-none text-(--theme-text) wrap-break-word ${SCRIPT}`}>
                   {w.name}
                 </span>
-                <span className="shrink-0 font-cormorant text-[13px] text-(--theme-muted)">
+                <span className="shrink-0 font-cormorant text-[12px] tracking-wide text-(--theme-muted)">
                   {formatDate(w.createdAt, "D MMM YYYY")}
                 </span>
               </p>
-              <p className="mt-0.5 font-cormorant text-[16px] leading-snug whitespace-pre-line wrap-break-word">
+              <p className="mt-1.5 font-cormorant text-[16px] leading-relaxed whitespace-pre-line wrap-break-word text-(--theme-text)/90">
                 {w.message}
               </p>
               {w.replies?.map((r) => (
                 <p
                   key={r.id}
-                  className="mt-1 border-l-2 border-(--pt-sage) pl-3 font-cormorant text-[15px] leading-snug wrap-break-word"
+                  className="mt-2 rounded-xl bg-white/70 px-3 py-2 font-cormorant text-[15px] leading-snug wrap-break-word"
                 >
                   <span className="font-bold">{r.name}</span> {r.message}
                 </p>
@@ -661,7 +661,7 @@ export function ClosingSection({
                 {ID.closing.wassalam}
               </p>
             )}
-            <p className={`mt-3 text-[min(7.5cqw,30px)] text-(--theme-muted) wrap-break-word ${SCRIPT}`}>
+            <p className={`mt-3 text-[min(7.5cqw,26px)] text-(--theme-text) wrap-break-word ${SCRIPT}`}>
               {first} &amp; {second}
             </p>
             {tag && (
