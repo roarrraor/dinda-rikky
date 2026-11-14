@@ -258,10 +258,6 @@ interface WishRow {
 const FIELD =
   "w-full border border-(--pt-sage) bg-white px-3.5 py-2.5 font-cormorant text-[18px] text-(--theme-text) placeholder:text-(--theme-muted) outline-none focus:border-(--theme-primary)";
 
-/** Kolom nama tamu: font biasa (sans) supaya gampang dibaca, bukan serif tipis. */
-const NAME_FIELD =
-  "w-full border border-(--pt-sage) bg-white px-3.5 py-2.5 font-sans text-[17px] text-(--theme-text) placeholder:text-(--theme-muted) outline-none focus:border-(--theme-primary)";
-
 export function RsvpSection({
   form,
   slug,
@@ -390,7 +386,7 @@ export function RsvpSection({
               value={form.name}
               onChange={(e) => form.setName(e.target.value)}
               placeholder={t.name}
-              className={NAME_FIELD}
+              className={FIELD}
             />
             {showRsvp && (
               <>
