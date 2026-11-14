@@ -1,10 +1,11 @@
 "use client";
 
 import { MotionConfig } from "motion/react";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { COPY, ID, PALETTE, paletteVars, type WeddingData } from "@/lib/pesta-teh/data";
 import { displayName, formatDate } from "@/lib/pesta-teh/format";
 import { buildEvents } from "@/lib/pesta-teh/events";
+import { resolveGuestName } from "@/lib/pesta-teh/guests";
 import { Cover } from "./cover";
 import { BurstSection, SalamSection, TableSection } from "./sections-a";
 import { CoupleSection, RundownSection, SaveDateSection, type Person } from "./sections-b";
@@ -26,6 +27,19 @@ const FALLBACK_GREETING =
 export function WeddingPestaTeh({ data, guestName }: { data: WeddingData; guestName?: string }) {
   const [opened, setOpened] = useState(false);
 
+  // Nama tamu: ?to= dari server didahulukan (boleh nama langsung atau slug
+  // daftar tamu); kalau tidak ada, baca #slug dari hash di browser.
+  const [hashGuest, setHashGuest] = useState<string | undefined>(undefined);
+  useEffect(() => {
+    try {
+      const h = window.location.hash.replace(/^#/, "").trim();
+      if (h) setHashGuest(resolveGuestName(decodeURIComponent(h)));
+    } catch {
+      /* abaikan hash yang tidak valid */
+    }
+  }, []);
+  const effectiveGuest = resolveGuestName(guestName) ?? hashGuest;
+
   const events = useMemo(
     () =>
       buildEvents({
@@ -38,9 +52,15 @@ export function WeddingPestaTeh({ data, guestName }: { data: WeddingData; guestN
 
   const form = useRsvpForm({
     slug: data.slug,
-    initialName: guestName,
+    initialName: effectiveGuest,
     eventChoices: events.map((e) => e.title),
   });
+
+  // Nama dari #slug baru ketahuan setelah mount — isi ke form kalau masih kosong.
+  useEffect(() => {
+    if (hashGuest && !form.name) form.setName(hashGuest);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [hashGuest]);
 
   const brideFirst = data.nameOrder === "bride-first";
   const groomName = displayName(data.groom, data.groomNickname);
@@ -88,7 +108,7 @@ export function WeddingPestaTeh({ data, guestName }: { data: WeddingData; guestN
             first={first}
             second={second}
             date={data.date}
-            guestName={guestName}
+            guestName={effectiveGuest}
             opened={opened}
             onOpen={() => setOpened(true)}
             audioUrl={data.musicUrl}

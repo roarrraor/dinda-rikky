@@ -48,6 +48,22 @@ Semua data ada di `lib/pesta-teh/data.ts` (objek `WEDDING`):
 Foto: taruh file di `public/assets/illustrations/` atau `public/assets/pesta-teh/`,
 lalu ubah path-nya di `data.ts`.
 
+## Link undangan per tamu
+
+Nama tamu di cover berubah otomatis sesuai link yang dikirim. Dua cara:
+
+1. **Nama langsung di link** (cara yang paling umum di web undangan):
+   `https://dinda-rikky-weld.vercel.app/?to=Budi+Santoso`
+   — spasi diganti `+`, nama tampil apa adanya.
+2. **Slug pendek dari daftar tamu** (nama asli tidak kelihatan di link):
+   `https://dinda-rikky-weld.vercel.app/#tamu-a`
+   atau `https://dinda-rikky-weld.vercel.app/?to=tamu-a`
+
+Daftar tamu ada di `lib/pesta-teh/guests.ts` (`GUESTS`): satu baris per tamu,
+misal `"tamu-a": "Bapak Budi Santoso"`. Nama dari link juga otomatis terisi
+di kolom nama form RSVP. Tanpa `?to=` atau `#slug`, cover menampilkan
+"Tamu Undangan".
+
 ## Yang masih perlu dilengkapi
 
 | Item | Keadaan |

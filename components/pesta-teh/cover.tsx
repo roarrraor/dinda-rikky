@@ -90,7 +90,7 @@ export function Cover({
             transition={{ duration: 0.7, ease: EASE }}
           >
             <motion.h1
-              className={`absolute right-[13cqw] z-10 text-[min(7cqw,32px)] text-(--theme-muted) ${SCRIPT}`}
+              className={`absolute inset-x-0 z-10 text-center text-[min(7cqw,32px)] text-(--theme-muted) ${SCRIPT}`}
               style={{ bottom: "calc(50cqh + 29cqw)" }}
               {...fade(0.3)}
             >
@@ -192,15 +192,18 @@ export function Cover({
               </div>
             </div>
 
-            {/* bunga kiri-atas & kanan-bawah */}
+            {/* bunga kiri-atas & kanan-bawah: tepat di sudut amplop.
+                Amplop: lebar 68cqw (15-83cqw), tinggi 51.9cqw (715x546),
+                tepi atas di 50cqh-25.9cqw, tepi bawah di 50cqh+26cqw dari atas.
+                Bunga 25x43.3cqw (386x669), dipusatkan tepat di tiap sudut. */}
             {[
-              { key: "tl", className: "left-[6cqw]", top: `calc(${ENVELOPE_BOTTOM} - 16cqw)`, flip: false, delay: 0.8 },
-              { key: "br", className: "right-[6cqw]", top: `calc(${ENVELOPE_BOTTOM} + 14cqw)`, flip: true, delay: 1 },
+              { key: "tl", className: "left-[2.5cqw]", top: "calc(50cqh - 47.6cqw)", flip: false, delay: 0.8 },
+              { key: "br", className: "left-[70.5cqw]", top: "calc(50cqh + 4.4cqw)", flip: true, delay: 1 },
             ].map((f) => (
               <motion.div
                 key={f.key}
                 aria-hidden
-                className={`pointer-events-none absolute z-20 w-[25cqw] origin-top ${f.className}`}
+                className={`pointer-events-none absolute z-20 w-[25cqw] origin-center ${f.className}`}
                 style={{ top: f.top }}
                 initial={{ opacity: 0, y: -12 }}
                 animate={
