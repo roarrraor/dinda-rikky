@@ -1,0 +1,46 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: var(--ff-manrope), system-ui, sans-serif;
+  --font-manrope: var(--ff-manrope), system-ui, sans-serif;
+  --font-cormorant: var(--ff-cormorant), Georgia, serif;
+  --font-pinyon: var(--ff-pinyon), cursive;
+  --font-marcellus: var(--ff-marcellus), serif;
+  --font-caveat: var(--ff-caveat), cursive;
+  --font-great-vibes: var(--ff-great-vibes), cursive;
+  --font-amiri: var(--ff-amiri), "Traditional Arabic", serif;
+}
+
+html {
+  min-height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background: #ffffff;
+  color: #3f4a2c;
+}
+
+/* tema Pesta Teh memakai Pinyon Script yang miring tipis */
+.font-pinyon {
+  font-size-adjust: 0.46;
+  font-style: italic;
+}
+
+.hide-scrollbar {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* ukuran HP hanya di desktop; di mobile undangan full-screen */
+@media (min-width: 1024px) {
+  .phone-shell-native {
+    zoom: var(--phone-zoom, 1);
+    width: 422px;
+    height: 876px;
+  }
+}
