@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useState, type FormEvent } from "react";
+import { useEffect, useRef, useState, type FormEvent } from "react";
 import { Camera, CheckCircle2, Copy, Images, Smile, X } from "lucide-react";
 import { ASSETS, COPY, ID, GUEST_CATEGORIES } from "@/lib/pesta-teh/data";
 import { STICKERS, stickerSrc } from "@/lib/pesta-teh/stickers";
@@ -284,6 +284,30 @@ export function RsvpSection({
   const sentKey = `dinda-rikky-wish-sent:${slug}`;
   const [alreadySent, setAlreadySent] = useState(false);
   const [pickerOpen, setPickerOpen] = useState(false);
+  const listRef = useRef<HTMLUListElement>(null);
+  // Kunci scroll di dalam list ucapan: kalau list sudah mentok atas/bawah,
+  // gestur swipe tidak boleh diteruskan ke halaman utama (overscroll-contain
+  // saja ternyata tidak cukup di HP Roar).
+  useEffect(() => {
+    const el = listRef.current;
+    if (!el) return;
+    let startY = 0;
+    const onTouchStart = (e: TouchEvent) => {
+      startY = e.touches[0].clientY;
+    };
+    const onTouchMove = (e: TouchEvent) => {
+      const dy = e.touches[0].clientY - startY;
+      const atTop = el.scrollTop <= 0;
+      const atBottom = el.scrollTop + el.clientHeight >= el.scrollHeight - 1;
+      if ((dy > 0 && atTop) || (dy < 0 && atBottom)) e.preventDefault();
+    };
+    el.addEventListener("touchstart", onTouchStart, { passive: true });
+    el.addEventListener("touchmove", onTouchMove, { passive: false });
+    return () => {
+      el.removeEventListener("touchstart", onTouchStart);
+      el.removeEventListener("touchmove", onTouchMove);
+    };
+  }, [wishes.length]);
   useEffect(() => {
     try {
       setAlreadySent(localStorage.getItem(sentKey) === "1");
@@ -513,14 +537,17 @@ export function RsvpSection({
       </ScallopCard>
 
       {showWishes && wishes.length > 0 && (
-        <ul className="mt-8 max-h-[36rem] space-y-4 overflow-y-auto overscroll-contain px-1 pr-1">
+        <ul
+          ref={listRef}
+          className="mt-8 max-h-[36rem] touch-pan-y space-y-4 overflow-y-auto overscroll-contain px-1 pr-1"
+        >
           {wishes.map((w, i) => (
             <li
               key={w.id || i}
               className="rounded-[20px] bg-(--theme-surface) px-5 py-4 shadow-[0_8px_18px_-10px_rgb(63_74_44/0.45)]"
             >
               <p className="flex items-baseline justify-between gap-3">
-                <span className={`min-w-0 text-[26px] leading-none text-(--theme-text) wrap-break-word ${SCRIPT}`}>
+                <span className="min-w-0 font-cormorant text-[20px] leading-tight font-semibold text-(--theme-text) wrap-break-word">
                   {w.name}
                 </span>
                 <span className="shrink-0 font-cormorant text-[12px] tracking-wide text-(--theme-muted)">
@@ -700,10 +727,11 @@ export function ClosingSection({
     <section
       id="pt-closing"
       style={GRASS}
-      className="@container relative flex min-h-dvh flex-col justify-center overflow-hidden px-5 pt-12 pb-20 lg:[[data-phone-frame]_&]:min-h-[844px]"
+      className="@container relative flex min-h-dvh flex-col overflow-hidden px-5 pt-12 lg:[[data-phone-frame]_&]:min-h-[844px]"
     >
       <Art art="orchid" className="top-0 right-[2cqw] z-20 w-[13cqw]" delay={0.6} />
 
+      <div className="flex flex-1 flex-col justify-center">
       <Drop className="relative z-10 mx-auto w-[68cqw]" tilt={-3}>
         <div className="relative aspect-square">
           <svg
@@ -764,8 +792,9 @@ export function ClosingSection({
           </div>
         </Drop>
       </div>
+      </div>
 
-      <Drop className="absolute bottom-[5cqw] -left-[6cqw] w-[34cqw]" tilt={-8} delay={0.9}>
+      <Drop className="absolute bottom-[20cqw] -left-[6cqw] w-[30cqw]" tilt={-8} delay={0.9}>
         <Image
           src={teacup.src}
           alt=""
@@ -775,10 +804,13 @@ export function ClosingSection({
           className="h-auto w-full drop-shadow-[0_10px_12px_rgb(0_0_0/0.3)]"
         />
       </Drop>
-      <Art art="orchid" className="-right-[1cqw] bottom-[6cqw] z-20 w-[11cqw]" delay={1} />
-      <p className="relative z-10 mt-12 text-center font-cormorant text-[13px] leading-snug text-white/85">
-        Dibuat dengan ♥ untuk momen yang tak terlupakan.
-      </p>
+      <Art art="orchid" className="-right-[1cqw] bottom-[20cqw] z-20 w-[11cqw]" delay={1} />
+      <footer className="relative z-10 -mx-5 mt-10 overflow-hidden rounded-t-[28px] bg-(--theme-surface) shadow-[0_-8px_18px_-10px_rgb(63_74_44/0.25)]">
+        <div aria-hidden className="h-3" style={GINGHAM} />
+        <p className="px-5 pt-4 pb-6 text-center font-cormorant text-[13px] leading-snug text-(--theme-text)">
+          Dibuat dengan ♥ untuk momen yang tak terlupakan.
+        </p>
+      </footer>
     </section>
   );
 }
