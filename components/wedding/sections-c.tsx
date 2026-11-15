@@ -244,13 +244,10 @@ interface WishRow {
 }
 
 const FIELD =
-  "w-full rounded-2xl border border-(--pt-sage) bg-white px-4 py-3 font-montserrat text-[16px] text-(--theme-text) placeholder:text-(--theme-muted) outline-none focus:border-(--theme-primary)";
-
-/** Tipografi fitur WA: Montserrat biasa (ramah, umum) — bukan script/serif undangan. Warna brand tetap sama. */
-const WA_BODY = "font-montserrat text-[15px] leading-relaxed";
+  "w-full rounded-2xl border border-(--pt-sage) bg-white px-4 py-3 font-cormorant text-[18px] text-(--theme-text) placeholder:text-(--theme-muted) outline-none focus:border-(--theme-primary)";
 
 /** Label kecil huruf kapital di atas tiap field, ala form inveet.id. */
-const FIELD_LABEL = "mb-1.5 block font-montserrat text-[12px] font-semibold uppercase tracking-[0.08em] text-(--theme-muted)";
+const FIELD_LABEL = `${LABEL} mb-1.5 block text-[12px] font-bold text-(--theme-muted)`;
 
 /** Warna nama pengirim di bubble chat, ala warna-warni grup WA. */
 const NAME_COLORS = ["#00A884", "#0093DD", "#7B61FF", "#E65100", "#C2185B", "#008069"];
@@ -428,7 +425,7 @@ export function RsvpSection({
   }, [slug, refresh, showWishes]);
 
   const choice = (active: boolean) =>
-    `rounded-2xl border px-3 py-2.5 font-montserrat text-[17px] font-semibold transition-colors cursor-pointer ${
+    `rounded-2xl border px-3 py-2.5 font-cormorant text-[17px] font-semibold transition-colors cursor-pointer ${
       active
         ? "border-(--theme-primary) bg-(--theme-primary) text-white"
         : "border-(--pt-sage) bg-white text-(--theme-text)"
@@ -437,26 +434,26 @@ export function RsvpSection({
   return (
     <section id="pt-rsvp" className="@container relative px-5 pt-10 pb-10">
       <Reveal className="text-center">
-        <SectionTitle friendly>{showRsvp ? "RSVP" : t.wishesTitle}</SectionTitle>
-        <p className={`mx-auto mt-3 max-w-80 ${WA_BODY}`}>{showRsvp ? COPY.rsvp : COPY.wishes}</p>
+        <SectionTitle plain={showRsvp}>{showRsvp ? "RSVP" : t.wishesTitle}</SectionTitle>
+        <p className={`mx-auto mt-3 max-w-80 ${BODY}`}>{showRsvp ? COPY.rsvp : COPY.wishes}</p>
       </Reveal>
 
       <ScallopCard className="mt-12">
         {done || alreadySent ? (
           <div className="py-2 text-center">
             <CheckCircle2 size={34} fill="currentColor" stroke="white" className="mx-auto text-(--theme-primary)" />
-            <p className="mt-2 font-montserrat text-[26px] font-semibold leading-tight text-(--theme-primary)">{t.thanks}</p>
-            <p className={WA_BODY}>
+            <p className={`mt-2 text-[32px] text-(--theme-primary) ${SCRIPT}`}>{t.thanks}</p>
+            <p className={BODY}>
               {showRsvp && form.attendance === "hadir"
                 ? t.received(form.pax, form.eventChoices ? form.events : null)
                 : t.wishReceived}
             </p>
-            {alreadySent && <p className={`${WA_BODY} mt-1`}>{t.alreadySent}</p>}
+            {alreadySent && <p className={`${BODY} mt-1`}>{t.alreadySent}</p>}
             {!alreadySent && (
               <button
                 type="button"
                 onClick={() => setDone(false)}
-                className="mt-3 font-montserrat text-[16px] font-semibold underline underline-offset-4 cursor-pointer"
+                className="mt-3 font-cormorant text-[16px] font-semibold underline underline-offset-4 cursor-pointer"
               >
                 {t.again}
               </button>
@@ -491,7 +488,7 @@ export function RsvpSection({
                       required
                       value={form.attendance ?? ""}
                       onChange={(e) => form.setAttendance(e.target.value as "hadir" | "tidak")}
-                      className={`w-full appearance-none rounded-2xl border border-(--pt-sage) bg-white px-4 py-3 pr-10 font-montserrat text-[18px] outline-none focus:border-(--theme-primary) ${
+                      className={`w-full appearance-none rounded-2xl border border-(--pt-sage) bg-white px-4 py-3 pr-10 font-cormorant text-[18px] outline-none focus:border-(--theme-primary) ${
                         form.attendance ? "text-(--theme-text)" : "text-(--theme-muted)"
                       }`}
                     >
@@ -533,7 +530,7 @@ export function RsvpSection({
                         <legend className={FIELD_LABEL}>{t.events}</legend>
                         <div className="space-y-2">
                           {form.eventChoices.map((ev) => (
-                            <label key={ev} className="flex items-center gap-3 font-montserrat text-[17px] cursor-pointer">
+                            <label key={ev} className="flex items-center gap-3 font-cormorant text-[17px] cursor-pointer">
                               <input
                                 type="checkbox"
                                 checked={form.events.includes(ev)}
@@ -558,7 +555,7 @@ export function RsvpSection({
                         >
                           <Minus size={18} />
                         </button>
-                        <span className="font-montserrat text-[19px] font-bold text-(--theme-text)">
+                        <span className="font-cormorant text-[19px] font-bold text-(--theme-text)">
                           {form.pax}{" "}
                           <span className="text-[16px] font-semibold text-(--theme-muted)">orang</span>
                         </span>
@@ -601,7 +598,7 @@ export function RsvpSection({
                     type="button"
                     onClick={() => setPickerOpen((o) => !o)}
                     aria-expanded={pickerOpen}
-                    className="flex items-center gap-2 rounded-full border border-(--pt-sage) bg-white px-3.5 py-2 font-montserrat text-[16px] font-semibold text-(--theme-text) cursor-pointer"
+                    className="flex items-center gap-2 rounded-full border border-(--pt-sage) bg-white px-3.5 py-2 font-cormorant text-[16px] font-semibold text-(--theme-text) cursor-pointer"
                   >
                     {form.sticker && stickerSrc(form.sticker) ? (
                       <Image src={stickerSrc(form.sticker)!} alt="" width={24} height={24} className="size-6" />
@@ -623,7 +620,7 @@ export function RsvpSection({
                 </div>
                 {pickerOpen && (
                   <div className="absolute right-0 bottom-full left-0 z-20 mb-2 rounded-2xl bg-white p-3 shadow-[0_16px_32px_-12px_rgb(63_74_44/0.45)] ring-1 ring-(--pt-sage)/60">
-                    <p className="font-montserrat text-[16px] font-semibold text-(--theme-text)">
+                    <p className="font-cormorant text-[16px] font-semibold text-(--theme-text)">
                       Pilih stiker untuk ucapanmu
                     </p>
                     <div className="mt-2 grid max-h-48 grid-cols-4 gap-2 overflow-y-auto pr-1">
@@ -647,9 +644,9 @@ export function RsvpSection({
               </div>
             )}
             {form.error && (
-              <p className="font-montserrat text-[15px] font-semibold text-(--theme-primary)">{form.error}</p>
+              <p className="font-cormorant text-[15px] font-semibold text-(--theme-primary)">{form.error}</p>
             )}
-            <PtButton type="submit" disabled={form.submitting} friendly className="w-full">
+            <PtButton type="submit" disabled={form.submitting} className="w-full uppercase tracking-[0.15em]">
               {form.submitting ? t.sending : t.send}
             </PtButton>
           </form>
@@ -666,16 +663,16 @@ export function RsvpSection({
             <MessageCircle size={22} />
             <span className="absolute -top-1.5 -right-1.5 flex h-5 min-w-5 items-center justify-center">
               <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-red-500 opacity-60" />
-              <span className="relative inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-red-500 px-1 font-montserrat text-[11px] leading-none font-bold text-white ring-2 ring-white">
+              <span className="relative inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-red-500 px-1 font-cormorant text-[11px] leading-none font-bold text-white ring-2 ring-white">
                 {wishes.length}
               </span>
             </span>
           </span>
           <span className="min-w-0 flex-1">
-            <span className="block font-montserrat text-[19px] leading-tight font-bold text-(--theme-text)">
+            <span className="block font-cormorant text-[19px] leading-tight font-bold text-(--theme-text)">
               Ucapan &amp; Doa
             </span>
-            <span className="block truncate font-montserrat text-[15px] leading-snug text-(--theme-muted)">
+            <span className="block truncate font-cormorant text-[15px] leading-snug text-(--theme-muted)">
               {latestWish ? `${latestWish.name}: ${latestWish.message}` : `${wishes.length} ucapan dari tamu`}
             </span>
           </span>
@@ -683,7 +680,7 @@ export function RsvpSection({
         </button>
       )}
       {showWishes && wishes.length === 0 && (
-        <p className={`mt-8 text-center ${WA_BODY} text-(--theme-muted)`}>
+        <p className={`mt-8 text-center ${BODY} text-(--theme-muted)`}>
           Belum ada ucapan — jadilah yang pertama mengirim doa!
         </p>
       )}
