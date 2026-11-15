@@ -8,6 +8,30 @@
   --font-caveat: var(--ff-caveat), cursive;
   --font-great-vibes: var(--ff-great-vibes), cursive;
   --font-amiri: var(--ff-amiri), "Traditional Arabic", serif;
+  --font-playfair: var(--ff-playfair), Georgia, serif;
+  --font-cinzel: var(--ff-cinzel), serif;
+  --font-dancing: var(--ff-dancing), cursive;
+  --font-montserrat: var(--ff-montserrat), system-ui, sans-serif;
+}
+
+/* Variabel tema Pesta Teh — harus ada di :root supaya semua rute (termasuk
+   /photobooth yang tidak memakai Cover) punya nilainya. Sebelum ini variabel
+   ini hanya di-set inline di Cover halaman undangan, jadi class seperti
+   bg-(--theme-primary) di /photobooth tidak punya warna: tombol aktif
+   jadi putih polos dengan teks putih yang tidak kelihatan. */
+:root {
+  --theme-primary: #6f9440;
+  --theme-accent: #eba7b1;
+  --theme-bg: #ffffff;
+  --theme-surface: #fdeef2;
+  --theme-text: #3f4a2c;
+  --theme-muted: #7d8968;
+  --theme-accent-text: #2b2725;
+  --theme-primary-text: #ffffff;
+  --pt-pink: #f9cbd3;
+  --pt-leaf: #e1f1c3;
+  --pt-pale: #c5de9b;
+  --pt-sage: #a8bd84;
 }
 
 html {

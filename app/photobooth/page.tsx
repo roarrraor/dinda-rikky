@@ -13,7 +13,7 @@ export default function PhotoboothPage() {
   return (
     <PhotoboothStudio
       caption={{
-        names: "DINDA & RIKKY",
+        names: "Dinda & Rikky",
         date: formatDate(WEDDING.date, "DD.MM.YY"),
         tag: WEDDING.hashtag ? `#${WEDDING.hashtag}` : null,
       }}

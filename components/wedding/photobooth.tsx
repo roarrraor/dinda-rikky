@@ -207,7 +207,7 @@ export async function renderStrip(canvas: HTMLCanvasElement, opts: StripOptions)
     ctx.fillStyle = frame.ink;
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
-    const scriptLike = font.id === "great-vibes" || font.id === "caveat";
+    const scriptLike = font.id === "dancing" || font.id === "caveat";
     ctx.font = `${scriptLike ? 76 : 46}px ${font.family}`;
     ctx.fillText(caption.names, g.w / 2, footerTop + 88, g.w - 120);
     ctx.font = "22px Marcellus, serif";

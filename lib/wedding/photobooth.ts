@@ -171,12 +171,14 @@ export interface PhotoboothFont {
   family: string;
 }
 
+/** Pilihan font — disamakan dengan inveet (Playfair default). */
 export const FONTS: PhotoboothFont[] = [
-  { id: "great-vibes", name: "Great Vibes", family: "'Great Vibes', cursive" },
+  { id: "playfair", name: "Playfair", family: "'Playfair Display', serif" },
   { id: "cormorant", name: "Cormorant", family: "'Cormorant Garamond', serif" },
-  { id: "marcellus", name: "Marcellus", family: "Marcellus, serif" },
+  { id: "cinzel", name: "Cinzel", family: "Cinzel, serif" },
+  { id: "dancing", name: "Dancing", family: "'Dancing Script', cursive" },
   { id: "caveat", name: "Caveat", family: "Caveat, cursive" },
-  { id: "manrope", name: "Manrope", family: "Manrope, sans-serif" },
+  { id: "montserrat", name: "Montserrat", family: "Montserrat, sans-serif" },
 ];
 
 export type ShapeId = "kotak" | "lembut" | "polaroid";
@@ -207,7 +209,7 @@ export const FILTERS: PhotoboothFilter[] = [
 
 export const DEFAULT_FILTER_ID = "klasik";
 export const DEFAULT_FRAME_ID = "teh-melati";
-export const DEFAULT_FONT_ID = "great-vibes";
+export const DEFAULT_FONT_ID = "playfair";
 export const DEFAULT_SHAPE_ID: ShapeId = "lembut";
 
 /** Teks UI studio (Bahasa Indonesia). */
