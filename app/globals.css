@@ -12,6 +12,9 @@
   --font-cinzel: var(--ff-cinzel), serif;
   --font-dancing: var(--ff-dancing), cursive;
   --font-montserrat: var(--ff-montserrat), system-ui, sans-serif;
+  /* Font sistem perangkat (San Francisco di iPhone) — untuk sheet chat WA,
+     biar terasa seperti WA biasa, bukan font web. */
+  --font-system: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
 }
 
 /* Variabel tema Pesta Teh — harus ada di :root supaya semua rute (termasuk

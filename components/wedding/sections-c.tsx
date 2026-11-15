@@ -723,10 +723,10 @@ export function RsvpSection({
                     <MessageCircle size={20} />
                   </span>
                   <span className="min-w-0 flex-1">
-                    <span className="block font-montserrat text-[19px] leading-tight font-bold">
+                    <span className="block font-system text-[17px] leading-tight font-bold">
                       Ucapan &amp; Doa
                     </span>
-                    <span className="block font-montserrat text-[13px] leading-tight text-white/85">
+                    <span className="block font-system text-[12px] leading-tight text-white/85">
                       {wishes.length} ucapan dari tamu
                     </span>
                   </span>
@@ -739,7 +739,7 @@ export function RsvpSection({
                         setTyping(false);
                         followRef.current = true;
                       }}
-                      className="shrink-0 rounded-full bg-white/15 px-3 py-1.5 font-montserrat text-[13px] font-bold text-white"
+                      className="shrink-0 rounded-full bg-white/15 px-3 py-1.5 font-system text-[12px] font-bold text-white"
                     >
                       Lewati
                     </button>
@@ -767,7 +767,7 @@ export function RsvpSection({
                       <div key={w.id || i}>
                         {day !== prevDay && (
                           <div className="my-3 flex justify-center">
-                            <span className="rounded-full bg-white/80 px-3 py-1 font-montserrat text-[12px] font-semibold tracking-wide text-(--theme-muted) shadow-sm">
+                            <span className="rounded-full bg-white/80 px-3 py-1 font-system text-[11px] font-semibold tracking-wide text-(--theme-muted) shadow-sm">
                               {day}
                             </span>
                           </div>
@@ -785,13 +785,13 @@ export function RsvpSection({
                           >
                             {!mine && (
                               <p
-                                className="font-montserrat text-[15px] leading-tight font-bold"
+                                className="font-system text-[14px] leading-tight font-bold"
                                 style={{ color: nameColor(w.name) }}
                               >
                                 {w.name}
                               </p>
                             )}
-                            <p className="font-montserrat text-[16px] leading-snug whitespace-pre-line wrap-break-word text-(--theme-text)">
+                            <p className="font-system text-[15px] leading-snug whitespace-pre-line wrap-break-word text-(--theme-text)">
                               {w.message}
                             </p>
                             {w.sticker && stickerSrc(w.sticker) && (
@@ -808,7 +808,7 @@ export function RsvpSection({
                             <div className="mt-1 flex items-end justify-between gap-2">
                               {w.attendance ? (
                                 <span
-                                  className={`flex items-center gap-1 font-montserrat text-[11px] leading-none font-semibold ${
+                                  className={`flex items-center gap-1 font-system text-[11px] leading-none font-semibold ${
                                     w.attendance === "hadir" ? "text-[#2E7D32]" : "text-(--theme-muted)"
                                   }`}
                                 >
@@ -822,7 +822,7 @@ export function RsvpSection({
                                 <span />
                               )}
                               <span
-                                className={`shrink-0 font-montserrat text-[11px] leading-none ${
+                                className={`shrink-0 font-system text-[11px] leading-none ${
                                   mine ? "text-[#4A7A3A]" : "text-(--theme-muted)"
                                 }`}
                               >
@@ -832,7 +832,7 @@ export function RsvpSection({
                             {w.replies?.map((r) => (
                               <p
                                 key={r.id}
-                                className="mt-2 rounded-xl bg-black/[0.04] px-3 py-2 font-montserrat text-[14px] leading-snug wrap-break-word"
+                                className="mt-2 rounded-xl bg-black/[0.04] px-3 py-2 font-system text-[13px] leading-snug wrap-break-word"
                               >
                                 <span className="font-bold">{r.name}</span> {r.message}
                               </p>
@@ -864,7 +864,7 @@ export function RsvpSection({
                   <button
                     type="button"
                     onClick={() => setSheetOpen(false)}
-                    className="flex flex-1 items-center justify-center gap-2 rounded-full bg-(--theme-primary) px-4 py-2.5 font-montserrat text-[17px] font-bold text-white"
+                    className="flex flex-1 items-center justify-center gap-2 rounded-full bg-(--theme-primary) px-4 py-2.5 font-system text-[16px] font-bold text-white"
                   >
                     <PenLine size={18} /> Tulis ucapan
                   </button>
