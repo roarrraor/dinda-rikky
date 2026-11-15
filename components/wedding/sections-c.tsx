@@ -243,6 +243,11 @@ interface WishRow {
   replies?: { id: string; name: string; message: string }[];
 }
 
+/** SEMENTARA (tes): batas satu ucapan per browser dimatikan — Roar masih mau
+    coba-coba kirim ucapan berkali-kali. WAJIB dinyalakan lagi (false) sebelum
+    undangan disebar, supaya tamu tidak bisa spam ucapan. */
+const ALLOW_MULTIPLE_WISHES = true;
+
 /** Input & label composer di dalam sheet WA: font sistem (San Francisco di
     iPhone), bukan font wedding — biar terasa seperti ngetik di WA biasa. */
 const SHEET_INPUT =
@@ -389,6 +394,10 @@ export function RsvpSection({
     }, 700);
   }, [visibleCount, sheetOpen]);
   useEffect(() => {
+    if (ALLOW_MULTIPLE_WISHES) {
+      setAlreadySent(false);
+      return;
+    }
     try {
       setAlreadySent(localStorage.getItem(sentKey) === "1");
     } catch {
@@ -398,7 +407,7 @@ export function RsvpSection({
 
   async function onSubmit(e: FormEvent) {
     e.preventDefault();
-    if (!slug || !form.name.trim() || alreadySent) return;
+    if (!slug || !form.name.trim() || (!ALLOW_MULTIPLE_WISHES && alreadySent)) return;
     // Kehadiran dipilih lewat chip (bukan select required), jadi divalidasi manual.
     if (showRsvp && !form.attendance) {
       setComposerError("Pilih kehadiran dulu ya.");
@@ -410,15 +419,18 @@ export function RsvpSection({
       ? await form.submit(showWishes ? undefined : { customMessage: "" })
       : await form.submit({ skipRsvp: true });
     if (ok) {
-      setDone(true);
+      // Selama mode tes: jangan kunci browser — tamu (dan Roar) boleh kirim lagi.
+      if (!ALLOW_MULTIPLE_WISHES) {
+        setDone(true);
+        try {
+          localStorage.setItem(sentKey, "1");
+        } catch {
+          /* abaikan */
+        }
+        setAlreadySent(true);
+      }
       setComposing(false);
       setPickerOpen(false);
-      try {
-        localStorage.setItem(sentKey, "1");
-      } catch {
-        /* abaikan */
-      }
-      setAlreadySent(true);
       if (hasWish) {
         setJustSent({ name: form.name.trim(), message: form.message.trim() });
         setRefresh((n) => n + 1);
