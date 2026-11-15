@@ -5,8 +5,8 @@ import { useEffect, useMemo, useRef, useState, type CSSProperties, type FormEven
 import { createPortal } from "react-dom";
 import dayjs from "dayjs";
 import { AnimatePresence, motion } from "motion/react";
-import { Camera, Check, CheckCircle2, ChevronDown, ChevronRight, Copy, Images, MessageCircle, Minus, PenLine, Plus, Smile, X } from "lucide-react";
-import { ASSETS, COPY, ID, GUEST_CATEGORIES, paletteVars } from "@/lib/wedding/data";
+import { Camera, Check, CheckCircle2, ChevronRight, Copy, Images, MessageCircle, Minus, Plus, Send, Smile, X } from "lucide-react";
+import { ASSETS, COPY, ID, paletteVars } from "@/lib/wedding/data";
 import { STICKERS, stickerSrc } from "@/lib/wedding/stickers";
 import { formatDate } from "@/lib/wedding/format";
 import { sanitizeRichText } from "@/lib/wedding/sanitize";
@@ -243,11 +243,13 @@ interface WishRow {
   replies?: { id: string; name: string; message: string }[];
 }
 
-const FIELD =
-  "w-full rounded-2xl border border-(--pt-sage) bg-white px-4 py-3 font-cormorant text-[18px] text-(--theme-text) placeholder:text-(--theme-muted) outline-none focus:border-(--theme-primary)";
+/** Input & label composer di dalam sheet WA: font sistem (San Francisco di
+    iPhone), bukan font wedding — biar terasa seperti ngetik di WA biasa. */
+const SHEET_INPUT =
+  "w-full rounded-xl border border-(--pt-sage) bg-white px-3.5 py-2.5 font-system text-[16px] text-(--theme-text) placeholder:text-(--theme-muted) outline-none focus:border-(--theme-primary)";
 
-/** Label kecil huruf kapital di atas tiap field, ala form inveet.id. */
-const FIELD_LABEL = `${LABEL} mb-1.5 block text-[12px] font-bold text-(--theme-muted)`;
+const SHEET_LABEL =
+  "mb-1 block font-system text-[11px] font-bold uppercase tracking-[0.08em] text-(--theme-muted)";
 
 /** Warna nama pengirim di bubble chat, ala warna-warni grup WA. */
 const NAME_COLORS = ["#00A884", "#0093DD", "#7B61FF", "#E65100", "#C2185B", "#008069"];
@@ -279,6 +281,10 @@ export function RsvpSection({
   const sentKey = `dinda-rikky-wish-sent:${slug}`;
   const [alreadySent, setAlreadySent] = useState(false);
   const [pickerOpen, setPickerOpen] = useState(false);
+  // Composer template di dalam sheet: form RSVP pindah ke sini, gaya ngetik
+  // pesan WA (bukan form terpisah di halaman).
+  const [composing, setComposing] = useState(false);
+  const [composerError, setComposerError] = useState<string | null>(null);
   // Bottom sheet ucapan gaya chat WA (opsi 3): daftar ucapan tidak lagi
   // jadi kotak scroll di dalam halaman (itu yang selalu nyangkut), melainkan
   // lembaran dari bawah dengan bubble chat + lazy load ala "mengetik...".
@@ -393,12 +399,20 @@ export function RsvpSection({
   async function onSubmit(e: FormEvent) {
     e.preventDefault();
     if (!slug || !form.name.trim() || alreadySent) return;
+    // Kehadiran dipilih lewat chip (bukan select required), jadi divalidasi manual.
+    if (showRsvp && !form.attendance) {
+      setComposerError("Pilih kehadiran dulu ya.");
+      return;
+    }
+    setComposerError(null);
     const hasWish = showWishes && !!form.message.trim();
     const ok = showRsvp
       ? await form.submit(showWishes ? undefined : { customMessage: "" })
       : await form.submit({ skipRsvp: true });
     if (ok) {
       setDone(true);
+      setComposing(false);
+      setPickerOpen(false);
       try {
         localStorage.setItem(sentKey, "1");
       } catch {
@@ -424,8 +438,8 @@ export function RsvpSection({
     };
   }, [slug, refresh, showWishes]);
 
-  const choice = (active: boolean) =>
-    `rounded-2xl border px-3 py-2.5 font-cormorant text-[17px] font-semibold transition-colors cursor-pointer ${
+  const sheetChoice = (active: boolean) =>
+    `rounded-xl border px-3 py-2 font-system text-[15px] font-semibold transition-colors cursor-pointer ${
       active
         ? "border-(--theme-primary) bg-(--theme-primary) text-white"
         : "border-(--pt-sage) bg-white text-(--theme-text)"
@@ -438,8 +452,8 @@ export function RsvpSection({
         <p className={`mx-auto mt-3 max-w-80 ${BODY}`}>{showRsvp ? COPY.rsvp : COPY.wishes}</p>
       </Reveal>
 
-      <ScallopCard className="mt-12">
-        {done || alreadySent ? (
+      {(done || alreadySent) && (
+        <ScallopCard className="mt-12">
           <div className="py-2 text-center">
             <CheckCircle2 size={34} fill="currentColor" stroke="white" className="mx-auto text-(--theme-primary)" />
             <p className={`mt-2 text-[32px] text-(--theme-primary) ${SCRIPT}`}>{t.thanks}</p>
@@ -452,208 +466,23 @@ export function RsvpSection({
             {!alreadySent && (
               <button
                 type="button"
-                onClick={() => setDone(false)}
+                onClick={() => {
+                  setDone(false);
+                  setSheetOpen(true);
+                  setComposing(true);
+                }}
                 className="mt-3 font-cormorant text-[16px] font-semibold underline underline-offset-4 cursor-pointer"
               >
                 {t.again}
               </button>
             )}
           </div>
-        ) : (
-          <form onSubmit={onSubmit} className="space-y-5 text-left">
-            <div>
-              <label htmlFor="rsvp-nama" className={FIELD_LABEL}>
-                {t.nameLabel}
-              </label>
-              <input
-                id="rsvp-nama"
-                aria-label={t.nameLabel}
-                required
-                value={form.name}
-                onChange={(e) => form.setName(e.target.value)}
-                placeholder={t.name}
-                className={FIELD}
-              />
-            </div>
-            {showRsvp && (
-              <>
-                <div>
-                  <label htmlFor="rsvp-hadir" className={FIELD_LABEL}>
-                    {t.attendance}
-                  </label>
-                  <div className="relative">
-                    <select
-                      id="rsvp-hadir"
-                      aria-label={t.attendance}
-                      required
-                      value={form.attendance ?? ""}
-                      onChange={(e) => form.setAttendance(e.target.value as "hadir" | "tidak")}
-                      className={`w-full appearance-none rounded-2xl border border-(--pt-sage) bg-white px-4 py-3 pr-10 font-cormorant text-[18px] outline-none focus:border-(--theme-primary) ${
-                        form.attendance ? "text-(--theme-text)" : "text-(--theme-muted)"
-                      }`}
-                    >
-                      <option value="" disabled>
-                        Pilih kehadiran
-                      </option>
-                      <option value="hadir">Hadir</option>
-                      <option value="tidak">Belum Dapat Hadir</option>
-                    </select>
-                    <ChevronDown
-                      size={20}
-                      className="pointer-events-none absolute top-1/2 right-4 -translate-y-1/2 text-(--theme-muted)"
-                    />
-                  </div>
-                </div>
-                {form.attendance === "hadir" && (
-                  <>
-                    {form.showCategory && (
-                      <div>
-                        <span className={FIELD_LABEL}>{t.guestOf}</span>
-                        <div role="radiogroup" aria-label={t.guestOf} className="grid grid-cols-2 gap-2">
-                          {GUEST_CATEGORIES.map((c) => (
-                            <button
-                              key={c.value}
-                              type="button"
-                              role="radio"
-                              aria-checked={form.category === c.value}
-                              onClick={() => form.setCategory(c.value)}
-                              className={choice(form.category === c.value)}
-                            >
-                              {c.label}
-                            </button>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-                    {form.eventChoices && (
-                      <fieldset>
-                        <legend className={FIELD_LABEL}>{t.events}</legend>
-                        <div className="space-y-2">
-                          {form.eventChoices.map((ev) => (
-                            <label key={ev} className="flex items-center gap-3 font-cormorant text-[17px] cursor-pointer">
-                              <input
-                                type="checkbox"
-                                checked={form.events.includes(ev)}
-                                onChange={() => form.toggleEvent(ev)}
-                                className="size-4 shrink-0 accent-(--theme-primary)"
-                              />
-                              {ev}
-                            </label>
-                          ))}
-                        </div>
-                      </fieldset>
-                    )}
-                    <div>
-                      <span className={FIELD_LABEL}>{t.paxLabel}</span>
-                      <div className="flex items-center justify-between rounded-2xl border border-(--pt-sage) bg-white px-2 py-2">
-                        <button
-                          type="button"
-                          aria-label="Kurangi jumlah tamu"
-                          disabled={form.pax <= 1}
-                          onClick={() => form.setPax(Math.max(1, form.pax - 1))}
-                          className="grid size-9 shrink-0 cursor-pointer place-items-center rounded-full border border-(--pt-sage) bg-white text-(--theme-text) transition-opacity disabled:cursor-default disabled:opacity-30"
-                        >
-                          <Minus size={18} />
-                        </button>
-                        <span className="font-cormorant text-[19px] font-bold text-(--theme-text)">
-                          {form.pax}{" "}
-                          <span className="text-[16px] font-semibold text-(--theme-muted)">orang</span>
-                        </span>
-                        <button
-                          type="button"
-                          aria-label="Tambah jumlah tamu"
-                          disabled={form.pax >= form.maxPax}
-                          onClick={() => form.setPax(Math.min(form.maxPax, form.pax + 1))}
-                          className="grid size-9 shrink-0 cursor-pointer place-items-center rounded-full border border-(--pt-sage) bg-white text-(--theme-text) transition-opacity disabled:cursor-default disabled:opacity-30"
-                        >
-                          <Plus size={18} />
-                        </button>
-                      </div>
-                    </div>
-                  </>
-                )}
-              </>
-            )}
-            {showWishes && (
-              <div>
-                <label htmlFor="rsvp-pesan" className={FIELD_LABEL}>
-                  {t.messageLabel}
-                </label>
-                <textarea
-                  id="rsvp-pesan"
-                  aria-label={t.messageLabel}
-                  rows={3}
-                  value={form.message}
-                  onChange={(e) => form.setMessage(e.target.value)}
-                  placeholder={showRsvp ? COPY.wishes : t.message}
-                  required={!showRsvp}
-                  className={`${FIELD} resize-none`}
-                />
-              </div>
-            )}
-            {showWishes && (
-              <div className="relative">
-                <div className="flex items-center gap-2">
-                  <button
-                    type="button"
-                    onClick={() => setPickerOpen((o) => !o)}
-                    aria-expanded={pickerOpen}
-                    className="flex items-center gap-2 rounded-full border border-(--pt-sage) bg-white px-3.5 py-2 font-cormorant text-[16px] font-semibold text-(--theme-text) cursor-pointer"
-                  >
-                    {form.sticker && stickerSrc(form.sticker) ? (
-                      <Image src={stickerSrc(form.sticker)!} alt="" width={24} height={24} className="size-6" />
-                    ) : (
-                      <Smile size={18} className="text-(--theme-primary)" />
-                    )}
-                    {form.sticker ? "Ganti stiker" : "Pilih stiker"}
-                  </button>
-                  {form.sticker && (
-                    <button
-                      type="button"
-                      onClick={() => form.setSticker("")}
-                      aria-label="Hapus stiker pilihan"
-                      className="grid size-8 place-items-center rounded-full border border-(--pt-sage) bg-white text-(--theme-text) cursor-pointer"
-                    >
-                      <X size={15} />
-                    </button>
-                  )}
-                </div>
-                {pickerOpen && (
-                  <div className="absolute right-0 bottom-full left-0 z-20 mb-2 rounded-2xl bg-white p-3 shadow-[0_16px_32px_-12px_rgb(63_74_44/0.45)] ring-1 ring-(--pt-sage)/60">
-                    <p className="font-cormorant text-[16px] font-semibold text-(--theme-text)">
-                      Pilih stiker untuk ucapanmu
-                    </p>
-                    <div className="mt-2 grid max-h-48 grid-cols-4 gap-2 overflow-y-auto pr-1">
-                      {STICKERS.map((s) => (
-                        <button
-                          key={s.key}
-                          type="button"
-                          onClick={() => form.setSticker(s.key)}
-                          aria-label={s.label}
-                          title={s.label}
-                          className={`grid aspect-square place-items-center rounded-xl bg-(--theme-surface) p-1.5 cursor-pointer ${
-                            form.sticker === s.key ? "ring-2 ring-(--theme-primary)" : "ring-1 ring-(--pt-sage)/50"
-                          }`}
-                        >
-                          <Image src={s.src} alt={s.label} width={52} height={52} className="h-full w-full object-contain" />
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </div>
-            )}
-            {form.error && (
-              <p className="font-cormorant text-[15px] font-semibold text-(--theme-primary)">{form.error}</p>
-            )}
-            <PtButton type="submit" disabled={form.submitting} className="w-full uppercase tracking-[0.15em]">
-              {form.submitting ? t.sending : t.send}
-            </PtButton>
-          </form>
-        )}
-      </ScallopCard>
+        </ScallopCard>
+      )}
 
-      {showWishes && wishes.length > 0 && (
+      {/* Satu-satunya jalan masuk ke form sekarang: tombol ini membuka sheet,
+          composer template ada di dalamnya. */}
+      {(showWishes || showRsvp) && (
         <button
           type="button"
           onClick={() => setSheetOpen(true)}
@@ -661,28 +490,29 @@ export function RsvpSection({
         >
           <span className="relative flex size-11 shrink-0 items-center justify-center rounded-full bg-(--theme-primary) text-white">
             <MessageCircle size={22} />
-            <span className="absolute -top-1.5 -right-1.5 flex h-5 min-w-5 items-center justify-center">
-              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-red-500 opacity-60" />
-              <span className="relative inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-red-500 px-1 font-cormorant text-[11px] leading-none font-bold text-white ring-2 ring-white">
-                {wishes.length}
+            {showWishes && wishes.length > 0 && (
+              <span className="absolute -top-1.5 -right-1.5 flex h-5 min-w-5 items-center justify-center">
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-red-500 opacity-60" />
+                <span className="relative inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-red-500 px-1 font-cormorant text-[11px] leading-none font-bold text-white ring-2 ring-white">
+                  {wishes.length}
+                </span>
               </span>
-            </span>
+            )}
           </span>
           <span className="min-w-0 flex-1">
             <span className="block font-cormorant text-[19px] leading-tight font-bold text-(--theme-text)">
-              Ucapan &amp; Doa
+              {showWishes ? "Ucapan & Doa" : "Konfirmasi Kehadiran"}
             </span>
             <span className="block truncate font-cormorant text-[15px] leading-snug text-(--theme-muted)">
-              {latestWish ? `${latestWish.name}: ${latestWish.message}` : `${wishes.length} ucapan dari tamu`}
+              {showWishes
+                ? latestWish
+                  ? `${latestWish.name}: ${latestWish.message}`
+                  : "Belum ada ucapan — jadilah yang pertama mengirim doa!"
+                : "Isi kehadiranmu lewat chat di sini"}
             </span>
           </span>
           <ChevronRight size={22} className="shrink-0 text-(--theme-muted)" />
         </button>
-      )}
-      {showWishes && wishes.length === 0 && (
-        <p className={`mt-8 text-center ${BODY} text-(--theme-muted)`}>
-          Belum ada ucapan — jadilah yang pertama mengirim doa!
-        </p>
       )}
       {mounted &&
         createPortal(
@@ -860,15 +690,244 @@ export function RsvpSection({
                     </motion.div>
                   )}
                 </div>
-                <div className="flex items-center gap-2 border-t border-(--pt-sage)/50 bg-white px-4 py-3">
-                  <button
-                    type="button"
-                    onClick={() => setSheetOpen(false)}
-                    className="flex flex-1 items-center justify-center gap-2 rounded-full bg-(--theme-primary) px-4 py-2.5 font-system text-[16px] font-bold text-white"
+                {done || alreadySent ? (
+                  <div className="flex items-center justify-center gap-2 border-t border-(--pt-sage)/50 bg-white px-4 py-3.5">
+                    <CheckCircle2 size={18} className="shrink-0 text-(--theme-primary)" />
+                    <p className="font-system text-[14px] font-semibold text-(--theme-muted)">
+                      {t.wishReceived}
+                    </p>
+                  </div>
+                ) : composing ? (
+                  <form
+                    onSubmit={onSubmit}
+                    className="max-h-[46dvh] shrink-0 overflow-y-auto border-t border-(--pt-sage)/50 bg-white px-4 pt-3 pb-3"
                   >
-                    <PenLine size={18} /> Tulis ucapan
-                  </button>
-                </div>
+                    <div className="mb-3 flex items-center justify-between">
+                      <p className="font-system text-[15px] font-bold text-(--theme-text)">Tulis ucapan</p>
+                      <button
+                        type="button"
+                        aria-label="Tutup"
+                        onClick={() => {
+                          setComposing(false);
+                          setPickerOpen(false);
+                        }}
+                        className="grid size-8 cursor-pointer place-items-center rounded-full bg-black/[0.04] text-(--theme-muted)"
+                      >
+                        <X size={16} />
+                      </button>
+                    </div>
+                    <div className="space-y-3.5">
+                      <div>
+                        <label htmlFor="sheet-nama" className={SHEET_LABEL}>
+                          {t.nameLabel}
+                        </label>
+                        <input
+                          id="sheet-nama"
+                          aria-label={t.nameLabel}
+                          required
+                          autoFocus
+                          value={form.name}
+                          onChange={(e) => form.setName(e.target.value)}
+                          placeholder={t.name}
+                          className={SHEET_INPUT}
+                        />
+                      </div>
+                      {showRsvp && (
+                        <div>
+                          <span className={SHEET_LABEL}>{t.attendance}</span>
+                          <div className="mt-1 grid grid-cols-2 gap-2">
+                            <button
+                              type="button"
+                              onClick={() => {
+                                form.setAttendance("hadir");
+                                setComposerError(null);
+                              }}
+                              className={sheetChoice(form.attendance === "hadir")}
+                            >
+                              Hadir
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                form.setAttendance("tidak");
+                                setComposerError(null);
+                              }}
+                              className={sheetChoice(form.attendance === "tidak")}
+                            >
+                              Belum Dapat Hadir
+                            </button>
+                          </div>
+                        </div>
+                      )}
+                      {showRsvp && form.attendance === "hadir" && (
+                        <>
+                          {form.eventChoices && (
+                            <div>
+                              <span className={SHEET_LABEL}>{t.events}</span>
+                              <div className="mt-1 flex flex-wrap gap-2">
+                                {form.eventChoices.map((ev) => (
+                                  <button
+                                    key={ev}
+                                    type="button"
+                                    onClick={() => form.toggleEvent(ev)}
+                                    className={sheetChoice(form.events.includes(ev))}
+                                  >
+                                    {ev}
+                                  </button>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+                          <div>
+                            <span className={SHEET_LABEL}>{t.paxLabel}</span>
+                            <div className="mt-1 flex items-center justify-between rounded-xl border border-(--pt-sage) bg-white px-2 py-1.5">
+                              <button
+                                type="button"
+                                aria-label="Kurangi jumlah tamu"
+                                disabled={form.pax <= 1}
+                                onClick={() => form.setPax(Math.max(1, form.pax - 1))}
+                                className="grid size-9 shrink-0 cursor-pointer place-items-center rounded-full border border-(--pt-sage) bg-white text-(--theme-text) transition-opacity disabled:cursor-default disabled:opacity-30"
+                              >
+                                <Minus size={16} />
+                              </button>
+                              <span className="font-system text-[16px] font-bold text-(--theme-text)">
+                                {form.pax}{" "}
+                                <span className="text-[13px] font-semibold text-(--theme-muted)">orang</span>
+                              </span>
+                              <button
+                                type="button"
+                                aria-label="Tambah jumlah tamu"
+                                disabled={form.pax >= form.maxPax}
+                                onClick={() => form.setPax(Math.min(form.maxPax, form.pax + 1))}
+                                className="grid size-9 shrink-0 cursor-pointer place-items-center rounded-full border border-(--pt-sage) bg-white text-(--theme-text) transition-opacity disabled:cursor-default disabled:opacity-30"
+                              >
+                                <Plus size={16} />
+                              </button>
+                            </div>
+                          </div>
+                        </>
+                      )}
+                      {showWishes && (
+                        <div>
+                          <label htmlFor="sheet-pesan" className={SHEET_LABEL}>
+                            {t.messageLabel}
+                          </label>
+                          <textarea
+                            id="sheet-pesan"
+                            aria-label={t.messageLabel}
+                            rows={3}
+                            value={form.message}
+                            onChange={(e) => form.setMessage(e.target.value)}
+                            placeholder={showRsvp ? COPY.wishes : t.message}
+                            required={!showRsvp}
+                            className={`${SHEET_INPUT} resize-none`}
+                          />
+                        </div>
+                      )}
+                      {form.sticker && stickerSrc(form.sticker) && (
+                        <div className="flex items-center gap-2 rounded-xl bg-(--theme-surface) px-3 py-2">
+                          <Image
+                            src={stickerSrc(form.sticker)!}
+                            alt=""
+                            width={40}
+                            height={40}
+                            className="size-10 object-contain"
+                          />
+                          <span className="flex-1 font-system text-[13px] text-(--theme-muted)">
+                            Stiker terpilih
+                          </span>
+                          <button
+                            type="button"
+                            onClick={() => form.setSticker("")}
+                            aria-label="Hapus stiker pilihan"
+                            className="grid size-8 cursor-pointer place-items-center rounded-full bg-white text-(--theme-text)"
+                          >
+                            <X size={15} />
+                          </button>
+                        </div>
+                      )}
+                      {(composerError || form.error) && (
+                        <p className="font-system text-[13px] font-semibold text-(--theme-primary)">
+                          {composerError || form.error}
+                        </p>
+                      )}
+                      {pickerOpen && (
+                        <div className="rounded-2xl bg-white p-3 shadow-[0_16px_32px_-12px_rgb(63_74_44/0.45)] ring-1 ring-(--pt-sage)/60">
+                          <p className="font-system text-[14px] font-bold text-(--theme-text)">
+                            Pilih stiker untuk ucapanmu
+                          </p>
+                          <div className="mt-2 grid max-h-44 grid-cols-4 gap-2 overflow-y-auto pr-1">
+                            {STICKERS.map((s) => (
+                              <button
+                                key={s.key}
+                                type="button"
+                                onClick={() => form.setSticker(s.key)}
+                                aria-label={s.label}
+                                title={s.label}
+                                className={`grid aspect-square cursor-pointer place-items-center rounded-xl bg-(--theme-surface) p-1.5 ${
+                                  form.sticker === s.key
+                                    ? "ring-2 ring-(--theme-primary)"
+                                    : "ring-1 ring-(--pt-sage)/50"
+                                }`}
+                              >
+                                <Image
+                                  src={s.src}
+                                  alt={s.label}
+                                  width={52}
+                                  height={52}
+                                  className="h-full w-full object-contain"
+                                />
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                      <div className="flex items-center gap-2 pt-1">
+                        <button
+                          type="button"
+                          onClick={() => setPickerOpen((o) => !o)}
+                          aria-expanded={pickerOpen}
+                          aria-label="Pilih stiker"
+                          className="grid size-10 shrink-0 cursor-pointer place-items-center rounded-full bg-black/[0.04] text-(--theme-primary)"
+                        >
+                          <Smile size={20} />
+                        </button>
+                        <span className="flex-1 font-system text-[12px] leading-snug text-(--theme-muted)">
+                          Pesanmu terkirim sebagai ucapan di grup ini.
+                        </span>
+                        <button
+                          type="submit"
+                          disabled={form.submitting}
+                          aria-label="Kirim ucapan"
+                          className="grid size-11 shrink-0 cursor-pointer place-items-center rounded-full bg-(--theme-primary) text-white shadow-[0_6px_14px_-6px_rgb(63_74_44/0.6)] transition-transform active:scale-[0.97] disabled:opacity-60"
+                        >
+                          <Send size={20} />
+                        </button>
+                      </div>
+                    </div>
+                  </form>
+                ) : (
+                  <div className="flex items-center gap-2 border-t border-(--pt-sage)/50 bg-white px-3 py-2.5">
+                    <button
+                      type="button"
+                      aria-label="Pilih stiker"
+                      onClick={() => {
+                        setComposing(true);
+                        setPickerOpen(true);
+                      }}
+                      className="grid size-10 shrink-0 cursor-pointer place-items-center rounded-full bg-black/[0.04] text-(--theme-primary)"
+                    >
+                      <Smile size={20} />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setComposing(true)}
+                      className="min-w-0 flex-1 cursor-pointer rounded-full bg-[#F0F0F0] px-4 py-2.5 text-left font-system text-[15px] text-(--theme-muted)"
+                    >
+                      Tulis ucapan...
+                    </button>
+                  </div>
+                )}
               </motion.div>
             )}
           </AnimatePresence>,
