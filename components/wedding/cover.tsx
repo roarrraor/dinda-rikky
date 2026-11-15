@@ -27,6 +27,7 @@ export function Cover({
   second,
   date,
   guestName,
+  hashtag,
   opened,
   onOpen,
   audioUrl,
@@ -37,6 +38,7 @@ export function Cover({
   second: string;
   date: string;
   guestName?: string;
+  hashtag?: string | null;
   opened: boolean;
   onOpen: () => void;
   audioUrl?: string;
@@ -48,6 +50,7 @@ export function Cover({
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const { envelopeClosed, envelopeOpen, envelopePocket, flowers } = ASSETS;
   const initials = `${first.charAt(0)}${second.charAt(0)}`;
+  const tag = hashtag?.trim().replace(/^#/, "");
 
   useEffect(
     () => () => {
@@ -146,6 +149,11 @@ export function Cover({
                         <p className={`mt-1 text-[9px] text-(--theme-accent) ${LABEL}`}>
                           {formatDate(date, "DD . MM . YYYY")}
                         </p>
+                        {tag && (
+                          <p className="mt-3 font-montserrat text-[12px] font-semibold tracking-[0.06em] text-(--theme-primary)">
+                            #{tag}
+                          </p>
+                        )}
                       </div>
                     </motion.div>
                     {/* kantong amplop (depan) — muncul halus, bukan pop */}

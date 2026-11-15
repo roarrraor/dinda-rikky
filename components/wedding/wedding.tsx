@@ -109,6 +109,7 @@ export function Wedding({ data, guestName }: { data: WeddingData; guestName?: st
             second={second}
             date={data.date}
             guestName={effectiveGuest}
+            hashtag={data.hashtag}
             opened={opened}
             onOpen={() => setOpened(true)}
             audioUrl={data.musicUrl}
