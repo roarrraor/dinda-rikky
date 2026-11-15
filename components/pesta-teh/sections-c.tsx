@@ -281,45 +281,43 @@ export function RsvpSection({
   const [alreadySent, setAlreadySent] = useState(false);
   const [pickerOpen, setPickerOpen] = useState(false);
   const listRef = useRef<HTMLUListElement>(null);
-  const unlockTimer = useRef<number | null>(null);
   // Kunci scroll di dalam list ucapan: kalau list sudah mentok atas/bawah,
   // gestur swipe tidak boleh diteruskan ke halaman utama (overscroll-contain
   // saja ternyata tidak cukup di HP Roar). Selain menahan di tepi, halaman
-  // juga dikunci selama jari menyentuh list — supaya momentum (inersia) dari
+  // juga ditahan selama jari menyentuh list — supaya momentum (inersia) dari
   // flick cepat tidak ikut menggeser halaman setelah jari diangkat.
+  // Caranya BUKAN mengubah style body (position:fixed bikin list "blink"
+  // karena layout berubah; overflow:hidden malah me-reset scroll halaman
+  // ke atas), melainkan menahan posisi scroll tiap frame: kalau halaman
+  // bergeser dari posisi saat jari nempel, langsung dikembalikan instant.
   useEffect(() => {
     const el = listRef.current;
     if (!el) return;
     let startY = 0;
     let savedPageY = 0;
-    let locked = false;
-    const lockPage = () => {
-      if (!locked) {
-        savedPageY = window.scrollY;
-        locked = true;
-      }
-      document.body.style.position = "fixed";
-      document.body.style.top = `-${savedPageY}px`;
-      document.body.style.left = "0";
-      document.body.style.right = "0";
-      if (unlockTimer.current) window.clearTimeout(unlockTimer.current);
-    };
-    const unlockPage = () => {
-      if (unlockTimer.current) window.clearTimeout(unlockTimer.current);
-      unlockTimer.current = window.setTimeout(() => {
-        document.body.style.position = "";
-        document.body.style.top = "";
-        document.body.style.left = "";
-        document.body.style.right = "";
-        // "instant" supaya tidak kena html { scroll-behavior: smooth } —
-        // kembalinya harus langsung, bukan animasi scroll yang kelihatan.
+    let rafId = 0;
+    let stopTimer: number | null = null;
+    const holdPage = () => {
+      if (window.scrollY !== savedPageY) {
         window.scrollTo({ top: savedPageY, behavior: "instant" });
-        locked = false;
-      }, 300);
+      }
+      rafId = requestAnimationFrame(holdPage);
+    };
+    const startHold = () => {
+      savedPageY = window.scrollY;
+      if (stopTimer) window.clearTimeout(stopTimer);
+      cancelAnimationFrame(rafId);
+      rafId = requestAnimationFrame(holdPage);
+    };
+    const stopHold = () => {
+      if (stopTimer) window.clearTimeout(stopTimer);
+      // 600ms: momentum (inersia) dari flick cepat masih hidup ~500ms
+      // setelah jari diangkat — halaman baru boleh lepas setelah itu.
+      stopTimer = window.setTimeout(() => cancelAnimationFrame(rafId), 600);
     };
     const onTouchStart = (e: TouchEvent) => {
       startY = e.touches[0].clientY;
-      lockPage();
+      startHold();
     };
     const onTouchMove = (e: TouchEvent) => {
       const dy = e.touches[0].clientY - startY;
@@ -327,7 +325,7 @@ export function RsvpSection({
       const atBottom = el.scrollTop + el.clientHeight >= el.scrollHeight - 1;
       if ((dy > 0 && atTop) || (dy < 0 && atBottom)) e.preventDefault();
     };
-    const onTouchEnd = () => unlockPage();
+    const onTouchEnd = () => stopHold();
     el.addEventListener("touchstart", onTouchStart, { passive: true });
     el.addEventListener("touchmove", onTouchMove, { passive: false });
     el.addEventListener("touchend", onTouchEnd, { passive: true });
@@ -337,11 +335,8 @@ export function RsvpSection({
       el.removeEventListener("touchmove", onTouchMove);
       el.removeEventListener("touchend", onTouchEnd);
       el.removeEventListener("touchcancel", onTouchEnd);
-      if (unlockTimer.current) window.clearTimeout(unlockTimer.current);
-      document.body.style.position = "";
-      document.body.style.top = "";
-      document.body.style.left = "";
-      document.body.style.right = "";
+      cancelAnimationFrame(rafId);
+      if (stopTimer) window.clearTimeout(stopTimer);
     };
   }, [wishes.length]);
   useEffect(() => {
@@ -799,8 +794,8 @@ export function ClosingSection({
             </p>
           </div>
         </div>
-        <Art art="flowers" className="-top-[12%] -left-[14%] w-[30%]" delay={0.5} />
-        <Art art="flowers" className="-top-[12%] -right-[14%] w-[30%]" delay={0.5} flip />
+        <Art art="flowers" className="top-[6%] -left-[14%] w-[30%]" delay={0.5} />
+        <Art art="flowers" className="top-[6%] -right-[14%] w-[30%]" delay={0.5} flip />
         <Art art="rosebud" className="-bottom-[5%] left-[35%] w-[30%]" delay={0.8} />
       </Drop>
 
