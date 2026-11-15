@@ -24,20 +24,20 @@ Nama tamu di cover bisa dikirim lewat query: `/?to=Budi`.
 app/page.tsx                    halaman utama (undangan)
 app/layout.tsx                  metadata & font
 app/api/{wishes/public,photobox,rsvp}   endpoint (stub, lihat catatan di bawah)
-components/pesta-teh/
-  wedding-pesta-teh.tsx         komponen utama (susun semua section)
+components/wedding/
+  wedding.tsx         komponen utama (susun semua section)
   cover.tsx                     amplop (drag / ketuk untuk buka)
   sections-a.tsx                meja teh, burst foto, salam
   sections-b.tsx                mempelai, save the date, susunan acara
   sections-c.tsx                kisah, dress code, galeri, photobooth, RSVP, hadiah, penutup
   primitives.tsx                animasi & elemen dekoratif
-lib/pesta-teh/data.ts           aset, palet, teks, data pernikahan
+lib/wedding/data.ts           aset, palet, teks, data pernikahan
 public/assets/                  gambar undangan
 ```
 
 ## Ganti data pernikahan
 
-Semua data ada di `lib/pesta-teh/data.ts` (objek `WEDDING`):
+Semua data ada di `lib/wedding/data.ts` (objek `WEDDING`):
 
 - Nama mempelai, nama orang tua, urutan anak, foto mempelai
 - Tanggal, tempat akad & resepsi, alamat, link Google Maps
@@ -45,7 +45,7 @@ Semua data ada di `lib/pesta-teh/data.ts` (objek `WEDDING`):
 - Rekening hadiah (`gifts`), foto QRIS (`qrisPhoto`), alamat kirim kado
 - Hashtag, dress code, musik (`musicUrl`)
 
-Foto: taruh file di `public/assets/illustrations/` atau `public/assets/pesta-teh/`,
+Foto: taruh file di `public/assets/illustrations/` atau `public/assets/wedding/`,
 lalu ubah path-nya di `data.ts`.
 
 ## Link undangan per tamu
@@ -59,7 +59,7 @@ Nama tamu di cover berubah otomatis sesuai link yang dikirim. Dua cara:
    `https://dinda-rikky-weld.vercel.app/#tamu-a`
    atau `https://dinda-rikky-weld.vercel.app/?to=tamu-a`
 
-Daftar tamu ada di `lib/pesta-teh/guests.ts` (`GUESTS`): satu baris per tamu,
+Daftar tamu ada di `lib/wedding/guests.ts` (`GUESTS`): satu baris per tamu,
 misal `"tamu-a": "Bapak Budi Santoso"`. Nama dari link juga otomatis terisi
 di kolom nama form RSVP. Tanpa `?to=` atau `#slug`, cover menampilkan
 "Tamu Undangan".
@@ -113,7 +113,7 @@ sama di Settings → Environment Variables lalu redeploy.
 ### 4. (Opsional) Seed ucapan contoh
 
 Jalankan isi `supabase/seed-wishes.sql` di SQL Editor untuk mengisi tabel
-`wishes` dengan 13 ucapan contoh dari `lib/pesta-teh/wishes.json`.
+`wishes` dengan 13 ucapan contoh dari `lib/wedding/wishes.json`.
 
 ### 5. Buka halaman admin
 
@@ -131,7 +131,7 @@ muncul di tengah kartu ucapan, di bawah teks.
 
 - File gambar: `public/assets/stickers/` (PNG transparan, 512x512).
   Set awal: `s1-hati.png`, `s2-cincin.png`, `s3-kue.png`, `s4-teko.png`.
-- Daftar opsi: `lib/pesta-teh/stickers.ts` (`STICKERS`). Untuk menambah
+- Daftar opsi: `lib/wedding/stickers.ts` (`STICKERS`). Untuk menambah
   opsi baru, taruh file PNG-nya di folder itu lalu tambah satu entri
   di `STICKERS` — tidak perlu migrasi.
 - Kolom database: `wishes.sticker` menyimpan key stiker (mis. `"hati"`).

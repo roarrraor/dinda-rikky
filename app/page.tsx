@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
-import { getWeddingData } from "@/lib/pesta-teh/settings";
-import { WeddingPestaTeh } from "@/components/pesta-teh/wedding-pesta-teh";
+import { getWeddingData } from "@/lib/wedding/settings";
+import { Wedding } from "@/components/wedding/wedding";
 
 export const metadata: Metadata = {
   title: "The Wedding of Dinda & Rikky",
@@ -12,5 +12,5 @@ export const metadata: Metadata = {
 export default async function Page({ searchParams }: { searchParams: Promise<{ to?: string }> }) {
   const { to } = await searchParams;
   const data = await getWeddingData();
-  return <WeddingPestaTeh data={data} guestName={to} />;
+  return <Wedding data={data} guestName={to} />;
 }

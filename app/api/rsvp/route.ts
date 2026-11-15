@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { getSupabase } from "@/lib/supabase-server";
-import { isStickerKey } from "@/lib/pesta-teh/stickers";
+import { isStickerKey } from "@/lib/wedding/stickers";
 
 const NOT_CONFIGURED = { ok: false, error: "Database belum dikonfigurasi" };
 

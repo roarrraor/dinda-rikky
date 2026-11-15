@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { isAdminLoggedIn } from "@/lib/admin-auth";
 import { getServiceSupabase } from "@/lib/supabase-server";
-import { getWeddingData, getWeddingSettings } from "@/lib/pesta-teh/settings";
+import { getWeddingData, getWeddingSettings } from "@/lib/wedding/settings";
 
 /** Field WeddingData yang bisa diubah dari halaman /admin. */
 const EDITABLE_FIELDS = [
