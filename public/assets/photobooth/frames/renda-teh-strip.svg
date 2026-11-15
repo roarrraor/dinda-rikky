@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="2103" viewBox="0 0 900 2103">
+  <!--
+    Frame contoh "Renda Teh" untuk layout Photostrip (output 900 x 2103 px).
+    Bagian tengah TRANSPARAN — foto tamu terlihat lewat sini.
+    Hanya garis tepi + hiasan sudut yang digambar.
+    Footer (nama & tanggal) digambar oleh kode, jadi area bawah dibiarkan kosong.
+  -->
+  <rect x="16" y="16" width="868" height="2071" fill="none" stroke="#6F9440" stroke-width="3"/>
+  <rect x="28" y="28" width="844" height="2047" fill="none" stroke="#EBA7B1" stroke-width="1.5"/>
+
+  <!-- hiasan sudut: bunga kecil 5 kelopak -->
+  <g fill="#EBA7B1">
+    <g transform="translate(72 72)">
+      <circle cx="0" cy="-14" r="9"/><circle cx="13" cy="-4" r="9"/><circle cx="8" cy="11" r="9"/><circle cx="-8" cy="11" r="9"/><circle cx="-13" cy="-4" r="9"/>
+      <circle r="6" fill="#6F9440"/>
+    </g>
+    <g transform="translate(828 72)">
+      <circle cx="0" cy="-14" r="9"/><circle cx="13" cy="-4" r="9"/><circle cx="8" cy="11" r="9"/><circle cx="-8" cy="11" r="9"/><circle cx="-13" cy="-4" r="9"/>
+      <circle r="6" fill="#6F9440"/>
+    </g>
+    <g transform="translate(72 2031)">
+      <circle cx="0" cy="-14" r="9"/><circle cx="13" cy="-4" r="9"/><circle cx="8" cy="11" r="9"/><circle cx="-8" cy="11" r="9"/><circle cx="-13" cy="-4" r="9"/>
+      <circle r="6" fill="#6F9440"/>
+    </g>
+    <g transform="translate(828 2031)">
+      <circle cx="0" cy="-14" r="9"/><circle cx="13" cy="-4" r="9"/><circle cx="8" cy="11" r="9"/><circle cx="-8" cy="11" r="9"/><circle cx="-13" cy="-4" r="9"/>
+      <circle r="6" fill="#6F9440"/>
+    </g>
+  </g>
+
+  <!-- ornamen tengah atas: belah ketupat + titik -->
+  <g fill="#6F9440">
+    <rect x="442" y="36" width="16" height="16" transform="rotate(45 450 44)"/>
+    <circle cx="414" cy="44" r="4"/>
+    <circle cx="486" cy="44" r="4"/>
+  </g>
+  <g fill="#6F9440">
+    <rect x="442" y="2051" width="16" height="16" transform="rotate(45 450 2059)"/>
+    <circle cx="414" cy="2059" r="4"/>
+    <circle cx="486" cy="2059" r="4"/>
+  </g>
+</svg>

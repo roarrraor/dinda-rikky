@@ -95,7 +95,7 @@ export const COPY = {
   photoboothTake: "Ambil Foto",
   photoboothGallery: "Lihat Foto Tamu",
   photoboothNote:
-    "Ambil foto bersama bingkai undangan kami. Fotomu akan tersimpan di galeri tamu.",
+    "Berpose sebentar, bawa pulang ceritanya. Foto diproses di perangkatmu dan tidak dikirim ke server.",
   rsvp: "Mohon konfirmasi kehadiran serta titipkan doa terbaik untuk kami.",
   wishes: "Tuliskan doa dan ucapan terbaik untuk kami.",
   giftTitle: "Tanda Kasih",

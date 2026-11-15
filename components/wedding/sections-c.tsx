@@ -11,7 +11,9 @@ import { STICKERS, stickerSrc } from "@/lib/wedding/stickers";
 import { formatDate } from "@/lib/wedding/format";
 import { sanitizeRichText } from "@/lib/wedding/sanitize";
 import { useRsvpForm, type RsvpForm } from "./use-rsvp-form";
+import { useRouter } from "next/navigation";
 import { Lightbox } from "./lightbox";
+import { PhotoboothWall } from "./photobooth";
 import {
   Art,
   BODY,
@@ -175,15 +177,18 @@ export function GallerySection({ photos }: { photos: string[] }) {
 /* ---------- Photobooth ---------- */
 
 /**
- * CATATAN: bagian kamera/upload photobooth asli (`PhotoboxSheet` + hook photobox) tidak ikut
- * ter-capture di mirror, jadi di sini hanya UI section-nya. Tombol membuka dialog placeholder.
+ * Photobooth versi kita (bukan mirror inveet): studio kamera di rute
+ * `/photobooth` — pilih tata letak, ambil foto (kamera / galeri), atur
+ * bingkai, simpan / bagikan. Foto diproses di perangkat tamu.
+ * Galeri di bawah ini menampilkan strip yang disimpan di perangkat ini.
  */
 export function PhotoboothSection({
   caption,
 }: {
   caption: { names: string; date: string; tag: string | null };
 }) {
-  const [dialog, setDialog] = useState<null | "take" | "wall">(null);
+  const router = useRouter();
+  const [wallOpen, setWallOpen] = useState(false);
   const { poses } = ASSETS;
 
   return (
@@ -210,39 +215,17 @@ export function PhotoboothSection({
       </Reveal>
 
       <Reveal className="mt-9 flex flex-col items-center gap-3">
-        <PtButton onClick={() => setDialog("take")}>
+        <PtButton onClick={() => router.push("/photobooth")}>
           <Camera size={14} />
           {COPY.photoboothTake}
         </PtButton>
-        <PtButton outline onClick={() => setDialog("wall")}>
+        <PtButton outline onClick={() => setWallOpen(true)}>
           <Images size={14} />
           {COPY.photoboothGallery}
         </PtButton>
       </Reveal>
 
-      {dialog && (
-        <div
-          role="dialog"
-          aria-modal="true"
-          className="fixed inset-0 z-[200] flex items-end justify-center bg-black/60 p-4 sm:items-center"
-          onClick={() => setDialog(null)}
-        >
-          <div
-            className="w-full max-w-sm bg-white p-6 text-center font-cormorant text-[17px] text-(--theme-text)"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <p className="font-semibold">
-              {dialog === "take" ? "Fitur kamera photobooth belum direkonstruksi." : "Galeri foto tamu belum direkonstruksi."}
-            </p>
-            <p className="mt-2 text-[15px] text-(--theme-muted)">
-              Hubungkan ke backend photobox kamu (endpoint <code>/api/photobox</code>).
-            </p>
-            <PtButton className="mt-4" onClick={() => setDialog(null)}>
-              Tutup
-            </PtButton>
-          </div>
-        </div>
-      )}
+      {wallOpen && <PhotoboothWall onClose={() => setWallOpen(false)} />}
     </section>
   );
 }
