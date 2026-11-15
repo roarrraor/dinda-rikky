@@ -118,6 +118,7 @@ export function GallerySection({ photos }: { photos: string[] }) {
   const [dragX, setDragX] = useState(0);
   const [dragging, setDragging] = useState(false);
   const startX = useRef(0);
+  const dragXRef = useRef(0);
   const dragged = useRef(false);
   const n = photos.length;
   // Posisi relatif tiap foto terhadap yang sedang tampil (loop): 0 = utama,
@@ -145,41 +146,47 @@ export function GallerySection({ photos }: { photos: string[] }) {
         style={{ touchAction: "pan-y" }}
         onPointerDown={(e) => {
           if (e.button !== 0) return;
-          (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
           startX.current = e.clientX;
+          dragXRef.current = 0;
           dragged.current = false;
           setDragging(true);
-        }}
-        onPointerMove={(e) => {
-          if (!dragging) return;
-          const dx = e.clientX - startX.current;
-          if (Math.abs(dx) > 8) dragged.current = true;
-          setDragX(dx);
-        }}
-        onPointerUp={() => {
-          if (!dragging) return;
-          setDragging(false);
-          if (dragX < -60) go(1);
-          else if (dragX > 60) go(-1);
-          setDragX(0);
-        }}
-        onPointerCancel={() => {
-          setDragging(false);
-          setDragX(0);
+          const move = (ev: PointerEvent) => {
+            const dx = ev.clientX - startX.current;
+            if (Math.abs(dx) > 8) dragged.current = true;
+            dragXRef.current = dx;
+            setDragX(dx);
+          };
+          const up = () => {
+            window.removeEventListener("pointermove", move);
+            window.removeEventListener("pointerup", up);
+            window.removeEventListener("pointercancel", up);
+            setDragging(false);
+            const dx = dragXRef.current;
+            dragXRef.current = 0;
+            setDragX(0);
+            if (dx < -60) go(1);
+            else if (dx > 60) go(-1);
+          };
+          window.addEventListener("pointermove", move);
+          window.addEventListener("pointerup", up);
+          window.addEventListener("pointercancel", up);
         }}
       >
         <ul
           className="flex gap-[9cqw] px-[18cqw]"
           style={{
-            transform: `translateX(calc(${-current * 73}cqw + ${dragX}px))`,
+            transform: `translateX(calc(${-(current + 1) * 73}cqw + ${dragX}px))`,
             transition: dragging ? "none" : "transform 420ms cubic-bezier(0.16, 1, 0.3, 1)",
           }}
         >
-          {photos.map((src, i) => {
+          {/* Daftar diperpanjang di kedua ujung ([terakhir, ...foto, pertama])
+              supaya tetangga kiri/kanan selalu ada, termasuk saat loop. */}
+          {[photos[n - 1], ...photos, photos[0]].map((src, j) => {
+            const i = (j - 1 + n) % n;
             const r = rel(i);
             return (
               <li
-                key={`${src}-${i}`}
+                key={`${src}-${j}`}
                 className="relative w-[64cqw] shrink-0"
                 style={{
                   transform: `scale(${r === 0 ? 1 : 1.2})`,
