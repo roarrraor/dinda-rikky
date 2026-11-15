@@ -28,20 +28,23 @@ export function Lightbox({
     return () => window.removeEventListener("keydown", onKey);
   }, [onClose, onPrev, onNext]);
 
-  // Kunci scroll halaman selama lightbox terbuka (html + body) dan kembalikan
-  // posisi scroll semula saat ditutup (toggle overflow di root bisa me-reset
-  // scroll ke atas di sebagian browser).
+  // Kunci scroll selama lightbox terbuka TANPA memindah halaman: body dibuat
+  // fixed di posisi scroll saat ini, jadi latar di balik overlay tetap galeri
+  // (bukan loncat ke atas seperti saat overflow di html di-toggle).
+  // Saat ditutup, posisi scroll dikembalikan.
   useEffect(() => {
-    const html = document.documentElement;
     const body = document.body;
-    const prevHtml = html.style.overflow;
-    const prevBody = body.style.overflow;
     const savedY = window.scrollY;
-    html.style.overflow = "hidden";
-    body.style.overflow = "hidden";
+    const prevPosition = body.style.position;
+    const prevTop = body.style.top;
+    const prevWidth = body.style.width;
+    body.style.position = "fixed";
+    body.style.top = `-${savedY}px`;
+    body.style.width = "100%";
     return () => {
-      html.style.overflow = prevHtml;
-      body.style.overflow = prevBody;
+      body.style.position = prevPosition;
+      body.style.top = prevTop;
+      body.style.width = prevWidth;
       window.scrollTo(0, savedY);
     };
   }, []);
