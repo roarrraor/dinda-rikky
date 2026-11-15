@@ -5,7 +5,7 @@ import { useEffect, useMemo, useRef, useState, type CSSProperties, type FormEven
 import { createPortal } from "react-dom";
 import dayjs from "dayjs";
 import { AnimatePresence, motion } from "motion/react";
-import { Camera, Check, CheckCircle2, ChevronRight, Copy, Images, MessageCircle, PenLine, Smile, X } from "lucide-react";
+import { Camera, Check, CheckCircle2, ChevronDown, ChevronRight, Copy, Images, MessageCircle, Minus, PenLine, Plus, Smile, X } from "lucide-react";
 import { ASSETS, COPY, ID, GUEST_CATEGORIES, paletteVars } from "@/lib/pesta-teh/data";
 import { STICKERS, stickerSrc } from "@/lib/pesta-teh/stickers";
 import { formatDate } from "@/lib/pesta-teh/format";
@@ -318,6 +318,9 @@ export function RsvpSection({
   }, []);
   // Urutan chat: paling lama di atas, paling baru di bawah (seperti WA).
   const orderedWishes = useMemo(() => [...wishes].reverse(), [wishes]);
+  // Ucapan terbaru (API mengembalikan terbaru dulu) — untuk preview di
+  // tombol notif.
+  const latestWish = wishes[0] ?? null;
   // Saat sheet terbuka, halaman belakang dikunci (sekali saat buka/tutup
   // saja — bukan tiap sentuhan, jadi tidak ada flash/geter).
   useEffect(() => {
@@ -492,23 +495,30 @@ export function RsvpSection({
             {showRsvp && (
               <>
                 <div>
-                  <span className={FIELD_LABEL}>{t.attendance}</span>
-                  <div role="radiogroup" aria-label={t.attendance} className="grid grid-cols-2 gap-2">
-                    {[
-                      { value: "hadir", label: "Hadir" },
-                      { value: "tidak", label: "Belum Dapat Hadir" },
-                    ].map((o) => (
-                      <button
-                        key={o.value}
-                        type="button"
-                        role="radio"
-                        aria-checked={form.attendance === o.value}
-                        onClick={() => form.setAttendance(o.value as "hadir" | "tidak")}
-                        className={choice(form.attendance === o.value)}
-                      >
-                        {o.label}
-                      </button>
-                    ))}
+                  <label htmlFor="rsvp-hadir" className={FIELD_LABEL}>
+                    {t.attendance}
+                  </label>
+                  <div className="relative">
+                    <select
+                      id="rsvp-hadir"
+                      aria-label={t.attendance}
+                      required
+                      value={form.attendance ?? ""}
+                      onChange={(e) => form.setAttendance(e.target.value as "hadir" | "tidak")}
+                      className={`w-full appearance-none rounded-2xl border border-(--pt-sage) bg-white px-4 py-3 pr-10 font-cormorant text-[18px] outline-none focus:border-(--theme-primary) ${
+                        form.attendance ? "text-(--theme-text)" : "text-(--theme-muted)"
+                      }`}
+                    >
+                      <option value="" disabled>
+                        Pilih kehadiran
+                      </option>
+                      <option value="hadir">Hadir</option>
+                      <option value="tidak">Belum Dapat Hadir</option>
+                    </select>
+                    <ChevronDown
+                      size={20}
+                      className="pointer-events-none absolute top-1/2 right-4 -translate-y-1/2 text-(--theme-muted)"
+                    />
                   </div>
                 </div>
                 {form.attendance === "hadir" && (
@@ -551,22 +561,31 @@ export function RsvpSection({
                       </fieldset>
                     )}
                     <div>
-                      <label htmlFor="rsvp-pax" className={FIELD_LABEL}>
-                        {t.paxLabel}
-                      </label>
-                      <select
-                        id="rsvp-pax"
-                        aria-label={t.paxLabel}
-                        value={form.pax}
-                        onChange={(e) => form.setPax(Number(e.target.value))}
-                        className={FIELD}
-                      >
-                        {Array.from({ length: form.maxPax }, (_, i) => i + 1).map((n) => (
-                          <option key={n} value={n}>
-                            {t.people(n)}
-                          </option>
-                        ))}
-                      </select>
+                      <span className={FIELD_LABEL}>{t.paxLabel}</span>
+                      <div className="flex items-center justify-between rounded-2xl border border-(--pt-sage) bg-white px-2 py-2">
+                        <button
+                          type="button"
+                          aria-label="Kurangi jumlah tamu"
+                          disabled={form.pax <= 1}
+                          onClick={() => form.setPax(Math.max(1, form.pax - 1))}
+                          className="grid size-9 shrink-0 cursor-pointer place-items-center rounded-full border border-(--pt-sage) bg-white text-(--theme-text) transition-opacity disabled:cursor-default disabled:opacity-30"
+                        >
+                          <Minus size={18} />
+                        </button>
+                        <span className="font-cormorant text-[19px] font-bold text-(--theme-text)">
+                          {form.pax}{" "}
+                          <span className="text-[16px] font-semibold text-(--theme-muted)">orang</span>
+                        </span>
+                        <button
+                          type="button"
+                          aria-label="Tambah jumlah tamu"
+                          disabled={form.pax >= form.maxPax}
+                          onClick={() => form.setPax(Math.min(form.maxPax, form.pax + 1))}
+                          className="grid size-9 shrink-0 cursor-pointer place-items-center rounded-full border border-(--pt-sage) bg-white text-(--theme-text) transition-opacity disabled:cursor-default disabled:opacity-30"
+                        >
+                          <Plus size={18} />
+                        </button>
+                      </div>
                     </div>
                   </>
                 )}
@@ -657,15 +676,21 @@ export function RsvpSection({
           onClick={() => setSheetOpen(true)}
           className="mt-8 flex w-full items-center gap-3 rounded-[20px] bg-white px-5 py-4 text-left shadow-[0_8px_18px_-10px_rgb(63_74_44/0.45)] ring-1 ring-(--pt-sage)/60 transition-transform active:scale-[0.98]"
         >
-          <span className="flex size-11 shrink-0 items-center justify-center rounded-full bg-(--theme-primary) text-white">
+          <span className="relative flex size-11 shrink-0 items-center justify-center rounded-full bg-(--theme-primary) text-white">
             <MessageCircle size={22} />
+            <span className="absolute -top-1.5 -right-1.5 flex h-5 min-w-5 items-center justify-center">
+              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-red-500 opacity-60" />
+              <span className="relative inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-red-500 px-1 font-cormorant text-[11px] leading-none font-bold text-white ring-2 ring-white">
+                {wishes.length}
+              </span>
+            </span>
           </span>
           <span className="min-w-0 flex-1">
             <span className="block font-cormorant text-[19px] leading-tight font-bold text-(--theme-text)">
               Ucapan &amp; Doa
             </span>
-            <span className="block font-cormorant text-[15px] leading-snug text-(--theme-muted)">
-              {wishes.length} ucapan dari tamu — ketuk untuk membaca
+            <span className="block truncate font-cormorant text-[15px] leading-snug text-(--theme-muted)">
+              {latestWish ? `${latestWish.name}: ${latestWish.message}` : `${wishes.length} ucapan dari tamu`}
             </span>
           </span>
           <ChevronRight size={22} className="shrink-0 text-(--theme-muted)" />

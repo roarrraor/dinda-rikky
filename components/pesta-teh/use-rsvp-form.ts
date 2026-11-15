@@ -5,7 +5,7 @@ import { useState } from "react";
 export interface RsvpForm {
   name: string;
   setName: (v: string) => void;
-  attendance: "hadir" | "tidak";
+  attendance: "hadir" | "tidak" | null;
   setAttendance: (v: "hadir" | "tidak") => void;
   pax: number;
   setPax: (v: number) => void;
@@ -36,7 +36,7 @@ export function useRsvpForm(opts: {
   maxPax?: number;
 }): RsvpForm {
   const [name, setName] = useState(opts.initialName ?? "");
-  const [attendance, setAttendance] = useState<"hadir" | "tidak">("hadir");
+  const [attendance, setAttendance] = useState<"hadir" | "tidak" | null>(null);
   const [pax, setPax] = useState(1);
   const [message, setMessage] = useState("");
   const [sticker, setSticker] = useState("");
