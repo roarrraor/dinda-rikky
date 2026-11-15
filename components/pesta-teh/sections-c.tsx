@@ -306,6 +306,13 @@ export function RsvpSection({
   const [justSent, setJustSent] = useState<{ name: string; message: string } | null>(null);
   const chatRef = useRef<HTMLDivElement>(null);
   const typingTimer = useRef<number | null>(null);
+  // Ikuti pesan baru atau tidak: true selama replay berjalan; kalau tamu
+  // sengaja scroll ke atas untuk membaca pesan lama, auto-follow berhenti.
+  const followRef = useRef(true);
+  // Penanda scroll yang dipicu kode (bukan jari tamu) supaya onScroll
+  // tidak salah mengira scroll halus kita sebagai scroll manual.
+  const autoScrollingRef = useRef(false);
+  const autoScrollTimer = useRef<number | null>(null);
   useEffect(() => {
     setMounted(true);
   }, []);
@@ -333,6 +340,7 @@ export function RsvpSection({
   // mulai dari nol — pesan-pesan muncul satu per satu seperti lagi ngechat.
   useEffect(() => {
     if (!sheetOpen) return;
+    followRef.current = true;
     if (justSent) {
       setVisibleCount(wishes.length);
       setTyping(false);
@@ -356,9 +364,11 @@ export function RsvpSection({
       return;
     }
     setTyping(true);
+    // Jeda ketikan dibuat seperti orang beneran ngetik: 1–1,8 detik per
+    // pesan (acak), bukan 550ms yang terasa kecepetan.
     typingTimer.current = window.setTimeout(() => {
       setVisibleCount((n) => Math.min(n + 1, wishes.length));
-    }, 550);
+    }, 1000 + Math.random() * 800);
     return () => {
       if (typingTimer.current) window.clearTimeout(typingTimer.current);
     };
@@ -367,18 +377,24 @@ export function RsvpSection({
   useEffect(() => {
     if (sheetOpen) return;
     if (typingTimer.current) window.clearTimeout(typingTimer.current);
+    if (autoScrollTimer.current) window.clearTimeout(autoScrollTimer.current);
+    autoScrollingRef.current = false;
     setTyping(false);
   }, [sheetOpen]);
-  // Ikuti pesan baru: kalau pengguna sedang di dekat bawah, scroll halus
-  // mengikutinya; kalau dia sedang membaca ke atas, jangan diganggu.
+  // Ikuti pesan baru seperti lagi ngechat: tiap pesan muncul, daftar
+  // bergeser ke atas dan pesan lama ketutup header — kecuali tamu sengaja
+  // scroll ke atas untuk membaca, maka auto-follow berhenti sampai dia
+  // kembali ke bawah.
   useEffect(() => {
     if (!sheetOpen) return;
     const el = chatRef.current;
-    if (!el) return;
-    const nearBottom = el.scrollTop + el.clientHeight >= el.scrollHeight - 160;
-    if (nearBottom) {
-      el.scrollTo({ top: el.scrollHeight, behavior: "smooth" });
-    }
+    if (!el || !followRef.current) return;
+    autoScrollingRef.current = true;
+    el.scrollTo({ top: el.scrollHeight, behavior: "smooth" });
+    if (autoScrollTimer.current) window.clearTimeout(autoScrollTimer.current);
+    autoScrollTimer.current = window.setTimeout(() => {
+      autoScrollingRef.current = false;
+    }, 700);
   }, [visibleCount, sheetOpen]);
   useEffect(() => {
     try {
@@ -713,6 +729,7 @@ export function RsvpSection({
                         if (typingTimer.current) window.clearTimeout(typingTimer.current);
                         setVisibleCount(wishes.length);
                         setTyping(false);
+                        followRef.current = true;
                       }}
                       className="shrink-0 rounded-full bg-white/15 px-3 py-1.5 font-cormorant text-[13px] font-bold text-white"
                     >
@@ -722,6 +739,15 @@ export function RsvpSection({
                 </div>
                 <div
                   ref={chatRef}
+                  onScroll={(e) => {
+                    // Scroll dari kode (smooth scrollTo) diabaikan; scroll
+                    // dari jari tamu yang menjauh dari bawah mematikan
+                    // auto-follow, kembali ke bawah menyalakannya lagi.
+                    if (autoScrollingRef.current) return;
+                    const el = e.currentTarget;
+                    followRef.current =
+                      el.scrollTop + el.clientHeight >= el.scrollHeight - 120;
+                  }}
                   className="flex-1 overflow-y-auto overscroll-contain bg-[#E7DFD3] px-3 pt-4 pb-4"
                 >
                   {orderedWishes.slice(0, visibleCount).map((w, i) => {
