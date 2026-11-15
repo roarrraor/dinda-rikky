@@ -16,10 +16,10 @@ export async function generateMetadata({
   const { to } = await searchParams;
   const guest = resolveGuestName(to);
   const title = guest
-    ? `Kepada Yth. ${guest} | The Wedding of Dinda & Rikky`
+    ? `Halo, ${guest}! Jangan Lupa Datang Ya`
     : "The Wedding of Dinda & Rikky";
   const description = guest
-    ? `Kepada Yth. ${guest}, kami mengundang Anda untuk hadir di pernikahan Dinda Intan Pratiwi & Rikky Arisendi, Minggu, 20 Desember 2026.`
+    ? `Halo ${guest}, kamu diundang ke pernikahan Dinda & Rikky, Minggu, 20 Desember 2026. Kami tunggu kehadiranmu!`
     : "Undangan pernikahan digital Dinda Intan Pratiwi & Rikky Arisendi. Kami mengundang Bapak/Ibu/Saudara/i untuk hadir di hari bahagia kami.";
   const url = to
     ? `${SITE_URL}/?to=${encodeURIComponent(to)}`
