@@ -45,7 +45,7 @@ import {
   type PhotoboothLayout,
   type ShapeId,
 } from "@/lib/wedding/photobooth";
-import { BODY, KICKER, PtButton } from "./primitives";
+import { PtButton } from "./primitives";
 
 export interface PhotoboothCaption {
   names: string;
@@ -289,6 +289,11 @@ const STEP_NAMES: Record<Step, string> = {
 };
 
 const STEP_NUM: Record<Step, number> = { layout: 1, access: 2, camera: 2, review: 2, result: 3 };
+
+/** Tipografi UI studio: Montserrat biasa (ramah, umum) — bukan script/serif undangan. Warna brand tetap sama. */
+const PB_BODY = "font-montserrat text-[15px] leading-relaxed text-(--theme-muted)";
+const PB_KICKER = "font-montserrat text-[12px] font-semibold uppercase tracking-[0.08em] text-(--theme-accent)";
+const PB_TITLE = "font-montserrat text-[28px] font-semibold leading-tight text-(--theme-muted)";
 
 export function PhotoboothStudio({ caption }: { caption: PhotoboothCaption }) {
   const [step, setStep] = useState<Step>("layout");
@@ -569,14 +574,14 @@ export function PhotoboothStudio({ caption }: { caption: PhotoboothCaption }) {
     <div className="mx-auto flex min-h-dvh w-full max-w-[480px] flex-col bg-white shadow-[0_0_60px_rgba(0,0,0,0.10)]">
       {/* header langkah */}
       <header className="flex items-center justify-between gap-2 border-b border-(--pt-sage)/40 px-4 py-3">
-        <Link href="/" className="flex items-center gap-1 font-marcellus text-[12px] uppercase tracking-[0.16em] text-(--theme-primary)">
+        <Link href="/" className="flex items-center gap-1 font-montserrat font-semibold text-[12px] uppercase tracking-[0.08em] text-(--theme-primary)">
           <ChevronLeft size={14} />
           {step === "layout" ? "Undangan" : "Kembali"}
         </Link>
-        <p className="font-cormorant text-[15px] text-(--theme-muted)">
+        <p className="font-montserrat text-[14px] font-medium text-(--theme-muted)">
           Langkah {STEP_NUM[step]} dari 3 · {STEP_NAMES[step]}
         </p>
-        <p className="hidden font-marcellus text-[11px] tracking-[0.12em] text-(--theme-text) min-[380px]:block">
+        <p className="hidden font-montserrat font-semibold text-[11px] tracking-[0.08em] text-(--theme-text) min-[380px]:block">
           {caption.names}
         </p>
       </header>
@@ -585,7 +590,7 @@ export function PhotoboothStudio({ caption }: { caption: PhotoboothCaption }) {
         <button
           type="button"
           onClick={() => setNotice(null)}
-          className="bg-(--theme-surface) px-4 py-2 text-center font-cormorant text-[15px] text-(--theme-text)"
+          className="bg-(--theme-surface) px-4 py-2 text-center font-montserrat text-[14px] font-medium text-(--theme-text)"
         >
           {notice} ✕
         </button>
@@ -594,9 +599,9 @@ export function PhotoboothStudio({ caption }: { caption: PhotoboothCaption }) {
       {/* ---------- LANGKAH 1: tata letak ---------- */}
       {step === "layout" && (
         <main className="flex-1 px-5 pt-8 pb-10 text-center">
-          <p className={KICKER}>Photobooth</p>
-          <h1 className="mt-1 font-great-vibes text-[40px] leading-[1.1] text-(--theme-muted)">Abadikan momen ini</h1>
-          <p className={`mx-auto mt-2 max-w-80 ${BODY}`}>{T.step1Desc}</p>
+          <p className={PB_KICKER}>Photobooth</p>
+          <h1 className={`mt-1 ${PB_TITLE}`}>Abadikan momen ini</h1>
+          <p className={`mx-auto mt-2 max-w-80 ${PB_BODY}`}>{T.step1Desc}</p>
 
           <div className="mt-8 grid grid-cols-2 gap-3 text-left">
             {LAYOUTS.map((l) => (
@@ -607,13 +612,13 @@ export function PhotoboothStudio({ caption }: { caption: PhotoboothCaption }) {
                 className="relative rounded-3xl border border-(--pt-sage)/60 bg-(--theme-surface) p-4 text-left transition-transform active:scale-[0.98] cursor-pointer"
               >
                 {l.badge && (
-                  <span className="absolute -top-2.5 right-3 rounded-full bg-[#E8A33D] px-2.5 py-0.5 font-marcellus text-[10px] uppercase tracking-[0.12em] text-white">
+                  <span className="absolute -top-2.5 right-3 rounded-full bg-[#E8A33D] px-2.5 py-0.5 font-montserrat font-semibold text-[10px] uppercase tracking-[0.08em] text-white">
                     {l.badge}
                   </span>
                 )}
-                <span className="font-marcellus text-[15px] text-(--theme-text)">{l.name}</span>
-                <span className="mt-1 block font-cormorant text-[15px] leading-snug text-(--theme-muted)">{l.desc}</span>
-                <span className="mt-3 flex items-center gap-2 font-marcellus text-[11px] uppercase tracking-[0.14em] text-(--theme-primary)">
+                <span className="font-montserrat text-[16px] font-semibold text-(--theme-text)">{l.name}</span>
+                <span className="mt-1 block font-montserrat text-[14px] leading-relaxed text-(--theme-muted)">{l.desc}</span>
+                <span className="mt-3 flex items-center gap-2 font-montserrat font-semibold text-[11px] uppercase tracking-[0.08em] text-(--theme-primary)">
                   <Aperture size={13} />
                   {l.shots} foto · {l.orientation}
                 </span>
@@ -621,8 +626,8 @@ export function PhotoboothStudio({ caption }: { caption: PhotoboothCaption }) {
             ))}
           </div>
 
-          <p className={`mx-auto mt-8 max-w-80 ${BODY}`}>{T.tip}</p>
-          <p className="mt-6 font-cormorant text-[14px] text-(--theme-muted) italic">{T.privacy}</p>
+          <p className={`mx-auto mt-8 max-w-80 ${PB_BODY}`}>{T.tip}</p>
+          <p className="mt-6 font-montserrat text-[14px] text-(--theme-muted)">{T.privacy}</p>
         </main>
       )}
 
@@ -632,10 +637,10 @@ export function PhotoboothStudio({ caption }: { caption: PhotoboothCaption }) {
           <span className="grid size-16 place-items-center rounded-full bg-(--theme-surface) text-(--theme-primary)">
             <Camera size={26} />
           </span>
-          <h1 className="mt-4 font-great-vibes text-[36px] text-(--theme-muted)">{T.cameraTitle}</h1>
-          <p className={`mt-2 max-w-72 ${BODY}`}>{T.cameraDesc}</p>
+          <h1 className={`mt-4 ${PB_TITLE}`}>{T.cameraTitle}</h1>
+          <p className={`mt-2 max-w-72 ${PB_BODY}`}>{T.cameraDesc}</p>
           <div className="mt-8 flex w-full max-w-72 flex-col gap-3">
-            <PtButton
+            <PtButton friendly
               onClick={() => {
                 setStep("camera");
                 void startCamera(facing);
@@ -644,14 +649,14 @@ export function PhotoboothStudio({ caption }: { caption: PhotoboothCaption }) {
               <Camera size={14} />
               {T.toCamera}
             </PtButton>
-            <PtButton outline onClick={() => fileRef.current?.click()}>
+            <PtButton friendly outline onClick={() => fileRef.current?.click()}>
               <ImagePlus size={14} />
               {T.fromGallery}
             </PtButton>
             <button
               type="button"
               onClick={() => setStep("layout")}
-              className="font-cormorant text-[16px] text-(--theme-muted) underline underline-offset-4 cursor-pointer"
+              className="font-montserrat text-[15px] font-medium text-(--theme-muted) underline underline-offset-4 cursor-pointer"
             >
               {T.later}
             </button>
@@ -682,7 +687,7 @@ export function PhotoboothStudio({ caption }: { caption: PhotoboothCaption }) {
                 />
               ))}
             </div>
-            <p className="font-cormorant text-[15px] text-white/80">{T.shotsTaken(shotsTaken, layout.shots)}</p>
+            <p className="font-montserrat text-[15px] text-white/80">{T.shotsTaken(shotsTaken, layout.shots)}</p>
           </div>
 
           <div className="relative mx-4 mt-3 flex-1 overflow-hidden rounded-3xl bg-black">
@@ -702,17 +707,17 @@ export function PhotoboothStudio({ caption }: { caption: PhotoboothCaption }) {
               <div className="absolute inset-0 grid place-items-center px-6 text-center">
                 {camState === "denied" ? (
                   <div>
-                    <p className="font-marcellus text-[15px] uppercase tracking-[0.14em]">{T.cameraDenied}</p>
-                    <p className="mt-2 font-cormorant text-[16px] leading-relaxed text-white/75">{T.cameraDeniedDesc}</p>
-                    <PtButton className="mt-5" onClick={() => fileRef.current?.click()}>
+                    <p className="font-montserrat text-[15px] font-semibold uppercase tracking-[0.08em]">{T.cameraDenied}</p>
+                    <p className="mt-2 font-montserrat text-[16px] leading-relaxed text-white/75">{T.cameraDeniedDesc}</p>
+                    <PtButton friendly className="mt-5" onClick={() => fileRef.current?.click()}>
                       <ImagePlus size={14} />
                       {T.fromGallery}
                     </PtButton>
                   </div>
                 ) : (
                   <div>
-                    <p className="font-marcellus text-[15px] uppercase tracking-[0.14em]">{T.waitingCamera}</p>
-                    <p className="mt-2 font-cormorant text-[16px] leading-relaxed text-white/75">{T.waitingCameraDesc}</p>
+                    <p className="font-montserrat text-[15px] font-semibold uppercase tracking-[0.08em]">{T.waitingCamera}</p>
+                    <p className="mt-2 font-montserrat text-[16px] leading-relaxed text-white/75">{T.waitingCameraDesc}</p>
                   </div>
                 )}
               </div>
@@ -726,7 +731,7 @@ export function PhotoboothStudio({ caption }: { caption: PhotoboothCaption }) {
             )}
             {countdown !== null && (
               <div className="absolute inset-0 grid place-items-center bg-black/30">
-                <span className="font-great-vibes text-[110px] leading-none text-white drop-shadow-[0_4px_16px_rgba(0,0,0,0.6)]">
+                <span className="font-montserrat text-[96px] font-bold leading-none text-white drop-shadow-[0_4px_16px_rgba(0,0,0,0.6)]">
                   {countdown}
                 </span>
               </div>
@@ -735,7 +740,7 @@ export function PhotoboothStudio({ caption }: { caption: PhotoboothCaption }) {
               <div className="absolute right-3 bottom-3 flex items-center gap-2 rounded-full bg-black/60 py-1 pr-3 pl-1">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img src={shots[target] ?? shots.filter(Boolean).at(-1) ?? ""} alt={T.lastShot} className="size-9 rounded-full object-cover" />
-                <span className="font-cormorant text-[13px]">{T.lastShot}</span>
+                <span className="font-montserrat text-[13px] font-medium">{T.lastShot}</span>
               </div>
             )}
           </div>
@@ -746,7 +751,7 @@ export function PhotoboothStudio({ caption }: { caption: PhotoboothCaption }) {
               <button
                 type="button"
                 onClick={() => setGridOn((v) => !v)}
-                className={`flex items-center gap-1.5 rounded-full px-3 py-2 font-cormorant text-[14px] cursor-pointer ${gridOn ? "bg-[#E8A33D] text-black" : "bg-white/10 text-white"}`}
+                className={`flex items-center gap-1.5 rounded-full px-3 py-2 font-montserrat text-[14px] font-medium cursor-pointer ${gridOn ? "bg-[#E8A33D] text-black" : "bg-white/10 text-white"}`}
               >
                 <LayoutGrid size={15} />
                 {T.grid}
@@ -754,7 +759,7 @@ export function PhotoboothStudio({ caption }: { caption: PhotoboothCaption }) {
               <button
                 type="button"
                 onClick={() => setShowFilters((v) => !v)}
-                className={`relative flex items-center gap-1.5 rounded-full px-3 py-2 font-cormorant text-[14px] cursor-pointer ${showFilters ? "bg-[#E8A33D] text-black" : "bg-white/10 text-white"}`}
+                className={`relative flex items-center gap-1.5 rounded-full px-3 py-2 font-montserrat text-[14px] font-medium cursor-pointer ${showFilters ? "bg-[#E8A33D] text-black" : "bg-white/10 text-white"}`}
               >
                 <Wand2 size={15} />
                 {filter.name}
@@ -763,7 +768,7 @@ export function PhotoboothStudio({ caption }: { caption: PhotoboothCaption }) {
               <button
                 type="button"
                 onClick={() => setAutoOn((v) => !v)}
-                className={`flex items-center gap-1.5 rounded-full px-3 py-2 font-cormorant text-[14px] cursor-pointer ${autoOn ? "bg-[#E8A33D] text-black" : "bg-white/10 text-white"}`}
+                className={`flex items-center gap-1.5 rounded-full px-3 py-2 font-montserrat text-[14px] font-medium cursor-pointer ${autoOn ? "bg-[#E8A33D] text-black" : "bg-white/10 text-white"}`}
               >
                 <Zap size={15} />
                 {T.auto}
@@ -777,7 +782,7 @@ export function PhotoboothStudio({ caption }: { caption: PhotoboothCaption }) {
                     key={f.id}
                     type="button"
                     onClick={() => setFilterId(f.id)}
-                    className={`shrink-0 rounded-full px-3.5 py-1.5 font-cormorant text-[14px] cursor-pointer ${filterId === f.id ? "bg-white text-black" : "bg-white/10 text-white"}`}
+                    className={`shrink-0 rounded-full px-3.5 py-1.5 font-montserrat text-[14px] font-medium cursor-pointer ${filterId === f.id ? "bg-white text-black" : "bg-white/10 text-white"}`}
                   >
                     {f.name}
                   </button>
@@ -785,7 +790,7 @@ export function PhotoboothStudio({ caption }: { caption: PhotoboothCaption }) {
                 <button
                   type="button"
                   onClick={() => setFilterId(DEFAULT_FILTER_ID)}
-                  className="shrink-0 rounded-full bg-white/10 px-3.5 py-1.5 font-cormorant text-[14px] text-white cursor-pointer"
+                  className="shrink-0 rounded-full bg-white/10 px-3.5 py-1.5 font-montserrat text-[14px] text-white cursor-pointer"
                 >
                   Reset
                 </button>
@@ -796,14 +801,14 @@ export function PhotoboothStudio({ caption }: { caption: PhotoboothCaption }) {
               <button
                 type="button"
                 onClick={() => setZoom(1)}
-                className={`rounded-full px-3 py-1.5 font-marcellus text-[12px] cursor-pointer ${zoom === 1 ? "bg-white text-black" : "bg-white/10 text-white"}`}
+                className={`rounded-full px-3 py-1.5 font-montserrat text-[12px] font-semibold cursor-pointer ${zoom === 1 ? "bg-white text-black" : "bg-white/10 text-white"}`}
               >
                 1×
               </button>
               <button
                 type="button"
                 onClick={() => setZoom(2)}
-                className={`rounded-full px-3 py-1.5 font-marcellus text-[12px] cursor-pointer ${zoom === 2 ? "bg-white text-black" : "bg-white/10 text-white"}`}
+                className={`rounded-full px-3 py-1.5 font-montserrat text-[12px] font-semibold cursor-pointer ${zoom === 2 ? "bg-white text-black" : "bg-white/10 text-white"}`}
               >
                 2×
               </button>
@@ -827,7 +832,7 @@ export function PhotoboothStudio({ caption }: { caption: PhotoboothCaption }) {
                   stopCamera();
                   setStep(shotsTaken > 0 ? "review" : "access");
                 }}
-                className="flex items-center gap-1 font-cormorant text-[15px] text-white/80 cursor-pointer"
+                className="flex items-center gap-1 font-montserrat text-[15px] font-medium text-white/80 cursor-pointer"
               >
                 <ChevronLeft size={16} />
                 Kembali
@@ -848,13 +853,13 @@ export function PhotoboothStudio({ caption }: { caption: PhotoboothCaption }) {
                   setFacing(next);
                   void startCamera(next);
                 }}
-                className="flex items-center gap-1 font-cormorant text-[15px] text-white/80 cursor-pointer"
+                className="flex items-center gap-1 font-montserrat text-[15px] font-medium text-white/80 cursor-pointer"
               >
                 <SwitchCamera size={16} />
                 {T.switchCamera}
               </button>
             </div>
-            {autoOn && <p className="mt-2 text-center font-cormorant text-[14px] text-[#E8A33D]">{T.autoOn}</p>}
+            {autoOn && <p className="mt-2 text-center font-montserrat text-[14px] font-medium text-[#E8A33D]">{T.autoOn}</p>}
           </div>
           <input
             ref={fileRef}
@@ -873,8 +878,8 @@ export function PhotoboothStudio({ caption }: { caption: PhotoboothCaption }) {
       {/* ---------- LANGKAH 2c: review pose ---------- */}
       {step === "review" && (
         <main className="flex-1 px-5 pt-8 pb-10 text-center">
-          <h1 className="font-great-vibes text-[36px] text-(--theme-muted)">{T.reviewTitle}</h1>
-          <p className={`mx-auto mt-2 max-w-80 ${BODY}`}>{T.reviewDesc}</p>
+          <h1 className={PB_TITLE}>{T.reviewTitle}</h1>
+          <p className={`mx-auto mt-2 max-w-80 ${PB_BODY}`}>{T.reviewDesc}</p>
           <div className={`mt-6 grid gap-3 ${layout.shots > 2 ? "grid-cols-2" : "grid-cols-1"}`}>
             {shots.map((s, i) => (
               <button
@@ -887,22 +892,22 @@ export function PhotoboothStudio({ caption }: { caption: PhotoboothCaption }) {
                   // eslint-disable-next-line @next/next/no-img-element
                   <img src={s} alt={`Bidikan ${i + 1}`} className="aspect-4/3 w-full object-cover" />
                 ) : (
-                  <span className="grid aspect-4/3 w-full place-items-center bg-(--theme-surface) font-cormorant text-[16px] text-(--theme-muted)">
+                  <span className="grid aspect-4/3 w-full place-items-center bg-(--theme-surface) font-montserrat text-[16px] text-(--theme-muted)">
                     Belum ada foto
                   </span>
                 )}
-                <span className="absolute inset-x-0 bottom-0 bg-black/55 px-3 py-1.5 text-center font-cormorant text-[14px] text-white">
+                <span className="absolute inset-x-0 bottom-0 bg-black/55 px-3 py-1.5 text-center font-montserrat text-[14px] font-medium text-white">
                   {T.retakeOne(i + 1)}
                 </span>
               </button>
             ))}
           </div>
           <div className="mt-8 flex flex-col items-center gap-3">
-            <PtButton disabled={!shots.every(Boolean)} onClick={() => setStep("result")}>
+            <PtButton friendly disabled={!shots.every(Boolean)} onClick={() => setStep("result")}>
               <Check size={14} />
               {T.toFrame}
             </PtButton>
-            <PtButton outline onClick={retakeAll}>
+            <PtButton friendly outline onClick={retakeAll}>
               <RotateCcw size={14} />
               {T.retakeAll}
             </PtButton>
@@ -913,12 +918,12 @@ export function PhotoboothStudio({ caption }: { caption: PhotoboothCaption }) {
       {/* ---------- LANGKAH 3: hasil ---------- */}
       {step === "result" && (
         <main className="flex-1 px-5 pt-8 pb-10">
-          <h1 className="text-center font-great-vibes text-[36px] text-(--theme-muted)">{T.resultTitle}</h1>
-          <p className={`mx-auto mt-2 max-w-80 text-center ${BODY}`}>{T.resultDesc}</p>
+          <h1 className={`text-center ${PB_TITLE}`}>{T.resultTitle}</h1>
+          <p className={`mx-auto mt-2 max-w-80 text-center ${PB_BODY}`}>{T.resultDesc}</p>
 
           <div className="mx-auto mt-6 max-w-[340px]">
             <canvas ref={previewRef} className="w-full rounded-2xl shadow-[0_16px_30px_-12px_rgba(63,74,44,0.45)]" />
-            <p className="mt-3 text-center font-cormorant text-[14px] text-(--theme-muted) italic">{T.privacy}</p>
+            <p className="mt-3 text-center font-montserrat text-[14px] text-(--theme-muted)">{T.privacy}</p>
           </div>
 
           {/* tab pengaturan */}
@@ -935,7 +940,7 @@ export function PhotoboothStudio({ caption }: { caption: PhotoboothCaption }) {
                 key={id}
                 type="button"
                 onClick={() => setTab(id)}
-                className={`rounded-full px-4 py-2 font-marcellus text-[12px] uppercase tracking-[0.14em] cursor-pointer ${tab === id ? "bg-(--theme-primary) text-white" : "bg-(--theme-surface) text-(--theme-text)"}`}
+                className={`rounded-full px-4 py-2 font-montserrat font-semibold text-[12px] uppercase tracking-[0.08em] cursor-pointer ${tab === id ? "bg-(--theme-primary) text-white" : "bg-(--theme-surface) text-(--theme-text)"}`}
               >
                 {label}
               </button>
@@ -944,7 +949,7 @@ export function PhotoboothStudio({ caption }: { caption: PhotoboothCaption }) {
 
           {tab === "frame" && (
             <div className="mt-5">
-              <p className="text-center font-marcellus text-[11px] uppercase tracking-[0.18em] text-(--theme-muted)">
+              <p className="text-center font-montserrat font-semibold text-[11px] uppercase tracking-[0.08em] text-(--theme-muted)">
                 {T.frameConcept}
               </p>
               <div className="mt-3 flex flex-wrap justify-center gap-2">
@@ -953,7 +958,7 @@ export function PhotoboothStudio({ caption }: { caption: PhotoboothCaption }) {
                     key={c}
                     type="button"
                     onClick={() => setConcept(c)}
-                    className={`rounded-full px-3.5 py-1.5 font-cormorant text-[15px] cursor-pointer ${concept === c ? "bg-(--theme-text) text-white" : "bg-(--theme-surface) text-(--theme-text)"}`}
+                    className={`rounded-full px-3.5 py-1.5 font-montserrat text-[15px] font-medium cursor-pointer ${concept === c ? "bg-(--theme-text) text-white" : "bg-(--theme-surface) text-(--theme-text)"}`}
                   >
                     {c}
                   </button>
@@ -989,7 +994,7 @@ export function PhotoboothStudio({ caption }: { caption: PhotoboothCaption }) {
                           // eslint-disable-next-line @next/next/no-img-element
                           <img src={(f as ImageFrame).src} alt={f.name} className="h-full w-full object-cover" />
                         ) : (
-                          <span className="absolute inset-x-3 bottom-2 block text-center font-cormorant text-[13px] leading-tight" style={{ color: (f as PhotoboothFrame).ink }}>
+                          <span className="absolute inset-x-3 bottom-2 block text-center font-montserrat text-[13px] leading-tight" style={{ color: (f as PhotoboothFrame).ink }}>
                             {caption.names}
                           </span>
                         )}
@@ -999,7 +1004,7 @@ export function PhotoboothStudio({ caption }: { caption: PhotoboothCaption }) {
                           </span>
                         )}
                       </span>
-                      <span className="block bg-white px-2 py-1.5 text-center font-cormorant text-[13px] leading-tight text-(--theme-text)">
+                      <span className="block bg-white px-2 py-1.5 text-center font-montserrat text-[13px] font-medium leading-tight text-(--theme-text)">
                         {f.name}
                       </span>
                     </button>
@@ -1011,7 +1016,7 @@ export function PhotoboothStudio({ caption }: { caption: PhotoboothCaption }) {
 
           {tab === "font" && (
             <div className="mt-5">
-              <p className="text-center font-cormorant text-[15px] text-(--theme-muted) italic">{T.fontHint}</p>
+              <p className="text-center font-montserrat text-[15px] text-(--theme-muted)">{T.fontHint}</p>
               <div className="mt-4 grid grid-cols-3 gap-2.5">
                 {FONTS.map((f) => (
                   <button
@@ -1023,7 +1028,7 @@ export function PhotoboothStudio({ caption }: { caption: PhotoboothCaption }) {
                     <span className="block text-[26px] leading-none text-(--theme-text)" style={{ fontFamily: f.family }}>
                       Aa
                     </span>
-                    <span className="mt-1.5 block font-cormorant text-[13px] text-(--theme-muted)">{f.name}</span>
+                    <span className="mt-1.5 block font-montserrat text-[13px] text-(--theme-muted)">{f.name}</span>
                   </button>
                 ))}
               </div>
@@ -1032,7 +1037,7 @@ export function PhotoboothStudio({ caption }: { caption: PhotoboothCaption }) {
 
           {tab === "shape" && (
             <div className="mt-5">
-              <p className="text-center font-cormorant text-[15px] text-(--theme-muted) italic">{T.shapeHint}</p>
+              <p className="text-center font-montserrat text-[15px] text-(--theme-muted)">{T.shapeHint}</p>
               <div className="mt-4 grid grid-cols-3 gap-2.5">
                 {SHAPES.map((s) => (
                   <button
@@ -1042,8 +1047,8 @@ export function PhotoboothStudio({ caption }: { caption: PhotoboothCaption }) {
                     className={`rounded-2xl border-2 bg-white px-2 py-3 text-center cursor-pointer ${shapeId === s.id ? "border-(--theme-primary)" : "border-(--pt-sage)/40"}`}
                   >
                     <span className={`mx-auto block h-14 w-11 ${s.id === "lembut" ? "rounded-xl" : ""} ${s.id === "polaroid" ? "border-[6px] border-b-[16px] border-white shadow" : ""} bg-(--theme-surface)`} />
-                    <span className="mt-2 block font-marcellus text-[12px] uppercase tracking-[0.12em] text-(--theme-text)">{s.name}</span>
-                    <span className="mt-0.5 block font-cormorant text-[13px] leading-tight text-(--theme-muted)">{s.desc}</span>
+                    <span className="mt-2 block font-montserrat font-semibold text-[12px] uppercase tracking-[0.08em] text-(--theme-text)">{s.name}</span>
+                    <span className="mt-0.5 block font-montserrat text-[13px] leading-tight text-(--theme-muted)">{s.desc}</span>
                   </button>
                 ))}
               </div>
@@ -1052,14 +1057,14 @@ export function PhotoboothStudio({ caption }: { caption: PhotoboothCaption }) {
 
           {tab === "filter" && (
             <div className="mt-5">
-              <p className="text-center font-cormorant text-[15px] text-(--theme-muted) italic">{T.filterHint}</p>
+              <p className="text-center font-montserrat text-[15px] text-(--theme-muted)">{T.filterHint}</p>
               <div className="mt-4 flex flex-wrap justify-center gap-2">
                 {FILTERS.map((f) => (
                   <button
                     key={f.id}
                     type="button"
                     onClick={() => setFilterId(f.id)}
-                    className={`rounded-full px-4 py-2 font-cormorant text-[15px] cursor-pointer ${filterId === f.id ? "bg-(--theme-text) text-white" : "bg-(--theme-surface) text-(--theme-text)"}`}
+                    className={`rounded-full px-4 py-2 font-montserrat text-[15px] font-medium cursor-pointer ${filterId === f.id ? "bg-(--theme-text) text-white" : "bg-(--theme-surface) text-(--theme-text)"}`}
                   >
                     {f.name}
                   </button>
@@ -1067,7 +1072,7 @@ export function PhotoboothStudio({ caption }: { caption: PhotoboothCaption }) {
                 <button
                   type="button"
                   onClick={() => setFilterId(DEFAULT_FILTER_ID)}
-                  className="rounded-full bg-(--theme-surface) px-4 py-2 font-cormorant text-[15px] text-(--theme-text) cursor-pointer"
+                  className="rounded-full bg-(--theme-surface) px-4 py-2 font-montserrat text-[15px] text-(--theme-text) cursor-pointer"
                 >
                   Reset
                 </button>
@@ -1076,21 +1081,21 @@ export function PhotoboothStudio({ caption }: { caption: PhotoboothCaption }) {
           )}
 
           <div className="mt-8 flex flex-col items-center gap-3">
-            <PtButton onClick={() => void saveStrip()}>
+            <PtButton friendly onClick={() => void saveStrip()}>
               <Download size={14} />
               {T.save}
             </PtButton>
             <div className="flex gap-3">
-              <PtButton outline onClick={() => void shareStrip()}>
+              <PtButton friendly outline onClick={() => void shareStrip()}>
                 <Share2 size={14} />
                 {T.share}
               </PtButton>
-              <PtButton outline onClick={restart}>
+              <PtButton friendly outline onClick={restart}>
                 <RotateCcw size={14} />
                 {T.restart}
               </PtButton>
             </div>
-            <Link href="/" className="mt-1 font-cormorant text-[16px] text-(--theme-muted) underline underline-offset-4">
+            <Link href="/" className="mt-1 font-montserrat text-[15px] font-medium text-(--theme-muted) underline underline-offset-4">
               {T.backToInvite}
             </Link>
           </div>
@@ -1120,14 +1125,14 @@ export function PhotoboothWall({ onClose }: { onClose: () => void }) {
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between">
-          <h3 className="font-great-vibes text-[30px] text-(--theme-muted)">{T.myPhotos}</h3>
+          <h3 className="font-montserrat text-[22px] font-semibold text-(--theme-muted)">{T.myPhotos}</h3>
           <button type="button" onClick={onClose} aria-label="Tutup" className="rounded-full bg-(--theme-surface) p-2 text-(--theme-text) cursor-pointer">
             <X size={16} />
           </button>
         </div>
-        <p className={`mt-1 ${BODY}`}>{T.myPhotosNote}</p>
+        <p className={`mt-1 ${PB_BODY}`}>{T.myPhotosNote}</p>
         {strips.length === 0 ? (
-          <p className="mt-6 font-cormorant text-[16px] text-(--theme-muted) italic">{T.myPhotosEmpty}</p>
+          <p className="mt-6 font-montserrat text-[16px] text-(--theme-muted)">{T.myPhotosEmpty}</p>
         ) : (
           <ul className="mt-5 grid grid-cols-2 gap-3">
             {strips.map((s) => (
@@ -1135,7 +1140,7 @@ export function PhotoboothWall({ onClose }: { onClose: () => void }) {
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img src={s.src} alt="Strip photobooth tersimpan" className="w-full object-cover" />
                 <span className="flex items-center justify-center gap-3 py-2">
-                  <a href={s.src} download={stripFileName()} className="flex items-center gap-1 font-cormorant text-[14px] text-(--theme-primary)">
+                  <a href={s.src} download={stripFileName()} className="flex items-center gap-1 font-montserrat text-[14px] text-(--theme-primary)">
                     <Download size={13} />
                     {T.download}
                   </a>
@@ -1145,7 +1150,7 @@ export function PhotoboothWall({ onClose }: { onClose: () => void }) {
                       removeMyStrip(s.id);
                       setStrips(loadMyStrips());
                     }}
-                    className="flex items-center gap-1 font-cormorant text-[14px] text-red-700 cursor-pointer"
+                    className="flex items-center gap-1 font-montserrat text-[14px] text-red-700 cursor-pointer"
                   >
                     <Trash2 size={13} />
                     {T.delete}
@@ -1155,7 +1160,7 @@ export function PhotoboothWall({ onClose }: { onClose: () => void }) {
             ))}
           </ul>
         )}
-        <PtButton className="mt-5" onClick={onClose}>
+        <PtButton friendly className="mt-5" onClick={onClose}>
           Tutup
         </PtButton>
       </div>

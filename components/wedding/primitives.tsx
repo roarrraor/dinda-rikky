@@ -232,19 +232,26 @@ export function SectionTitle({
   children,
   light = false,
   plain = false,
+  friendly = false,
 }: {
   kicker?: string;
   children: ReactNode;
   light?: boolean;
   /** plain: judul pakai Marcellus (kapital tegas) supaya gampang dibaca, bukan script */
   plain?: boolean;
+  /** friendly: judul pakai Montserrat biasa (sans, ramah) — untuk fitur interaktif */
+  friendly?: boolean;
 }) {
   return (
     <div className="text-center">
       {kicker && <p className={KICKER}>{kicker}</p>}
       <h2
         className={`mt-1 text-[32px] ${light ? "text-(--theme-surface)" : "text-(--theme-muted)"} ${
-          plain ? "font-marcellus text-[30px] tracking-[0.06em]" : SCRIPT
+          friendly
+            ? "font-montserrat text-[26px] font-semibold leading-tight"
+            : plain
+              ? "font-marcellus text-[30px] tracking-[0.06em]"
+              : SCRIPT
         }`}
       >
         {children}
@@ -261,14 +268,18 @@ export function GinghamStrip({ className = "" }: { className?: string }) {
 const BTN_BASE =
   "inline-flex items-center justify-center gap-2 rounded-full px-6 py-2.5 font-marcellus text-[12px] uppercase leading-none tracking-[0.16em] transition-transform active:scale-[0.97] disabled:opacity-60 cursor-pointer";
 
-type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & { outline?: boolean };
+/** Varian ramah: Montserrat biasa (tanpa kapital) — untuk fitur interaktif. */
+const BTN_FRIENDLY =
+  "inline-flex items-center justify-center gap-2 rounded-full px-6 py-2.5 font-montserrat text-[14px] font-semibold leading-none transition-transform active:scale-[0.97] disabled:opacity-60 cursor-pointer";
 
-export function PtButton({ children, className = "", outline = false, type = "button", ...rest }: ButtonProps) {
+type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & { outline?: boolean; friendly?: boolean };
+
+export function PtButton({ children, className = "", outline = false, friendly = false, type = "button", ...rest }: ButtonProps) {
   const tone = outline
     ? "border border-(--theme-primary) bg-white text-(--theme-primary)"
     : "bg-(--theme-primary) text-white shadow-[0_6px_14px_-6px_rgb(63_74_44/0.6)]";
   return (
-    <button type={type} {...rest} className={`${BTN_BASE} ${tone} ${className}`}>
+    <button type={type} {...rest} className={`${friendly ? BTN_FRIENDLY : BTN_BASE} ${tone} ${className}`}>
       {children}
     </button>
   );
