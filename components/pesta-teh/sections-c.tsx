@@ -1,9 +1,12 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useRef, useState, type FormEvent } from "react";
-import { Camera, CheckCircle2, Copy, Images, Smile, X } from "lucide-react";
-import { ASSETS, COPY, ID, GUEST_CATEGORIES } from "@/lib/pesta-teh/data";
+import { useEffect, useMemo, useRef, useState, type CSSProperties, type FormEvent } from "react";
+import { createPortal } from "react-dom";
+import dayjs from "dayjs";
+import { AnimatePresence, motion } from "motion/react";
+import { Camera, CheckCircle2, ChevronRight, Copy, Images, MessageCircle, PenLine, Smile, X } from "lucide-react";
+import { ASSETS, COPY, ID, GUEST_CATEGORIES, paletteVars } from "@/lib/pesta-teh/data";
 import { STICKERS, stickerSrc } from "@/lib/pesta-teh/stickers";
 import { formatDate } from "@/lib/pesta-teh/format";
 import { sanitizeRichText } from "@/lib/pesta-teh/sanitize";
@@ -258,6 +261,14 @@ interface WishRow {
 const FIELD =
   "w-full border border-(--pt-sage) bg-white px-3.5 py-2.5 font-cormorant text-[18px] text-(--theme-text) placeholder:text-(--theme-muted) outline-none focus:border-(--theme-primary)";
 
+/** Warna nama pengirim di bubble chat, ala warna-warni grup WA. */
+const NAME_COLORS = ["#00A884", "#0093DD", "#7B61FF", "#E65100", "#C2185B", "#008069"];
+function nameColor(name: string): string {
+  let h = 0;
+  for (const ch of name) h = (h * 31 + ch.charCodeAt(0)) % 997;
+  return NAME_COLORS[h % NAME_COLORS.length];
+}
+
 export function RsvpSection({
   form,
   slug,
@@ -280,35 +291,95 @@ export function RsvpSection({
   const sentKey = `dinda-rikky-wish-sent:${slug}`;
   const [alreadySent, setAlreadySent] = useState(false);
   const [pickerOpen, setPickerOpen] = useState(false);
-  const listRef = useRef<HTMLUListElement>(null);
-  // Kunci scroll di dalam list ucapan: kalau list sudah mentok atas/bawah,
-  // gestur swipe tidak boleh diteruskan ke halaman utama. Cukup
-  // overscroll-contain + menahan di tepi — tanpa mengubah style body dan
-  // tanpa menahan posisi scroll tiap frame. Menahan tiap frame itu yang
-  // bikin geter: momentum browser tetap mendorong halaman tiap frame,
-  // sementara kodenya menarik balik tiap frame juga — jadinya berantem
-  // dan scroll list ikut tidak smooth. Versi simpel ini membiarkan browser
-  // yang mengatur scroll-nya (native, smooth), kode cuma menahan di tepi.
+  // Bottom sheet ucapan gaya chat WA (opsi 3): daftar ucapan tidak lagi
+  // jadi kotak scroll di dalam halaman (itu yang selalu nyangkut), melainkan
+  // lembaran dari bawah dengan bubble chat + lazy load ala "mengetik...".
+  const [mounted, setMounted] = useState(false);
+  const [sheetOpen, setSheetOpen] = useState(false);
+  const [visibleCount, setVisibleCount] = useState(8);
+  const [typing, setTyping] = useState(false);
+  const [justSent, setJustSent] = useState<{ name: string; message: string } | null>(null);
+  const chatRef = useRef<HTMLDivElement>(null);
+  const sentinelRef = useRef<HTMLDivElement>(null);
+  const typingTimer = useRef<number | null>(null);
+  const loadingRef = useRef(false);
   useEffect(() => {
-    const el = listRef.current;
-    if (!el) return;
-    let startY = 0;
-    const onTouchStart = (e: TouchEvent) => {
-      startY = e.touches[0].clientY;
-    };
-    const onTouchMove = (e: TouchEvent) => {
-      const dy = e.touches[0].clientY - startY;
-      const atTop = el.scrollTop <= 0;
-      const atBottom = el.scrollTop + el.clientHeight >= el.scrollHeight - 1;
-      if ((dy > 0 && atTop) || (dy < 0 && atBottom)) e.preventDefault();
-    };
-    el.addEventListener("touchstart", onTouchStart, { passive: true });
-    el.addEventListener("touchmove", onTouchMove, { passive: false });
+    setMounted(true);
+  }, []);
+  // Urutan chat: paling lama di atas, paling baru di bawah (seperti WA).
+  const orderedWishes = useMemo(() => [...wishes].reverse(), [wishes]);
+  // Saat sheet terbuka, halaman belakang dikunci (sekali saat buka/tutup
+  // saja — bukan tiap sentuhan, jadi tidak ada flash/geter).
+  useEffect(() => {
+    if (!sheetOpen) return;
+    const y = window.scrollY;
+    document.body.style.position = "fixed";
+    document.body.style.top = `-${y}px`;
+    document.body.style.left = "0";
+    document.body.style.right = "0";
     return () => {
-      el.removeEventListener("touchstart", onTouchStart);
-      el.removeEventListener("touchmove", onTouchMove);
+      document.body.style.position = "";
+      document.body.style.top = "";
+      document.body.style.left = "";
+      document.body.style.right = "";
+      window.scrollTo({ top: y, behavior: "instant" });
     };
-  }, [wishes.length]);
+  }, [sheetOpen]);
+  // Saat sheet dibuka: kalau tamu baru saja kirim ucapan, tampilkan semua
+  // dan lompat ke bawah (biar dia langsung lihat ucapannya); kalau tidak,
+  // mulai dari atas dengan 8 ucapan pertama.
+  useEffect(() => {
+    if (!sheetOpen) return;
+    if (justSent) {
+      setVisibleCount(wishes.length);
+      setTyping(false);
+      requestAnimationFrame(() =>
+        chatRef.current?.scrollTo({ top: chatRef.current.scrollHeight, behavior: "instant" })
+      );
+    } else {
+      setVisibleCount(8);
+      setTyping(false);
+      requestAnimationFrame(() => chatRef.current?.scrollTo({ top: 0, behavior: "instant" }));
+    }
+  }, [sheetOpen, justSent, wishes.length]);
+  // Lazy load ala ketikan WA: saat pengguna scroll mendekati ujung bawah
+  // daftar yang sudah tampil, tampilkan indikator "mengetik..." sebentar,
+  // lalu munculkan 5 ucapan berikutnya.
+  useEffect(() => {
+    if (!sheetOpen) return;
+    const root = chatRef.current;
+    const target = sentinelRef.current;
+    if (!root || !target) return;
+    const io = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && visibleCount < wishes.length && !loadingRef.current) {
+          loadingRef.current = true;
+          setTyping(true);
+          typingTimer.current = window.setTimeout(() => {
+            setVisibleCount((n) => Math.min(n + 5, wishes.length));
+            setTyping(false);
+            loadingRef.current = false;
+          }, 700);
+        }
+      },
+      { root, rootMargin: "120px" }
+    );
+    io.observe(target);
+    // JANGAN clearTimeout di cleanup sini: cleanup jalan tiap kali dep
+    // berubah (termasuk saat typing baru saja true) dan akan membatalkan
+    // timer batch-nya sendiri — itu yang bikin indikator "mengetik..."
+    // nyangkut selamanya. Timer cuma dibatalkan saat sheet ditutup.
+    return () => {
+      io.disconnect();
+    };
+  }, [sheetOpen, visibleCount, wishes.length]);
+  // Batalkan batch yang tertunda saat sheet ditutup.
+  useEffect(() => {
+    if (sheetOpen) return;
+    if (typingTimer.current) window.clearTimeout(typingTimer.current);
+    setTyping(false);
+    loadingRef.current = false;
+  }, [sheetOpen]);
   useEffect(() => {
     try {
       setAlreadySent(localStorage.getItem(sentKey) === "1");
@@ -332,7 +403,10 @@ export function RsvpSection({
         /* abaikan */
       }
       setAlreadySent(true);
-      if (hasWish) setRefresh((n) => n + 1);
+      if (hasWish) {
+        setJustSent({ name: form.name.trim(), message: form.message.trim() });
+        setRefresh((n) => n + 1);
+      }
     }
   }
 
@@ -538,49 +612,181 @@ export function RsvpSection({
       </ScallopCard>
 
       {showWishes && wishes.length > 0 && (
-        <ul
-          ref={listRef}
-          className="mt-8 max-h-[36rem] touch-pan-y space-y-4 overflow-y-auto overscroll-contain px-1 pr-1"
+        <button
+          type="button"
+          onClick={() => setSheetOpen(true)}
+          className="mt-8 flex w-full items-center gap-3 rounded-[20px] bg-white px-5 py-4 text-left shadow-[0_8px_18px_-10px_rgb(63_74_44/0.45)] ring-1 ring-(--pt-sage)/60 transition-transform active:scale-[0.98]"
         >
-          {wishes.map((w, i) => (
-            <li
-              key={w.id || i}
-              className="rounded-[20px] bg-(--theme-surface) px-5 py-4 shadow-[0_8px_18px_-10px_rgb(63_74_44/0.45)]"
-            >
-              <p className="flex items-baseline justify-between gap-3">
-                <span className="min-w-0 font-cormorant text-[20px] leading-tight font-semibold text-(--theme-text) wrap-break-word">
-                  {w.name}
-                </span>
-                <span className="shrink-0 font-cormorant text-[12px] tracking-wide text-(--theme-muted)">
-                  {formatDate(w.createdAt, "D MMM YYYY")}
-                </span>
-              </p>
-              <p className="mt-1.5 font-cormorant text-[16px] leading-relaxed whitespace-pre-line wrap-break-word text-(--theme-text)/90">
-                {w.message}
-              </p>
-              {w.sticker && stickerSrc(w.sticker) && (
-                <span className="mt-3 flex justify-center">
-                  <Image
-                    src={stickerSrc(w.sticker)!}
-                    alt=""
-                    width={96}
-                    height={96}
-                    className="h-24 w-auto"
-                  />
-                </span>
-              )}
-              {w.replies?.map((r) => (
-                <p
-                  key={r.id}
-                  className="mt-2 rounded-xl bg-white/70 px-3 py-2 font-cormorant text-[15px] leading-snug wrap-break-word"
-                >
-                  <span className="font-bold">{r.name}</span> {r.message}
-                </p>
-              ))}
-            </li>
-          ))}
-        </ul>
+          <span className="flex size-11 shrink-0 items-center justify-center rounded-full bg-(--theme-primary) text-white">
+            <MessageCircle size={22} />
+          </span>
+          <span className="min-w-0 flex-1">
+            <span className="block font-cormorant text-[19px] leading-tight font-bold text-(--theme-text)">
+              Ucapan &amp; Doa
+            </span>
+            <span className="block font-cormorant text-[15px] leading-snug text-(--theme-muted)">
+              {wishes.length} ucapan dari tamu — ketuk untuk membaca
+            </span>
+          </span>
+          <ChevronRight size={22} className="shrink-0 text-(--theme-muted)" />
+        </button>
       )}
+      {showWishes && wishes.length === 0 && (
+        <p className={`mt-8 text-center ${BODY} text-(--theme-muted)`}>
+          Belum ada ucapan — jadilah yang pertama mengirim doa!
+        </p>
+      )}
+      {mounted &&
+        createPortal(
+          <AnimatePresence>
+            {sheetOpen && (
+              <motion.div
+                key="backdrop"
+                className="fixed inset-0 z-[70] bg-black/50"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                onClick={() => setSheetOpen(false)}
+              />
+            )}
+            {sheetOpen && (
+              <motion.div
+                key="sheet"
+                role="dialog"
+                aria-modal="true"
+                aria-label="Ucapan dan doa tamu"
+                className="fixed inset-x-0 bottom-0 z-[71] mx-auto flex h-[86dvh] w-full max-w-[480px] flex-col overflow-hidden rounded-t-[28px] bg-[#EFEAE3] shadow-2xl"
+                style={paletteVars() as CSSProperties}
+                initial={{ y: "100%" }}
+                animate={{ y: 0 }}
+                exit={{ y: "100%" }}
+                transition={{ type: "spring", stiffness: 320, damping: 32 }}
+              >
+                <div className="flex items-center gap-3 bg-(--theme-primary) px-4 pt-3 pb-3 text-white">
+                  <button
+                    type="button"
+                    aria-label="Tutup"
+                    onClick={() => setSheetOpen(false)}
+                    className="flex size-9 shrink-0 items-center justify-center rounded-full bg-white/15"
+                  >
+                    <X size={20} />
+                  </button>
+                  <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-white/20">
+                    <MessageCircle size={20} />
+                  </span>
+                  <span className="min-w-0 flex-1">
+                    <span className="block font-cormorant text-[19px] leading-tight font-bold">
+                      Ucapan &amp; Doa
+                    </span>
+                    <span className="block font-cormorant text-[13px] leading-tight text-white/85">
+                      {wishes.length} ucapan dari tamu
+                    </span>
+                  </span>
+                </div>
+                <div
+                  ref={chatRef}
+                  className="flex-1 overflow-y-auto overscroll-contain bg-[#E7DFD3] px-3 pt-4 pb-4"
+                >
+                  {orderedWishes.slice(0, visibleCount).map((w, i) => {
+                    const mine = !!justSent && w.name === justSent.name && w.message === justSent.message;
+                    const day = formatDate(w.createdAt, "D MMMM YYYY");
+                    const prevDay =
+                      i > 0 ? formatDate(orderedWishes[i - 1].createdAt, "D MMMM YYYY") : null;
+                    return (
+                      <div key={w.id || i}>
+                        {day !== prevDay && (
+                          <div className="my-3 flex justify-center">
+                            <span className="rounded-full bg-white/80 px-3 py-1 font-cormorant text-[12px] font-semibold tracking-wide text-(--theme-muted) shadow-sm">
+                              {day}
+                            </span>
+                          </div>
+                        )}
+                        <motion.div
+                          initial={{ opacity: 0, y: 14, scale: 0.98 }}
+                          animate={{ opacity: 1, y: 0, scale: 1 }}
+                          transition={{ duration: 0.3, ease: "easeOut" }}
+                          className={`mb-2 flex ${mine ? "justify-end" : "justify-start"}`}
+                        >
+                          <div
+                            className={`max-w-[85%] rounded-2xl px-3.5 py-2.5 shadow-[0_2px_6px_rgb(63_74_44/0.18)] ${
+                              mine ? "rounded-br-[4px] bg-[#D9FDD3]" : "rounded-tl-[4px] bg-white"
+                            }`}
+                          >
+                            {!mine && (
+                              <p
+                                className="font-cormorant text-[15px] leading-tight font-bold"
+                                style={{ color: nameColor(w.name) }}
+                              >
+                                {w.name}
+                              </p>
+                            )}
+                            <p className="font-cormorant text-[16px] leading-snug whitespace-pre-line wrap-break-word text-(--theme-text)">
+                              {w.message}
+                            </p>
+                            {w.sticker && stickerSrc(w.sticker) && (
+                              <span className="mt-2 flex justify-center">
+                                <Image
+                                  src={stickerSrc(w.sticker)!}
+                                  alt=""
+                                  width={96}
+                                  height={96}
+                                  className="h-20 w-auto"
+                                />
+                              </span>
+                            )}
+                            <p
+                              className={`mt-1 text-right font-cormorant text-[11px] leading-none ${
+                                mine ? "text-[#4A7A3A]" : "text-(--theme-muted)"
+                              }`}
+                            >
+                              {dayjs(w.createdAt).format("HH:mm")}
+                            </p>
+                            {w.replies?.map((r) => (
+                              <p
+                                key={r.id}
+                                className="mt-2 rounded-xl bg-black/[0.04] px-3 py-2 font-cormorant text-[14px] leading-snug wrap-break-word"
+                              >
+                                <span className="font-bold">{r.name}</span> {r.message}
+                              </p>
+                            ))}
+                          </div>
+                        </motion.div>
+                      </div>
+                    );
+                  })}
+                  {typing && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="mb-2 flex justify-start"
+                    >
+                      <div className="flex items-center gap-1.5 rounded-2xl rounded-tl-[4px] bg-white px-4 py-3.5 shadow-[0_2px_6px_rgb(63_74_44/0.18)]">
+                        {[0, 1, 2].map((d) => (
+                          <span
+                            key={d}
+                            className="size-2 animate-bounce rounded-full bg-(--theme-muted)"
+                            style={{ animationDelay: `${d * 150}ms` }}
+                          />
+                        ))}
+                      </div>
+                    </motion.div>
+                  )}
+                  <div ref={sentinelRef} className="h-2 shrink-0" />
+                </div>
+                <div className="flex items-center gap-2 border-t border-(--pt-sage)/50 bg-white px-4 py-3">
+                  <button
+                    type="button"
+                    onClick={() => setSheetOpen(false)}
+                    className="flex flex-1 items-center justify-center gap-2 rounded-full bg-(--theme-primary) px-4 py-2.5 font-cormorant text-[17px] font-bold text-white"
+                  >
+                    <PenLine size={18} /> Tulis ucapan
+                  </button>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>,
+          document.body
+        )}
     </section>
   );
 }
