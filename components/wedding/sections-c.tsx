@@ -5,7 +5,7 @@ import { useEffect, useMemo, useRef, useState, type CSSProperties, type FormEven
 import { createPortal } from "react-dom";
 import dayjs from "dayjs";
 import { AnimatePresence, motion } from "motion/react";
-import { Camera, Check, CheckCircle2, ChevronRight, Copy, Images, MessageCircle, Minus, Plus, Send, Smile, X } from "lucide-react";
+import { Camera, Check, CheckCircle2, ChevronDown, ChevronRight, ChevronUp, Copy, Images, MessageCircle, Minus, Plus, Send, Smile, X } from "lucide-react";
 import { ASSETS, COPY, ID, paletteVars } from "@/lib/wedding/data";
 import { STICKERS, stickerSrc } from "@/lib/wedding/stickers";
 import { formatDate } from "@/lib/wedding/format";
@@ -115,6 +115,20 @@ export function DressCodeSection({
 export function GallerySection({ photos }: { photos: string[] }) {
   const [open, setOpen] = useState<number | null>(null);
   const [current, setCurrent] = useState(0);
+  const [dragX, setDragX] = useState(0);
+  const [dragging, setDragging] = useState(false);
+  const startX = useRef(0);
+  const dragged = useRef(false);
+  const n = photos.length;
+  // Posisi relatif tiap foto terhadap yang sedang tampil (loop): 0 = utama,
+  // ±1 = tetangga kiri/kanan, selebihnya di luar layar.
+  const rel = (i: number) => {
+    let r = (i - current) % n;
+    if (r > n / 2) r -= n;
+    if (r < -n / 2) r += n;
+    return r;
+  };
+  const go = (d: number) => setCurrent((c) => (c + d + n) % n);
   if (photos.length === 0) return null;
   const step = (d: number) => setOpen((a) => (a === null ? a : (a + d + photos.length) % photos.length));
 
@@ -123,31 +137,82 @@ export function GallerySection({ photos }: { photos: string[] }) {
       <Reveal className="px-6">
         <SectionTitle>{COPY.galleryTitle}</SectionTitle>
       </Reveal>
-      <ul
-        className="hide-scrollbar mt-6 flex snap-x snap-mandatory gap-4 overflow-x-auto px-[18cqw] pt-2 pb-4"
-        onScroll={(e) => {
-          const el = e.currentTarget;
-          const first = el.firstElementChild as HTMLElement | null;
-          if (first) {
-            setCurrent(Math.min(photos.length - 1, Math.round(el.scrollLeft / (first.offsetWidth + 16))));
-          }
+      {/* Expo slider (UI Initiative): foto utama berwarna di tengah, tetangga
+          mengintip dari tepi dalam hitam-putih dan lebih besar; geser untuk
+          ganti foto. Frame tetap polaroid bawaan. */}
+      <div
+        className="relative mt-6 overflow-hidden py-12"
+        style={{ touchAction: "pan-y" }}
+        onPointerDown={(e) => {
+          if (e.button !== 0) return;
+          (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
+          startX.current = e.clientX;
+          dragged.current = false;
+          setDragging(true);
+        }}
+        onPointerMove={(e) => {
+          if (!dragging) return;
+          const dx = e.clientX - startX.current;
+          if (Math.abs(dx) > 8) dragged.current = true;
+          setDragX(dx);
+        }}
+        onPointerUp={() => {
+          if (!dragging) return;
+          setDragging(false);
+          if (dragX < -60) go(1);
+          else if (dragX > 60) go(-1);
+          setDragX(0);
+        }}
+        onPointerCancel={() => {
+          setDragging(false);
+          setDragX(0);
         }}
       >
-        {photos.map((src, i) => (
-          <li key={`${src}-${i}`} className={`w-[64cqw] shrink-0 snap-center ${i % 2 ? "rotate-2" : "-rotate-2"}`}>
-            <button
-              type="button"
-              onClick={() => setOpen(i)}
-              aria-label={ID.gallery.view(i + 1)}
-              className="block w-full bg-white p-2 pb-8 shadow-[0_8px_16px_-6px_rgb(63_74_44/0.4)] cursor-zoom-in"
-            >
-              <span className="relative block aspect-3/4 overflow-hidden">
-                <Image src={src} alt={ID.gallery.photo(i + 1)} fill sizes="280px" className="object-cover" />
-              </span>
-            </button>
-          </li>
-        ))}
-      </ul>
+        <ul
+          className="flex gap-[9cqw] px-[18cqw]"
+          style={{
+            transform: `translateX(calc(${-current * 73}cqw + ${dragX}px))`,
+            transition: dragging ? "none" : "transform 420ms cubic-bezier(0.16, 1, 0.3, 1)",
+          }}
+        >
+          {photos.map((src, i) => {
+            const r = rel(i);
+            return (
+              <li
+                key={`${src}-${i}`}
+                className="relative w-[64cqw] shrink-0"
+                style={{
+                  transform: `scale(${r === 0 ? 1 : 1.2})`,
+                  transition: dragging ? "none" : "transform 420ms cubic-bezier(0.16, 1, 0.3, 1)",
+                  zIndex: r === 0 ? 10 : 1,
+                  opacity: Math.abs(r) > 2 ? 0 : 1,
+                }}
+              >
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (dragged.current) return;
+                    if (r === 0) setOpen(i);
+                    else setCurrent(i);
+                  }}
+                  aria-label={ID.gallery.view(i + 1)}
+                  className="block w-full cursor-zoom-in bg-white p-2 pb-8 shadow-[0_8px_16px_-6px_rgb(63_74_44/0.4)]"
+                >
+                  <span className="relative block aspect-3/4 overflow-hidden">
+                    <Image
+                      src={src}
+                      alt={ID.gallery.photo(i + 1)}
+                      fill
+                      sizes="280px"
+                      className={`object-cover transition-[filter] duration-300 ${r === 0 ? "" : "grayscale"}`}
+                    />
+                  </span>
+                </button>
+              </li>
+            );
+          })}
+        </ul>
+      </div>
       {photos.length > 1 && (
         <div aria-hidden className="mt-2 flex justify-center gap-1.5">
           {photos.map((_, i) => (
@@ -957,18 +1022,20 @@ function GiftCard({
   value,
   copy,
   small = false,
+  className = "",
 }: {
   label: string;
   name?: string;
   value: string;
   copy: string;
   small?: boolean;
+  className?: string;
 }) {
   const [copied, setCopied] = useState(false);
   return (
-    <div className="overflow-hidden bg-white text-center shadow-[0_8px_18px_-10px_rgb(63_74_44/0.5)] ring-1 ring-(--pt-sage)/60">
+    <div className={`overflow-hidden bg-white text-center shadow-[0_8px_18px_-10px_rgb(63_74_44/0.5)] ring-1 ring-(--pt-sage)/60 ${className}`}>
       <div aria-hidden className="h-3" style={GINGHAM} />
-      <div className="px-5 pt-4 pb-4">
+      <div className="flex h-[calc(100%-12px)] flex-col items-center justify-center px-5 py-4">
         <p className={`text-[12px] text-(--theme-primary) ${LABEL}`}>{label}</p>
         {name && <p className="mt-1 font-cormorant text-[17px] leading-tight">{name}</p>}
         <p
@@ -996,6 +1063,107 @@ function GiftCard({
   );
 }
 
+/** Tumpukan kartu ala cards-stack-slider (UI Initiative): kartu depan penuh,
+    tetangga mengintip di atas/bawah, geser ke atas/bawah untuk ganti kartu. */
+function GiftStack({
+  cards,
+}: {
+  cards: { label: string; name?: string; value: string; copy: string; small?: boolean }[];
+}) {
+  const n = cards.length;
+  const [index, setIndex] = useState(0);
+  const [dragY, setDragY] = useState(0);
+  const [dragging, setDragging] = useState(false);
+  const startY = useRef(0);
+  const PEEK = 88;
+  const CARD_H = 190;
+
+  const go = (d: number) => setIndex((i) => (i + d + n) % n);
+  const rel = (i: number) => {
+    let r = (i - index) % n;
+    if (r > n / 2) r -= n;
+    if (r < -n / 2) r += n;
+    return r;
+  };
+
+  return (
+    <div className="mt-6">
+      <div
+        role="region"
+        aria-label="Kartu rekening — geser ke atas atau bawah"
+        className="relative mx-auto w-full max-w-[420px] touch-none select-none"
+        style={{ height: CARD_H + PEEK * 2 }}
+        onPointerDown={(e) => {
+          if (e.button !== 0 || (e.target as HTMLElement).closest("button")) return;
+          (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
+          startY.current = e.clientY;
+          setDragging(true);
+        }}
+        onPointerMove={(e) => {
+          if (!dragging) return;
+          setDragY(e.clientY - startY.current);
+        }}
+        onPointerUp={() => {
+          if (!dragging) return;
+          setDragging(false);
+          if (dragY < -60) go(1);
+          else if (dragY > 60) go(-1);
+          setDragY(0);
+        }}
+        onPointerCancel={() => {
+          setDragging(false);
+          setDragY(0);
+        }}
+      >
+        {cards.map((c, i) => {
+          const r = rel(i);
+          const hidden = Math.abs(r) > 1;
+          return (
+            <div
+              key={`${c.label}-${i}`}
+              className="absolute inset-x-0"
+              style={{
+                height: CARD_H,
+                top: PEEK + r * PEEK + (dragging ? dragY * (r === 0 ? 1 : 0.35) : 0),
+                zIndex: r === 0 ? 30 : r === -1 ? 20 : 10,
+                opacity: hidden ? 0 : 1,
+                transform: `scale(${r === 0 ? 1 : 0.985})`,
+                transition: dragging
+                  ? "none"
+                  : "top 380ms cubic-bezier(0.16, 1, 0.3, 1), opacity 380ms, transform 380ms cubic-bezier(0.16, 1, 0.3, 1)",
+                pointerEvents: r === 0 ? "auto" : "none",
+              }}
+            >
+              <GiftCard {...c} className="h-full" />
+            </div>
+          );
+        })}
+      </div>
+      <div className="mt-3 flex items-center justify-center gap-3">
+        <button
+          type="button"
+          aria-label="Kartu sebelumnya"
+          onClick={() => go(-1)}
+          className="grid size-8 cursor-pointer place-items-center rounded-full bg-white text-(--theme-muted) ring-1 ring-(--pt-sage)/60"
+        >
+          <ChevronUp size={16} />
+        </button>
+        <p className="font-cormorant text-[15px] font-semibold text-(--theme-muted)">
+          {index + 1} dari {n} · geser ke atas / bawah
+        </p>
+        <button
+          type="button"
+          aria-label="Kartu berikutnya"
+          onClick={() => go(1)}
+          className="grid size-8 cursor-pointer place-items-center rounded-full bg-white text-(--theme-muted) ring-1 ring-(--pt-sage)/60"
+        >
+          <ChevronDown size={16} />
+        </button>
+      </div>
+    </div>
+  );
+}
+
 export function GiftSection({
   gifts,
   qrisPhoto,
@@ -1010,6 +1178,26 @@ export function GiftSection({
   const [zoom, setZoom] = useState(false);
   const accounts = (gifts ?? []).filter((g) => g.accountNumber?.trim());
   const address = giftAddress?.trim();
+  const cards = [
+    ...accounts.map((g) => ({
+      label: g.bank,
+      name: g.accountName,
+      value: g.accountNumber,
+      copy: g.accountNumber,
+      small: false,
+    })),
+    ...(address
+      ? [
+          {
+            label: ID.gift.sendTo,
+            name: giftReceiver?.trim() || ID.gift.address,
+            value: address,
+            copy: giftReceiver ? `${giftReceiver} ${address}` : address,
+            small: true,
+          },
+        ]
+      : []),
+  ];
   if (accounts.length === 0 && !address && !qrisPhoto) return null;
 
   return (
@@ -1018,26 +1206,13 @@ export function GiftSection({
         <SectionTitle>{COPY.giftTitle}</SectionTitle>
         <p className={`mx-auto mt-3 max-w-80 ${BODY}`}>{COPY.gift}</p>
       </Reveal>
-      <Reveal className="mt-6 space-y-3">
-        {accounts.map((g, i) => (
-          <GiftCard
-            key={`${g.bank}-${i}`}
-            label={g.bank}
-            name={g.accountName}
-            value={g.accountNumber}
-            copy={g.accountNumber}
-          />
-        ))}
-        {address && (
-          <GiftCard
-            label={ID.gift.sendTo}
-            name={giftReceiver?.trim() || ID.gift.address}
-            value={address}
-            copy={giftReceiver ? `${giftReceiver} ${address}` : address}
-            small
-          />
-        )}
-      </Reveal>
+      {cards.length === 1 ? (
+        <Reveal className="mt-6">
+          <GiftCard {...cards[0]} />
+        </Reveal>
+      ) : (
+        <GiftStack cards={cards} />
+      )}
       {qrisPhoto && (
         <button
           type="button"
