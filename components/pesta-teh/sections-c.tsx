@@ -5,7 +5,7 @@ import { useEffect, useMemo, useRef, useState, type CSSProperties, type FormEven
 import { createPortal } from "react-dom";
 import dayjs from "dayjs";
 import { AnimatePresence, motion } from "motion/react";
-import { Camera, CheckCircle2, ChevronRight, Copy, Images, MessageCircle, PenLine, Smile, X } from "lucide-react";
+import { Camera, Check, CheckCircle2, ChevronRight, Copy, Images, MessageCircle, PenLine, Smile, X } from "lucide-react";
 import { ASSETS, COPY, ID, GUEST_CATEGORIES, paletteVars } from "@/lib/pesta-teh/data";
 import { STICKERS, stickerSrc } from "@/lib/pesta-teh/stickers";
 import { formatDate } from "@/lib/pesta-teh/format";
@@ -254,12 +254,17 @@ interface WishRow {
   name: string;
   message: string;
   sticker?: string | null;
+  attendance?: string | null;
+  pax?: number | null;
   createdAt: string;
   replies?: { id: string; name: string; message: string }[];
 }
 
 const FIELD =
-  "w-full border border-(--pt-sage) bg-white px-3.5 py-2.5 font-cormorant text-[18px] text-(--theme-text) placeholder:text-(--theme-muted) outline-none focus:border-(--theme-primary)";
+  "w-full rounded-2xl border border-(--pt-sage) bg-white px-4 py-3 font-cormorant text-[18px] text-(--theme-text) placeholder:text-(--theme-muted) outline-none focus:border-(--theme-primary)";
+
+/** Label kecil huruf kapital di atas tiap field, ala form inveet.id. */
+const FIELD_LABEL = `${LABEL} mb-1.5 block text-[12px] font-bold text-(--theme-muted)`;
 
 /** Warna nama pengirim di bubble chat, ala warna-warni grup WA. */
 const NAME_COLORS = ["#00A884", "#0093DD", "#7B61FF", "#E65100", "#C2185B", "#008069"];
@@ -300,9 +305,7 @@ export function RsvpSection({
   const [typing, setTyping] = useState(false);
   const [justSent, setJustSent] = useState<{ name: string; message: string } | null>(null);
   const chatRef = useRef<HTMLDivElement>(null);
-  const sentinelRef = useRef<HTMLDivElement>(null);
   const typingTimer = useRef<number | null>(null);
-  const loadingRef = useRef(false);
   useEffect(() => {
     setMounted(true);
   }, []);
@@ -327,7 +330,7 @@ export function RsvpSection({
   }, [sheetOpen]);
   // Saat sheet dibuka: kalau tamu baru saja kirim ucapan, tampilkan semua
   // dan lompat ke bawah (biar dia langsung lihat ucapannya); kalau tidak,
-  // mulai dari atas dengan 8 ucapan pertama.
+  // mulai dari nol — pesan-pesan muncul satu per satu seperti lagi ngechat.
   useEffect(() => {
     if (!sheetOpen) return;
     if (justSent) {
@@ -337,49 +340,46 @@ export function RsvpSection({
         chatRef.current?.scrollTo({ top: chatRef.current.scrollHeight, behavior: "instant" })
       );
     } else {
-      setVisibleCount(8);
+      setVisibleCount(0);
       setTyping(false);
       requestAnimationFrame(() => chatRef.current?.scrollTo({ top: 0, behavior: "instant" }));
     }
   }, [sheetOpen, justSent, wishes.length]);
-  // Lazy load ala ketikan WA: saat pengguna scroll mendekati ujung bawah
-  // daftar yang sudah tampil, tampilkan indikator "mengetik..." sebentar,
-  // lalu munculkan 5 ucapan berikutnya.
+  // Reveal satu-per-satu ala chat grup: tiap pesan didahului indikator
+  // "mengetik..." sebentar, lalu pesannya muncul. Berjalan otomatis
+  // sampai semua tampil. Indikatornya dibiarkan menyala selama reveal
+  // (bukan on/off tiap pesan) supaya tidak berkedip.
   useEffect(() => {
     if (!sheetOpen) return;
-    const root = chatRef.current;
-    const target = sentinelRef.current;
-    if (!root || !target) return;
-    const io = new IntersectionObserver(
-      (entries) => {
-        if (entries[0].isIntersecting && visibleCount < wishes.length && !loadingRef.current) {
-          loadingRef.current = true;
-          setTyping(true);
-          typingTimer.current = window.setTimeout(() => {
-            setVisibleCount((n) => Math.min(n + 5, wishes.length));
-            setTyping(false);
-            loadingRef.current = false;
-          }, 700);
-        }
-      },
-      { root, rootMargin: "120px" }
-    );
-    io.observe(target);
-    // JANGAN clearTimeout di cleanup sini: cleanup jalan tiap kali dep
-    // berubah (termasuk saat typing baru saja true) dan akan membatalkan
-    // timer batch-nya sendiri — itu yang bikin indikator "mengetik..."
-    // nyangkut selamanya. Timer cuma dibatalkan saat sheet ditutup.
+    if (visibleCount >= wishes.length) {
+      setTyping(false);
+      return;
+    }
+    setTyping(true);
+    typingTimer.current = window.setTimeout(() => {
+      setVisibleCount((n) => Math.min(n + 1, wishes.length));
+    }, 550);
     return () => {
-      io.disconnect();
+      if (typingTimer.current) window.clearTimeout(typingTimer.current);
     };
   }, [sheetOpen, visibleCount, wishes.length]);
-  // Batalkan batch yang tertunda saat sheet ditutup.
+  // Batalkan reveal yang tertunda saat sheet ditutup.
   useEffect(() => {
     if (sheetOpen) return;
     if (typingTimer.current) window.clearTimeout(typingTimer.current);
     setTyping(false);
-    loadingRef.current = false;
   }, [sheetOpen]);
+  // Ikuti pesan baru: kalau pengguna sedang di dekat bawah, scroll halus
+  // mengikutinya; kalau dia sedang membaca ke atas, jangan diganggu.
+  useEffect(() => {
+    if (!sheetOpen) return;
+    const el = chatRef.current;
+    if (!el) return;
+    const nearBottom = el.scrollTop + el.clientHeight >= el.scrollHeight - 160;
+    if (nearBottom) {
+      el.scrollTo({ top: el.scrollHeight, behavior: "smooth" });
+    }
+  }, [visibleCount, sheetOpen]);
   useEffect(() => {
     try {
       setAlreadySent(localStorage.getItem(sentKey) === "1");
@@ -423,7 +423,7 @@ export function RsvpSection({
   }, [slug, refresh, showWishes]);
 
   const choice = (active: boolean) =>
-    `border px-3 py-2.5 font-cormorant text-[17px] font-semibold transition-colors cursor-pointer ${
+    `rounded-2xl border px-3 py-2.5 font-cormorant text-[17px] font-semibold transition-colors cursor-pointer ${
       active
         ? "border-(--theme-primary) bg-(--theme-primary) text-white"
         : "border-(--pt-sage) bg-white text-(--theme-text)"
@@ -458,55 +458,67 @@ export function RsvpSection({
             )}
           </div>
         ) : (
-          <form onSubmit={onSubmit} className="space-y-3 text-left">
-            <input
-              aria-label={t.nameLabel}
-              required
-              value={form.name}
-              onChange={(e) => form.setName(e.target.value)}
-              placeholder={t.name}
-              className={FIELD}
-            />
+          <form onSubmit={onSubmit} className="space-y-5 text-left">
+            <div>
+              <label htmlFor="rsvp-nama" className={FIELD_LABEL}>
+                {t.nameLabel}
+              </label>
+              <input
+                id="rsvp-nama"
+                aria-label={t.nameLabel}
+                required
+                value={form.name}
+                onChange={(e) => form.setName(e.target.value)}
+                placeholder={t.name}
+                className={FIELD}
+              />
+            </div>
             {showRsvp && (
               <>
-                <div role="radiogroup" aria-label={t.attendance} className="grid grid-cols-2 gap-2">
-                  {[
-                    { value: "hadir", label: "Hadir" },
-                    { value: "tidak", label: "Belum Dapat Hadir" },
-                  ].map((o) => (
-                    <button
-                      key={o.value}
-                      type="button"
-                      role="radio"
-                      aria-checked={form.attendance === o.value}
-                      onClick={() => form.setAttendance(o.value as "hadir" | "tidak")}
-                      className={choice(form.attendance === o.value)}
-                    >
-                      {o.label}
-                    </button>
-                  ))}
+                <div>
+                  <span className={FIELD_LABEL}>{t.attendance}</span>
+                  <div role="radiogroup" aria-label={t.attendance} className="grid grid-cols-2 gap-2">
+                    {[
+                      { value: "hadir", label: "Hadir" },
+                      { value: "tidak", label: "Belum Dapat Hadir" },
+                    ].map((o) => (
+                      <button
+                        key={o.value}
+                        type="button"
+                        role="radio"
+                        aria-checked={form.attendance === o.value}
+                        onClick={() => form.setAttendance(o.value as "hadir" | "tidak")}
+                        className={choice(form.attendance === o.value)}
+                      >
+                        {o.label}
+                      </button>
+                    ))}
+                  </div>
                 </div>
                 {form.attendance === "hadir" && (
                   <>
                     {form.showCategory && (
-                      <div role="radiogroup" aria-label={t.guestOf} className="grid grid-cols-2 gap-2">
-                        {GUEST_CATEGORIES.map((c) => (
-                          <button
-                            key={c.value}
-                            type="button"
-                            role="radio"
-                            aria-checked={form.category === c.value}
-                            onClick={() => form.setCategory(c.value)}
-                            className={choice(form.category === c.value)}
-                          >
-                            {c.label}
-                          </button>
-                        ))}
+                      <div>
+                        <span className={FIELD_LABEL}>{t.guestOf}</span>
+                        <div role="radiogroup" aria-label={t.guestOf} className="grid grid-cols-2 gap-2">
+                          {GUEST_CATEGORIES.map((c) => (
+                            <button
+                              key={c.value}
+                              type="button"
+                              role="radio"
+                              aria-checked={form.category === c.value}
+                              onClick={() => form.setCategory(c.value)}
+                              className={choice(form.category === c.value)}
+                            >
+                              {c.label}
+                            </button>
+                          ))}
+                        </div>
                       </div>
                     )}
                     {form.eventChoices && (
                       <fieldset>
-                        <legend className="mb-2 font-cormorant text-[16px] font-semibold">{t.events}</legend>
+                        <legend className={FIELD_LABEL}>{t.events}</legend>
                         <div className="space-y-2">
                           {form.eventChoices.map((ev) => (
                             <label key={ev} className="flex items-center gap-3 font-cormorant text-[17px] cursor-pointer">
@@ -522,32 +534,44 @@ export function RsvpSection({
                         </div>
                       </fieldset>
                     )}
-                    <select
-                      aria-label={t.paxLabel}
-                      value={form.pax}
-                      onChange={(e) => form.setPax(Number(e.target.value))}
-                      className={FIELD}
-                    >
-                      {Array.from({ length: form.maxPax }, (_, i) => i + 1).map((n) => (
-                        <option key={n} value={n}>
-                          {t.people(n)}
-                        </option>
-                      ))}
-                    </select>
+                    <div>
+                      <label htmlFor="rsvp-pax" className={FIELD_LABEL}>
+                        {t.paxLabel}
+                      </label>
+                      <select
+                        id="rsvp-pax"
+                        aria-label={t.paxLabel}
+                        value={form.pax}
+                        onChange={(e) => form.setPax(Number(e.target.value))}
+                        className={FIELD}
+                      >
+                        {Array.from({ length: form.maxPax }, (_, i) => i + 1).map((n) => (
+                          <option key={n} value={n}>
+                            {t.people(n)}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
                   </>
                 )}
               </>
             )}
             {showWishes && (
-              <textarea
-                aria-label={t.messageLabel}
-                rows={3}
-                value={form.message}
-                onChange={(e) => form.setMessage(e.target.value)}
-                placeholder={showRsvp ? COPY.wishes : t.message}
-                required={!showRsvp}
-                className={`${FIELD} resize-none`}
-              />
+              <div>
+                <label htmlFor="rsvp-pesan" className={FIELD_LABEL}>
+                  {t.messageLabel}
+                </label>
+                <textarea
+                  id="rsvp-pesan"
+                  aria-label={t.messageLabel}
+                  rows={3}
+                  value={form.message}
+                  onChange={(e) => form.setMessage(e.target.value)}
+                  placeholder={showRsvp ? COPY.wishes : t.message}
+                  required={!showRsvp}
+                  className={`${FIELD} resize-none`}
+                />
+              </div>
             )}
             {showWishes && (
               <div className="relative">
@@ -604,7 +628,7 @@ export function RsvpSection({
             {form.error && (
               <p className="font-cormorant text-[15px] font-semibold text-(--theme-primary)">{form.error}</p>
             )}
-            <PtButton type="submit" disabled={form.submitting} className="w-full">
+            <PtButton type="submit" disabled={form.submitting} className="w-full uppercase tracking-[0.15em]">
               {form.submitting ? t.sending : t.send}
             </PtButton>
           </form>
@@ -682,6 +706,19 @@ export function RsvpSection({
                       {wishes.length} ucapan dari tamu
                     </span>
                   </span>
+                  {visibleCount < wishes.length && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (typingTimer.current) window.clearTimeout(typingTimer.current);
+                        setVisibleCount(wishes.length);
+                        setTyping(false);
+                      }}
+                      className="shrink-0 rounded-full bg-white/15 px-3 py-1.5 font-cormorant text-[13px] font-bold text-white"
+                    >
+                      Lewati
+                    </button>
+                  )}
                 </div>
                 <div
                   ref={chatRef}
@@ -734,13 +771,30 @@ export function RsvpSection({
                                 />
                               </span>
                             )}
-                            <p
-                              className={`mt-1 text-right font-cormorant text-[11px] leading-none ${
-                                mine ? "text-[#4A7A3A]" : "text-(--theme-muted)"
-                              }`}
-                            >
-                              {dayjs(w.createdAt).format("HH:mm")}
-                            </p>
+                            <div className="mt-1 flex items-end justify-between gap-2">
+                              {w.attendance ? (
+                                <span
+                                  className={`flex items-center gap-1 font-cormorant text-[11px] leading-none font-semibold ${
+                                    w.attendance === "hadir" ? "text-[#2E7D32]" : "text-(--theme-muted)"
+                                  }`}
+                                >
+                                  {w.attendance === "hadir" ? <Check size={11} /> : <X size={11} />}
+                                  {w.attendance === "hadir" ? "Hadir" : "Tidak hadir"}
+                                  {w.attendance === "hadir" && typeof w.pax === "number" && w.pax > 1
+                                    ? ` · ${w.pax} tamu`
+                                    : ""}
+                                </span>
+                              ) : (
+                                <span />
+                              )}
+                              <span
+                                className={`shrink-0 font-cormorant text-[11px] leading-none ${
+                                  mine ? "text-[#4A7A3A]" : "text-(--theme-muted)"
+                                }`}
+                              >
+                                {dayjs(w.createdAt).format("HH:mm")}
+                              </span>
+                            </div>
                             {w.replies?.map((r) => (
                               <p
                                 key={r.id}
@@ -771,7 +825,6 @@ export function RsvpSection({
                       </div>
                     </motion.div>
                   )}
-                  <div ref={sentinelRef} className="h-2 shrink-0" />
                 </div>
                 <div className="flex items-center gap-2 border-t border-(--pt-sage)/50 bg-white px-4 py-3">
                   <button

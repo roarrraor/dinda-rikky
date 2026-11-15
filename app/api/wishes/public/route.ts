@@ -9,6 +9,7 @@ type WishRow = {
   message: string;
   sticker: string | null;
   attendance: string | null;
+  pax: number | null;
   parent_id: string | null;
   created_at: string;
 };
@@ -19,6 +20,7 @@ type PublicWish = {
   message: string;
   sticker: string | null;
   attendance: string | null;
+  pax: number | null;
   createdAt: string;
   replies: { id: string; name: string; message: string }[];
 };
@@ -42,7 +44,7 @@ export async function GET(req: Request) {
 
   let { data, error } = await supabase
     .from("wishes")
-    .select("id, name, message, sticker, attendance, parent_id, created_at")
+    .select("id, name, message, sticker, attendance, pax, parent_id, created_at")
     .eq("slug", slug)
     .order("created_at", { ascending: false })
     .limit(200);
@@ -52,7 +54,7 @@ export async function GET(req: Request) {
   if (error && error.message.includes("sticker")) {
     const retry = await supabase
       .from("wishes")
-      .select("id, name, message, attendance, parent_id, created_at")
+      .select("id, name, message, attendance, pax, parent_id, created_at")
       .eq("slug", slug)
       .order("created_at", { ascending: false })
       .limit(200);
@@ -76,6 +78,7 @@ export async function GET(req: Request) {
       message: row.message,
       sticker: row.sticker ?? null,
       attendance: row.attendance,
+      pax: row.pax ?? null,
       createdAt: row.created_at,
       replies: [],
     });
