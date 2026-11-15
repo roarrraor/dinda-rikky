@@ -147,7 +147,9 @@ export function Cover({
                           {first} &amp; {second}
                         </p>
                         {tag && (
-                          <p className={`mt-1 text-[20px] text-(--theme-primary) ${SCRIPT}`}>#{tag}</p>
+                          <p className="mt-1 font-cormorant text-[16px] font-semibold tracking-[0.04em] text-(--theme-primary)">
+                            #{tag}
+                          </p>
                         )}
                         <p className={`mt-1 text-[9px] text-(--theme-accent) ${LABEL}`}>
                           {formatDate(date, "DD . MM . YYYY")}

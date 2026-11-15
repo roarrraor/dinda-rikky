@@ -14,15 +14,18 @@ export function TableSection({
   second,
   date,
   venue,
+  hashtag,
 }: {
   first: string;
   second: string;
   date: string;
   venue?: string;
+  hashtag?: string | null;
 }) {
   const music = useMusic();
   const { envelopeClosed, envelopeOpen, envelopePocket, plate, swan, venue: venueArt, poses } = ASSETS;
   const initials = `${first.charAt(0)}${second.charAt(0)}`;
+  const tag = hashtag?.trim().replace(/^#/, "");
   const flowers = (cls: string, delay: number) => <Art art="flowers" className={`z-30 ${cls}`} delay={delay} />;
 
   return (
@@ -69,6 +72,11 @@ export function TableSection({
               >
                 {first} &amp; {second}
               </p>
+              {tag && (
+                <p className="mt-[4%] font-cormorant text-[min(3.8cqw,15px)] font-semibold tracking-[0.04em] text-(--theme-primary)">
+                  #{tag}
+                </p>
+              )}
             </div>
             <Image src={envelopePocket.src} alt="" fill sizes="220px" className="object-contain" />
             <span className="absolute top-[69%] left-1/2 w-[19%] -translate-x-1/2 -translate-y-1/2 text-[11px]">

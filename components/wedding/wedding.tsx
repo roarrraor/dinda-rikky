@@ -121,7 +121,7 @@ export function Wedding({ data, guestName }: { data: WeddingData; guestName?: st
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.9, ease: "easeOut" }}
           >
-            <TableSection first={first} second={second} date={data.date} venue={events[0]?.venue || data.venue} />
+            <TableSection first={first} second={second} date={data.date} venue={events[0]?.venue || data.venue} hashtag={data.hashtag} />
             <BurstSection date={data.date} />
             <SalamSection
               muslim={muslim}
