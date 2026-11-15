@@ -121,6 +121,9 @@ export function GallerySection({ photos }: { photos: string[] }) {
   const dragXRef = useRef(0);
   const dragged = useRef(false);
   const tapPhoto = useRef<string | null>(null);
+  // Penjaga drag lewat ref (bukan state) supaya tidak kena closure basi:
+  // pointerup/cancel yang datang dari render lama tetap tahu drag sedang jalan.
+  const dragActive = useRef(false);
   const n = photos.length;
   // Posisi relatif tiap foto terhadap yang sedang tampil (loop): 0 = utama,
   // ±1 = tetangga kiri/kanan, selebihnya di luar layar.
@@ -131,6 +134,20 @@ export function GallerySection({ photos }: { photos: string[] }) {
     return r;
   };
   const go = (d: number) => setCurrent((c) => (c + d + n) % n);
+  // Commit drag: geser cukup jauh -> pindah foto. Dipakai pointerup DAN
+  // pointercancel (sebagian browser mengakhiri drag dengan cancel, bukan up).
+  const commitDrag = () => {
+    const dx = dragXRef.current;
+    dragXRef.current = 0;
+    setDragX(0);
+    if (dx < -60) go(1);
+    else if (dx > 60) go(-1);
+  };
+  const endDrag = () => {
+    if (!dragActive.current) return;
+    dragActive.current = false;
+    setDragging(false);
+  };
   if (photos.length === 0) return null;
   const step = (d: number) => setOpen((a) => (a === null ? a : (a + d + photos.length) % photos.length));
 
@@ -151,6 +168,7 @@ export function GallerySection({ photos }: { photos: string[] }) {
           dragXRef.current = 0;
           dragged.current = false;
           tapPhoto.current = (e.target as HTMLElement).closest("button")?.dataset.photo ?? null;
+          dragActive.current = true;
           setDragging(true);
           try {
             // Pola yang sama dengan GiftStack (terbukti jalan): tangkap pointer
@@ -160,6 +178,7 @@ export function GallerySection({ photos }: { photos: string[] }) {
           } catch {
             // Fallback kalau capture tidak didukung: dengarkan di window.
             const move = (ev: PointerEvent) => {
+              if (!dragActive.current) return;
               const dx = ev.clientX - startX.current;
               if (Math.abs(dx) > 8) dragged.current = true;
               dragXRef.current = dx;
@@ -169,12 +188,8 @@ export function GallerySection({ photos }: { photos: string[] }) {
               window.removeEventListener("pointermove", move);
               window.removeEventListener("pointerup", up);
               window.removeEventListener("pointercancel", up);
-              setDragging(false);
-              const dx = dragXRef.current;
-              dragXRef.current = 0;
-              setDragX(0);
-              if (dx < -60) go(1);
-              else if (dx > 60) go(-1);
+              endDrag();
+              commitDrag();
             };
             window.addEventListener("pointermove", move);
             window.addEventListener("pointerup", up);
@@ -182,33 +197,32 @@ export function GallerySection({ photos }: { photos: string[] }) {
           }
         }}
         onPointerMove={(e) => {
-          if (!dragging) return;
+          if (!dragActive.current) return;
           const dx = e.clientX - startX.current;
           if (Math.abs(dx) > 8) dragged.current = true;
           dragXRef.current = dx;
           setDragX(dx);
         }}
         onPointerUp={() => {
-          if (!dragging) return;
-          setDragging(false);
-          const dx = dragXRef.current;
-          dragXRef.current = 0;
-          setDragX(0);
+          if (!dragActive.current) return;
+          endDrag();
           // Ketukan (bukan geseran): capture membuat klik jatuh ke container,
           // jadi tap ditangani di sini lewat foto yang ditekan saat pointerdown.
           if (!dragged.current && tapPhoto.current !== null) {
             const i = Number(tapPhoto.current);
+            dragXRef.current = 0;
+            setDragX(0);
             if (rel(i) === 0) setOpen(i);
             else setCurrent(i);
             return;
           }
-          if (dx < -60) go(1);
-          else if (dx > 60) go(-1);
+          commitDrag();
         }}
         onPointerCancel={() => {
-          setDragging(false);
-          dragXRef.current = 0;
-          setDragX(0);
+          if (!dragActive.current) return;
+          endDrag();
+          // Drag yang dibatalkan browser tetap di-commit (bukan tap).
+          commitDrag();
         }}
       >
         <ul

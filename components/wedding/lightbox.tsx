@@ -28,18 +28,21 @@ export function Lightbox({
     return () => window.removeEventListener("keydown", onKey);
   }, [onClose, onPrev, onNext]);
 
-  // Kunci scroll halaman selama lightbox terbuka (html + body, supaya
-  // posisi scroll tidak berubah saat dibuka/ditutup).
+  // Kunci scroll halaman selama lightbox terbuka (html + body) dan kembalikan
+  // posisi scroll semula saat ditutup (toggle overflow di root bisa me-reset
+  // scroll ke atas di sebagian browser).
   useEffect(() => {
     const html = document.documentElement;
     const body = document.body;
     const prevHtml = html.style.overflow;
     const prevBody = body.style.overflow;
+    const savedY = window.scrollY;
     html.style.overflow = "hidden";
     body.style.overflow = "hidden";
     return () => {
       html.style.overflow = prevHtml;
       body.style.overflow = prevBody;
+      window.scrollTo(0, savedY);
     };
   }, []);
 
