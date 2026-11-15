@@ -282,42 +282,19 @@ export function RsvpSection({
   const [pickerOpen, setPickerOpen] = useState(false);
   const listRef = useRef<HTMLUListElement>(null);
   // Kunci scroll di dalam list ucapan: kalau list sudah mentok atas/bawah,
-  // gestur swipe tidak boleh diteruskan ke halaman utama (overscroll-contain
-  // saja ternyata tidak cukup di HP Roar). Selain menahan di tepi, halaman
-  // juga ditahan selama jari menyentuh list — supaya momentum (inersia) dari
-  // flick cepat tidak ikut menggeser halaman setelah jari diangkat.
-  // Caranya BUKAN mengubah style body (position:fixed bikin list "blink"
-  // karena layout berubah; overflow:hidden malah me-reset scroll halaman
-  // ke atas), melainkan menahan posisi scroll tiap frame: kalau halaman
-  // bergeser dari posisi saat jari nempel, langsung dikembalikan instant.
+  // gestur swipe tidak boleh diteruskan ke halaman utama. Cukup
+  // overscroll-contain + menahan di tepi — tanpa mengubah style body dan
+  // tanpa menahan posisi scroll tiap frame. Menahan tiap frame itu yang
+  // bikin geter: momentum browser tetap mendorong halaman tiap frame,
+  // sementara kodenya menarik balik tiap frame juga — jadinya berantem
+  // dan scroll list ikut tidak smooth. Versi simpel ini membiarkan browser
+  // yang mengatur scroll-nya (native, smooth), kode cuma menahan di tepi.
   useEffect(() => {
     const el = listRef.current;
     if (!el) return;
     let startY = 0;
-    let savedPageY = 0;
-    let rafId = 0;
-    let stopTimer: number | null = null;
-    const holdPage = () => {
-      if (window.scrollY !== savedPageY) {
-        window.scrollTo({ top: savedPageY, behavior: "instant" });
-      }
-      rafId = requestAnimationFrame(holdPage);
-    };
-    const startHold = () => {
-      savedPageY = window.scrollY;
-      if (stopTimer) window.clearTimeout(stopTimer);
-      cancelAnimationFrame(rafId);
-      rafId = requestAnimationFrame(holdPage);
-    };
-    const stopHold = () => {
-      if (stopTimer) window.clearTimeout(stopTimer);
-      // 600ms: momentum (inersia) dari flick cepat masih hidup ~500ms
-      // setelah jari diangkat — halaman baru boleh lepas setelah itu.
-      stopTimer = window.setTimeout(() => cancelAnimationFrame(rafId), 600);
-    };
     const onTouchStart = (e: TouchEvent) => {
       startY = e.touches[0].clientY;
-      startHold();
     };
     const onTouchMove = (e: TouchEvent) => {
       const dy = e.touches[0].clientY - startY;
@@ -325,18 +302,11 @@ export function RsvpSection({
       const atBottom = el.scrollTop + el.clientHeight >= el.scrollHeight - 1;
       if ((dy > 0 && atTop) || (dy < 0 && atBottom)) e.preventDefault();
     };
-    const onTouchEnd = () => stopHold();
     el.addEventListener("touchstart", onTouchStart, { passive: true });
     el.addEventListener("touchmove", onTouchMove, { passive: false });
-    el.addEventListener("touchend", onTouchEnd, { passive: true });
-    el.addEventListener("touchcancel", onTouchEnd, { passive: true });
     return () => {
       el.removeEventListener("touchstart", onTouchStart);
       el.removeEventListener("touchmove", onTouchMove);
-      el.removeEventListener("touchend", onTouchEnd);
-      el.removeEventListener("touchcancel", onTouchEnd);
-      cancelAnimationFrame(rafId);
-      if (stopTimer) window.clearTimeout(stopTimer);
     };
   }, [wishes.length]);
   useEffect(() => {
