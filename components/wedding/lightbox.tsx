@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import { useEffect } from "react";
+import { createPortal } from "react-dom";
 import { ChevronLeft, ChevronRight, X } from "lucide-react";
 
 export function Lightbox({
@@ -27,7 +28,19 @@ export function Lightbox({
     return () => window.removeEventListener("keydown", onKey);
   }, [onClose, onPrev, onNext]);
 
-  return (
+  // Kunci scroll halaman selama lightbox terbuka.
+  useEffect(() => {
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = prev;
+    };
+  }, []);
+
+  // Portal ke body: section memakai @container (container-type) yang membuat
+  // `position: fixed` di dalamnya menempel ke section, bukan ke viewport —
+  // lightbox jadi tidak terlihat / tombolnya di luar layar.
+  return createPortal(
     <div
       role="dialog"
       aria-modal="true"
@@ -71,6 +84,7 @@ export function Lightbox({
           <ChevronRight size={22} />
         </button>
       )}
-    </div>
+    </div>,
+    document.body
   );
 }

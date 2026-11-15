@@ -142,7 +142,7 @@ export function GallerySection({ photos }: { photos: string[] }) {
           mengintip dari tepi dalam hitam-putih dan lebih besar; geser untuk
           ganti foto. Frame tetap polaroid bawaan. */}
       <div
-        className="relative mt-6 overflow-hidden py-12"
+        className="relative mt-6 overflow-hidden py-12 select-none"
         style={{ touchAction: "pan-y" }}
         onPointerDown={(e) => {
           if (e.button !== 0) return;
@@ -203,6 +203,7 @@ export function GallerySection({ photos }: { photos: string[] }) {
                     else setCurrent(i);
                   }}
                   aria-label={ID.gallery.view(i + 1)}
+                  onDragStart={(e) => e.preventDefault()}
                   className="block w-full cursor-zoom-in bg-white p-2 pb-8 shadow-[0_8px_16px_-6px_rgb(63_74_44/0.4)]"
                 >
                   <span className="relative block aspect-3/4 overflow-hidden">
@@ -211,6 +212,7 @@ export function GallerySection({ photos }: { photos: string[] }) {
                       alt={ID.gallery.photo(i + 1)}
                       fill
                       sizes="280px"
+                      draggable={false}
                       className={`object-cover transition-[filter] duration-300 ${r === 0 ? "" : "grayscale"}`}
                     />
                   </span>
