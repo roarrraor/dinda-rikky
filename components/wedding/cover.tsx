@@ -146,14 +146,12 @@ export function Cover({
                         <p className={`text-[26px] text-(--theme-muted) ${SCRIPT}`}>
                           {first} &amp; {second}
                         </p>
+                        {tag && (
+                          <p className={`mt-1 text-[20px] text-(--theme-primary) ${SCRIPT}`}>#{tag}</p>
+                        )}
                         <p className={`mt-1 text-[9px] text-(--theme-accent) ${LABEL}`}>
                           {formatDate(date, "DD . MM . YYYY")}
                         </p>
-                        {tag && (
-                          <p className="mt-3 font-montserrat text-[12px] font-semibold tracking-[0.06em] text-(--theme-primary)">
-                            #{tag}
-                          </p>
-                        )}
                       </div>
                     </motion.div>
                     {/* kantong amplop (depan) — muncul halus, bukan pop */}
