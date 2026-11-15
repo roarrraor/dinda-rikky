@@ -23,11 +23,11 @@ export const ASSETS = {
   cosmos: asset("cosmos.webp", 196, 360),
   teacup: asset("teacup.webp", 365, 323),
   grass: asset("grass.webp", 1000, 982),
+  // Pose foto couple (pakai foto galeri asli, bukan ilustrasi pose-*.webp lagi).
   poses: [
-    asset("pose-1.webp", 900, 1095),
-    asset("pose-2.webp", 900, 1095),
-    asset("pose-3.webp", 900, 1095),
-    asset("pose-4.webp", 900, 1095),
+    { src: "/assets/illustrations/gallery-1.webp", width: 1092, height: 1440 },
+    { src: "/assets/illustrations/gallery-2.webp", width: 1084, height: 1428 },
+    { src: "/assets/illustrations/gallery-3.webp", width: 1084, height: 1428 },
   ],
 } as const;
 
@@ -251,12 +251,12 @@ const story = [
   },
 ];
 
-// Foto galeri: tambah file gallery-3.webp dst ke public/assets/illustrations/
+// Foto galeri: tambah file gallery-4.webp dst ke public/assets/illustrations/
 // lalu uncomment baris di bawah.
 const galleryPhotos = [
   "/assets/illustrations/gallery-1.webp",
   "/assets/illustrations/gallery-2.webp",
-  // "/assets/illustrations/gallery-3.webp",
+  "/assets/illustrations/gallery-3.webp",
   // "/assets/illustrations/gallery-4.webp",
   // "/assets/illustrations/gallery-5.webp",
 ];
