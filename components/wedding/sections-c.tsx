@@ -120,6 +120,7 @@ export function GallerySection({ photos }: { photos: string[] }) {
   const startX = useRef(0);
   const dragXRef = useRef(0);
   const dragged = useRef(false);
+  const tapPhoto = useRef<string | null>(null);
   const n = photos.length;
   // Posisi relatif tiap foto terhadap yang sedang tampil (loop): 0 = utama,
   // ±1 = tetangga kiri/kanan, selebihnya di luar layar.
@@ -149,27 +150,65 @@ export function GallerySection({ photos }: { photos: string[] }) {
           startX.current = e.clientX;
           dragXRef.current = 0;
           dragged.current = false;
+          tapPhoto.current = (e.target as HTMLElement).closest("button")?.dataset.photo ?? null;
           setDragging(true);
-          const move = (ev: PointerEvent) => {
-            const dx = ev.clientX - startX.current;
-            if (Math.abs(dx) > 8) dragged.current = true;
-            dragXRef.current = dx;
-            setDragX(dx);
-          };
-          const up = () => {
-            window.removeEventListener("pointermove", move);
-            window.removeEventListener("pointerup", up);
-            window.removeEventListener("pointercancel", up);
-            setDragging(false);
-            const dx = dragXRef.current;
-            dragXRef.current = 0;
-            setDragX(0);
-            if (dx < -60) go(1);
-            else if (dx > 60) go(-1);
-          };
-          window.addEventListener("pointermove", move);
-          window.addEventListener("pointerup", up);
-          window.addEventListener("pointercancel", up);
+          try {
+            // Pola yang sama dengan GiftStack (terbukti jalan): tangkap pointer
+            // ke container supaya pointermove/up tetap sampai walau jari/kursor
+            // keluar dari kartu. Tanpa capture, klik ketelen (lihat lightbox).
+            (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
+          } catch {
+            // Fallback kalau capture tidak didukung: dengarkan di window.
+            const move = (ev: PointerEvent) => {
+              const dx = ev.clientX - startX.current;
+              if (Math.abs(dx) > 8) dragged.current = true;
+              dragXRef.current = dx;
+              setDragX(dx);
+            };
+            const up = () => {
+              window.removeEventListener("pointermove", move);
+              window.removeEventListener("pointerup", up);
+              window.removeEventListener("pointercancel", up);
+              setDragging(false);
+              const dx = dragXRef.current;
+              dragXRef.current = 0;
+              setDragX(0);
+              if (dx < -60) go(1);
+              else if (dx > 60) go(-1);
+            };
+            window.addEventListener("pointermove", move);
+            window.addEventListener("pointerup", up);
+            window.addEventListener("pointercancel", up);
+          }
+        }}
+        onPointerMove={(e) => {
+          if (!dragging) return;
+          const dx = e.clientX - startX.current;
+          if (Math.abs(dx) > 8) dragged.current = true;
+          dragXRef.current = dx;
+          setDragX(dx);
+        }}
+        onPointerUp={() => {
+          if (!dragging) return;
+          setDragging(false);
+          const dx = dragXRef.current;
+          dragXRef.current = 0;
+          setDragX(0);
+          // Ketukan (bukan geseran): capture membuat klik jatuh ke container,
+          // jadi tap ditangani di sini lewat foto yang ditekan saat pointerdown.
+          if (!dragged.current && tapPhoto.current !== null) {
+            const i = Number(tapPhoto.current);
+            if (rel(i) === 0) setOpen(i);
+            else setCurrent(i);
+            return;
+          }
+          if (dx < -60) go(1);
+          else if (dx > 60) go(-1);
+        }}
+        onPointerCancel={() => {
+          setDragging(false);
+          dragXRef.current = 0;
+          setDragX(0);
         }}
       >
         <ul
@@ -197,7 +236,10 @@ export function GallerySection({ photos }: { photos: string[] }) {
               >
                 <button
                   type="button"
+                  data-photo={i}
                   onClick={() => {
+                    // Fallback kalau pointer capture gagal: klik biasa.
+                    // Kalau capture jalan, klik jatuh ke container dan tidak sampai sini.
                     if (dragged.current) return;
                     if (r === 0) setOpen(i);
                     else setCurrent(i);

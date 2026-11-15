@@ -28,12 +28,18 @@ export function Lightbox({
     return () => window.removeEventListener("keydown", onKey);
   }, [onClose, onPrev, onNext]);
 
-  // Kunci scroll halaman selama lightbox terbuka.
+  // Kunci scroll halaman selama lightbox terbuka (html + body, supaya
+  // posisi scroll tidak berubah saat dibuka/ditutup).
   useEffect(() => {
-    const prev = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
+    const html = document.documentElement;
+    const body = document.body;
+    const prevHtml = html.style.overflow;
+    const prevBody = body.style.overflow;
+    html.style.overflow = "hidden";
+    body.style.overflow = "hidden";
     return () => {
-      document.body.style.overflow = prev;
+      html.style.overflow = prevHtml;
+      body.style.overflow = prevBody;
     };
   }, []);
 
@@ -48,7 +54,7 @@ export function Lightbox({
       onClick={onClose}
     >
       <div className="relative h-[80dvh] w-full max-w-md" onClick={(e) => e.stopPropagation()}>
-        <Image src={src} alt={alt} fill sizes="448px" className="object-contain" />
+        <Image src={src} alt={alt} fill sizes="448px" priority className="object-contain" />
       </div>
       <button
         type="button"
