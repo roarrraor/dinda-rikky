@@ -66,15 +66,16 @@ function PhotoFrame({ src, alt }: { src: string; alt: string }) {
         <svg
           aria-hidden
           viewBox="0 0 100 110"
-          className="absolute inset-0 size-full drop-shadow-[0_10px_14px_rgb(63_74_44/0.28)]"
+          className="absolute inset-0 size-full"
         >
           <defs>
-            <pattern id={`${id}-g`} width="5" height="5" patternUnits="userSpaceOnUse">
-              <rect width="5" height="5" fill="white" />
-              <rect width="2.5" height="5" style={{ fill: "var(--pt-pink)" }} opacity="0.75" />
-              <rect width="5" height="2.5" style={{ fill: "var(--pt-pink)" }} opacity="0.75" />
+            <pattern id={`${id}-g`} width="10" height="10" patternUnits="userSpaceOnUse">
+              <rect width="10" height="10" fill="white" />
+              <rect width="5" height="10" style={{ fill: "var(--pt-pink)" }} opacity="0.75" />
+              <rect width="10" height="5" style={{ fill: "var(--pt-pink)" }} opacity="0.75" />
             </pattern>
           </defs>
+          <path d={PHOTO_FRAME_PATH} transform="translate(0 2.5)" fill="black" opacity="0.12" />
           <path d={PHOTO_FRAME_PATH} fill={`url(#${id}-g)`} stroke="var(--theme-accent)" strokeWidth="0.6" />
           <ellipse cx="50" cy="55" rx="38.5" ry="43.5" fill="white" />
         </svg>
@@ -117,9 +118,11 @@ function PersonCard({ p, showPhoto, mirror }: { p: Person; showPhoto: boolean; m
   return (
     <div className="relative mx-auto w-[86cqw]">
       {showPhoto && (
-        <Drop className={`relative z-10 mx-auto w-[64cqw] ${mirror ? "rotate-2" : "-rotate-2"}`} tilt={0}>
-          <PhotoFrame src={p.photo} alt={p.name} />
-        </Drop>
+        <Reveal className="relative z-10 mx-auto w-[64cqw]">
+          <div className={mirror ? "rotate-2" : "-rotate-2"}>
+            <PhotoFrame src={p.photo} alt={p.name} />
+          </div>
+        </Reveal>
       )}
       <Reveal className={`relative ${showPhoto ? "-mt-[34cqw]" : ""}`}>
         <div

@@ -281,15 +281,45 @@ export function RsvpSection({
   const [alreadySent, setAlreadySent] = useState(false);
   const [pickerOpen, setPickerOpen] = useState(false);
   const listRef = useRef<HTMLUListElement>(null);
+  const unlockTimer = useRef<number | null>(null);
   // Kunci scroll di dalam list ucapan: kalau list sudah mentok atas/bawah,
   // gestur swipe tidak boleh diteruskan ke halaman utama (overscroll-contain
-  // saja ternyata tidak cukup di HP Roar).
+  // saja ternyata tidak cukup di HP Roar). Selain menahan di tepi, halaman
+  // juga dikunci selama jari menyentuh list — supaya momentum (inersia) dari
+  // flick cepat tidak ikut menggeser halaman setelah jari diangkat.
   useEffect(() => {
     const el = listRef.current;
     if (!el) return;
     let startY = 0;
+    let savedPageY = 0;
+    let locked = false;
+    const lockPage = () => {
+      if (!locked) {
+        savedPageY = window.scrollY;
+        locked = true;
+      }
+      document.body.style.position = "fixed";
+      document.body.style.top = `-${savedPageY}px`;
+      document.body.style.left = "0";
+      document.body.style.right = "0";
+      if (unlockTimer.current) window.clearTimeout(unlockTimer.current);
+    };
+    const unlockPage = () => {
+      if (unlockTimer.current) window.clearTimeout(unlockTimer.current);
+      unlockTimer.current = window.setTimeout(() => {
+        document.body.style.position = "";
+        document.body.style.top = "";
+        document.body.style.left = "";
+        document.body.style.right = "";
+        // "instant" supaya tidak kena html { scroll-behavior: smooth } —
+        // kembalinya harus langsung, bukan animasi scroll yang kelihatan.
+        window.scrollTo({ top: savedPageY, behavior: "instant" });
+        locked = false;
+      }, 300);
+    };
     const onTouchStart = (e: TouchEvent) => {
       startY = e.touches[0].clientY;
+      lockPage();
     };
     const onTouchMove = (e: TouchEvent) => {
       const dy = e.touches[0].clientY - startY;
@@ -297,11 +327,21 @@ export function RsvpSection({
       const atBottom = el.scrollTop + el.clientHeight >= el.scrollHeight - 1;
       if ((dy > 0 && atTop) || (dy < 0 && atBottom)) e.preventDefault();
     };
+    const onTouchEnd = () => unlockPage();
     el.addEventListener("touchstart", onTouchStart, { passive: true });
     el.addEventListener("touchmove", onTouchMove, { passive: false });
+    el.addEventListener("touchend", onTouchEnd, { passive: true });
+    el.addEventListener("touchcancel", onTouchEnd, { passive: true });
     return () => {
       el.removeEventListener("touchstart", onTouchStart);
       el.removeEventListener("touchmove", onTouchMove);
+      el.removeEventListener("touchend", onTouchEnd);
+      el.removeEventListener("touchcancel", onTouchEnd);
+      if (unlockTimer.current) window.clearTimeout(unlockTimer.current);
+      document.body.style.position = "";
+      document.body.style.top = "";
+      document.body.style.left = "";
+      document.body.style.right = "";
     };
   }, [wishes.length]);
   useEffect(() => {
@@ -725,8 +765,6 @@ export function ClosingSection({
       style={GRASS}
       className="@container relative flex min-h-dvh flex-col overflow-hidden px-5 pt-12 lg:[[data-phone-frame]_&]:min-h-[844px]"
     >
-      <Art art="orchid" className="top-0 right-[2cqw] z-20 w-[13cqw]" delay={0.6} />
-
       <div className="flex flex-1 flex-col justify-center">
       <Drop className="relative z-10 mx-auto w-[68cqw]" tilt={-3}>
         <div className="relative aspect-square">
@@ -761,8 +799,9 @@ export function ClosingSection({
             </p>
           </div>
         </div>
-        <Art art="flowers" className="-top-[12%] -left-[14%] w-[34%]" delay={0.5} />
-        <Art art="rosebud" className="-right-[10%] -bottom-[2%] w-[36%] -rotate-12" delay={0.8} />
+        <Art art="flowers" className="-top-[12%] -left-[14%] w-[30%]" delay={0.5} />
+        <Art art="flowers" className="-top-[12%] -right-[14%] w-[30%]" delay={0.5} flip />
+        <Art art="rosebud" className="-bottom-[5%] left-[35%] w-[30%]" delay={0.8} />
       </Drop>
 
       <div className="relative mt-[6cqw] flex items-start">
