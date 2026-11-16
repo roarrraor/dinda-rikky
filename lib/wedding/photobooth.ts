@@ -158,7 +158,7 @@ export const IMAGE_FRAMES: ImageFrame[] = [
     id: "renda-teh",
     name: "Renda Teh",
     concept: "Klasik",
-    src: "/assets/photobooth/frames/renda-teh-strip.svg",
+    src: "/assets/photobooth/frames/renda-teh-strip.png",
     layouts: ["strip"],
     footer: "drawn",
   },

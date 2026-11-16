@@ -36,7 +36,7 @@ Aturan gambarnya:
 - **Transparan di tengah** — bagian tempat foto tamu berada harus
   transparan (alpha 0), kalau tidak fotonya ketutup.
 - **Ukuran = ukuran output layout** yang didaftarkan di `layouts`:
-  - `strip` (3 foto): **900 × 2103 px**
+  - `strip` (3 foto): **900 × 2121 px**
   - `grid` (4 foto): **1080 × 1248 px**
   - `portrait` (1 foto): **900 × 1269 px**
   - `duet` (2 foto): **1200 × 669 px**
