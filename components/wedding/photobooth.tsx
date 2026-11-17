@@ -1277,7 +1277,7 @@ export function PhotoboothStudio({ caption }: { caption: PhotoboothCaption }) {
           <h1 className={`mt-1 text-center ${PB_TITLE}`}>{T.resultTitle}</h1>
           <p className={`mx-auto mt-2 max-w-80 text-center ${PB_BODY}`}>{T.resultDesc}</p>
 
-          <div className="mx-auto mt-6 max-w-[340px] rounded-3xl bg-white p-3 shadow-[0_16px_30px_-12px_rgba(63,74,44,0.35)]">
+          <div className="mx-auto mt-6 max-w-[340px] bg-white p-3 shadow-[0_16px_30px_-12px_rgba(63,74,44,0.35)]">
             <canvas ref={previewRef} className="mx-auto block max-h-[62vh] w-auto max-w-full" />
           </div>
           <p className="mt-3 flex items-center justify-center gap-1.5 text-center font-montserrat text-[14px] text-(--theme-muted)">
