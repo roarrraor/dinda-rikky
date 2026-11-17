@@ -280,9 +280,12 @@ export const PHOTOBOOTH_COPY = {
   filterHint: "Siap dibawa pulang. Simpan untuk dikenang di hari-hari nanti.",
   save: "Simpan",
   share: "Bagikan",
+  shareText:
+    "Baru aja mengabadikan momen di pernikahan Dinda & Rikky, 20 Desember 2026! 📸✨ #taNDAkeseRIusan",
   restart: "Ulang",
   saved: "Strip tersimpan di perangkatmu.",
-  shareFallback: "Bagikan tidak didukung di browser ini — strip sudah diunduh saja.",
+  shareFallback:
+    "Bagikan tidak didukung di browser ini — strip sudah diunduh, teks caption sudah disalin, tinggal tempel.",
   privacy: "Foto diproses di perangkatmu dan tidak dikirim ke server.",
   privacyShort: "Foto diproses di perangkatmu",
   auto: "Otomatis",

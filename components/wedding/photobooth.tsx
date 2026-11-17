@@ -803,9 +803,16 @@ export function PhotoboothStudio({ caption }: { caption: PhotoboothCaption }) {
     const blob = await buildStripBlob();
     if (!blob) return;
     const file = new File([blob], stripFileName(), { type: "image/png" });
+    // salin teks caption ke clipboard juga, biar bisa ditempel di aplikasi
+    // yang tidak mengambil teks dari share sheet (mis. Instagram)
+    try {
+      await navigator.clipboard.writeText(T.shareText);
+    } catch {
+      /* clipboard gagal: teks tetap ikut lewat share sheet */
+    }
     if (navigator.canShare?.({ files: [file] })) {
       try {
-        await navigator.share({ files: [file], title: "Photobooth Dinda & Rikky" });
+        await navigator.share({ files: [file], title: "Photobooth Dinda & Rikky", text: T.shareText });
         return;
       } catch {
         /* dibatalkan: jangan unduh otomatis */
