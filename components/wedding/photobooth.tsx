@@ -392,9 +392,11 @@ export async function renderStrip(canvas: HTMLCanvasElement, opts: StripOptions)
     // Jarak antar baris (tengah teks ke tengah teks) + pembatas ke nama.
     const NAME_DATE_GAP = 58;
     const DIVIDER_GAP = 54;
-    // Titik tengah blok (pembatas sampai bawah tanggal) ada 7.5px di bawah
-    // tengah nama — jadi tengah nama = tengah zona - 7.5.
-    const nameY = zoneCenter - 7.5;
+    // Titik tengah blok (pembatas sampai bawah tanggal) dipusatkan di tengah
+    // zona, dengan koreksi ke atas karena baseline "middle" canvas menaruh
+    // glyph Playfair/Montserrat sedikit lebih rendah dari tengah visualnya
+    // (terukur live: footer masih ~20px terlalu rendah di kanvas).
+    const nameY = zoneCenter - 27;
     const dateY = nameY + NAME_DATE_GAP;
     const dividerY = nameY - DIVIDER_GAP;
     ctx.strokeStyle = frame.accent;
