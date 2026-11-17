@@ -436,7 +436,7 @@ export async function renderStrip(canvas: HTMLCanvasElement, opts: StripOptions)
   }
   if (imageFrame?.layer !== "background") {
     ctx.strokeStyle = frame.border;
-    ctx.lineWidth = 3;
+    ctx.lineWidth = 1;
     ctx.strokeRect(16, 16, g.w - 32, g.h - 32);
   }
 
