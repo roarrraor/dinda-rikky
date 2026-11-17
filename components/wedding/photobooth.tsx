@@ -366,7 +366,7 @@ export async function renderStrip(canvas: HTMLCanvasElement, opts: StripOptions)
           ctx.shadowColor = "rgba(0,0,0,0.28)";
           ctx.shadowBlur = 14;
           ctx.shadowOffsetY = 5;
-          if (shape === "lembut") roundRectPath(ctx, slot.x, slot.y, slot.w, slot.h, 12);
+          if (shape === "lembut") roundRectPath(ctx, slot.x, slot.y, slot.w, slot.h, 18);
           else {
             ctx.beginPath();
             ctx.rect(slot.x, slot.y, slot.w, slot.h);
@@ -376,7 +376,7 @@ export async function renderStrip(canvas: HTMLCanvasElement, opts: StripOptions)
           ctx.restore();
         }
         ctx.save();
-        if (shape === "lembut") roundRectPath(ctx, slot.x, slot.y, slot.w, slot.h, 12);
+        if (shape === "lembut") roundRectPath(ctx, slot.x, slot.y, slot.w, slot.h, 18);
         else ctx.rect(slot.x, slot.y, slot.w, slot.h);
         ctx.clip();
         if (filter.ops.length > 0 && !canvasFilterSupported()) {
@@ -401,13 +401,13 @@ export async function renderStrip(canvas: HTMLCanvasElement, opts: StripOptions)
         ctx.restore();
         if (shape !== "polaroid") {
           ctx.save();
-          if (shape === "lembut") roundRectPath(ctx, slot.x, slot.y, slot.w, slot.h, 12);
+          if (shape === "lembut") roundRectPath(ctx, slot.x, slot.y, slot.w, slot.h, 18);
           else {
             ctx.beginPath();
             ctx.rect(slot.x, slot.y, slot.w, slot.h);
           }
           ctx.strokeStyle = "rgba(255,255,255,0.95)";
-          ctx.lineWidth = 2;
+          ctx.lineWidth = 1;
           ctx.stroke();
           ctx.restore();
         }
@@ -1418,7 +1418,7 @@ export function PhotoboothStudio({ caption }: { caption: PhotoboothCaption }) {
                     onClick={() => setShapeId(s.id)}
                     className={`rounded-2xl border-2 bg-white px-2 py-3 text-center cursor-pointer ${shapeId === s.id ? "border-(--theme-text)" : "border-(--pt-sage)/40"}`}
                   >
-                    <span className={`mx-auto block h-14 w-11 ${s.id === "lembut" ? "rounded-xl" : ""} ${s.id === "polaroid" ? "border-[6px] border-b-[16px] border-white shadow" : ""} bg-(--theme-surface)`} />
+                    <span className={`mx-auto block h-14 w-11 ${s.id === "lembut" ? "rounded-2xl" : ""} ${s.id === "polaroid" ? "border-[6px] border-b-[16px] border-white shadow" : ""} bg-(--theme-surface)`} />
                     <span className="mt-2 block font-montserrat font-semibold text-[12px] uppercase tracking-[0.08em] text-(--theme-text)">{s.name}</span>
                     <span className="mt-0.5 block min-h-8 font-montserrat text-[13px] leading-tight text-(--theme-muted) line-clamp-2">{s.desc}</span>
                   </button>
