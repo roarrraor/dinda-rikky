@@ -15,10 +15,46 @@ Tambah satu baris ke `FRAMES` di `lib/wedding/photobooth.ts`:
 - `bg`: warna latar strip. `ink`: warna teks footer. `accent`: warna garis
   pemisah. `border`: warna garis tepi strip.
 
-## 2. Frame gambar (PNG / SVG)
+## 2. Frame gambar (PNG / SVG / WebP)
 
-1. Taruh filenya di folder ini, misal `bungaku-strip.png`.
-2. Daftarkan di `IMAGE_FRAMES` di `lib/wedding/photobooth.ts`:
+Ada dua jenis — pilih salah satu saat mendaftarkan di `IMAGE_FRAMES`:
+
+### 2a. Background (paling gampang, ala inveet) — `layer: "background"`
+
+Gambar full digambar DI BAWAH foto (cover-fit ke kanvas), jadi gambar
+boleh utuh tanpa bolong — foto menutupi bagian tengahnya sendiri.
+Satu file bisa dipakai untuk SEMUA layout (cover-fit menyesuaikan
+rasio tiap layout otomatis).
+
+```ts
+{
+  id: "botanical",
+  name: "Botanical",
+  concept: "Taman",
+  src: "/assets/photobooth/frames/botanical.webp",
+  layouts: ["strip", "grid", "portrait", "duet"],
+  footer: "drawn",
+  layer: "background",
+  footerFade: "#F3EADB",
+},
+```
+
+Aturan gambarnya:
+
+- **Tengah polos** — bagian tempat foto berada sebaiknya polos / motif
+  halus, supaya tepi foto terlihat bersih.
+- **Bawah kosong + `footerFade`** — isi `footerFade` dengan warna krem
+  gambar (sampel dari tengah gambar). Bagian bawah strip di-fade ke
+  warna itu supaya teks nama + tanggal terbaca.
+- `footer: "drawn"` — teks nama + tanggal tetap digambar kode di bawah.
+  `footer: "none"` — frame sudah membawa teks footer sendiri, kode
+  tidak menggambar teks lagi.
+
+### 2b. Overlay — `layer: "overlay"` (bawaan kalau `layer` tidak diisi)
+
+Gambar digambar DI ATAS foto, jadi bagian tengah tempat foto berada
+harus TRANSPARAN (alpha 0), kalau tidak fotonya ketutup. Satu file
+hanya untuk SATU layout (ukuran harus = ukuran output layout itu):
 
 ```ts
 {
@@ -28,23 +64,19 @@ Tambah satu baris ke `FRAMES` di `lib/wedding/photobooth.ts`:
   src: "/assets/photobooth/frames/bungaku-strip.png",
   layouts: ["strip"],
   footer: "drawn",
+  layer: "overlay",
 },
 ```
 
-Aturan gambarnya:
+Ukuran output tiap layout:
 
-- **Transparan di tengah** — bagian tempat foto tamu berada harus
-  transparan (alpha 0), kalau tidak fotonya ketutup.
-- **Ukuran = ukuran output layout** yang didaftarkan di `layouts`:
-  - `strip` (3 foto): **900 × 2121 px**
-  - `grid` (4 foto): **1080 × 1248 px**
-  - `portrait` (1 foto): **900 × 1269 px**
-  - `duet` (2 foto): **1200 × 669 px**
-- `footer: "drawn"` — teks nama + tanggal tetap digambar kode di bawah
-  (jadi biarkan area footer bawah kosong). `footer: "none"` — frame sudah
-  membawa teks footer sendiri, kode tidak menggambar teks lagi.
-- Kalau file-nya PNG (bukan SVG), upload lewat browser ke GitHub
-  (push via connector hanya bisa file teks, PNG akan rusak).
+- `strip` (3 foto): **900 × 2145 px**
+- `grid` (4 foto): **1080 × 1272 px**
+- `portrait` (1 foto): **900 × 1293 px**
+- `duet` (2 foto): **1200 × 693 px**
+
+Kalau file-nya PNG / WebP (bukan SVG), upload lewat browser ke GitHub
+(push via connector hanya bisa file teks, file biner akan rusak).
 
 ## Contoh
 

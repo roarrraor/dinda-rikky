@@ -9,12 +9,19 @@
  * == CARA NAMBAH FRAME (buat Roar) ==
  * 1) Frame warna (tanpa file): tambah satu entri ke `FRAMES` di bawah —
  *    cukup isi nama, konsep, dan warna. Langsung jalan.
- * 2) Frame gambar (PNG/SVG): taruh filenya di
- *    `public/assets/photobooth/frames/`, lalu tambah satu entri ke
- *    `IMAGE_FRAMES` (id, nama, konsep, src, layout yang cocok).
- *    Gambar frame harus TRANSPARAN di bagian tengah tempat foto berada,
- *    dan ukurannya mengikuti ukuran output layout yang didaftarkan
- *    (lihat `layoutGeometry`). Contoh siap pakai + panduannya ada di
+ * 2) Frame gambar: taruh filenya di `public/assets/photobooth/frames/`,
+ *    lalu tambah satu entri ke `IMAGE_FRAMES` (id, nama, konsep, src,
+ *    layout yang cocok). Ada dua jenis:
+ *    - `layer: "overlay"` (bawaan): gambar digambar DI ATAS foto, jadi
+ *      bagian tengah tempat foto harus TRANSPARAN (alpha 0), dan
+ *      ukurannya mengikuti ukuran output layout yang didaftarkan
+ *      (lihat `layoutGeometry`).
+ *    - `layer: "background"` (ala inveet): gambar full digambar DI BAWAH
+ *      foto (cover-fit ke kanvas), jadi gambar boleh utuh tanpa bolong —
+ *      foto menutupi bagian tengahnya sendiri. Isi `footerFade` dengan
+ *      warna krem gambar supaya teks nama/tanggal di footer tetap
+ *      terbaca (bagian bawah di-fade ke warna itu).
+ *    Contoh siap pakai + panduannya ada di
  *    `public/assets/photobooth/frames/README.md`.
  */
 
@@ -89,7 +96,7 @@ export interface StripGeometry {
 export function layoutGeometry(layout: PhotoboothLayout): StripGeometry {
   const pad = 48;
   const gap = 24;
-  const footerH = 168;
+  const footerH = 192;
   const photoW =
     layout.id === "grid" || layout.id === "duet"
       ? (layout.outW - pad * 2 - gap) / 2
@@ -141,7 +148,7 @@ export const FRAMES: PhotoboothFrame[] = [
 
 export const FRAME_CONCEPTS: ("Semua" | FrameConcept)[] = ["Semua", "Klasik", "Taman", "Modern"];
 
-/** Bingkai gambar (PNG/SVG transparan) — lihat README di folder frames. */
+/** Bingkai gambar — lihat README di folder frames. */
 export interface ImageFrame {
   id: string;
   name: string;
@@ -151,6 +158,11 @@ export interface ImageFrame {
   layouts: LayoutId[];
   /** "drawn": teks footer tetap digambar kode; "none": frame sudah membawa teks sendiri */
   footer: "drawn" | "none";
+  /** "overlay" (bawaan): gambar di atas foto, tengah harus transparan.
+   *  "background": gambar full di bawah foto (cover-fit, ala inveet). */
+  layer?: "overlay" | "background";
+  /** khusus background: warna krem untuk fade footer supaya teks terbaca */
+  footerFade?: string;
 }
 
 export const IMAGE_FRAMES: ImageFrame[] = [
@@ -161,6 +173,17 @@ export const IMAGE_FRAMES: ImageFrame[] = [
     src: "/assets/photobooth/frames/renda-teh-strip.svg",
     layouts: ["strip"],
     footer: "drawn",
+    layer: "overlay",
+  },
+  {
+    id: "botanical",
+    name: "Botanical",
+    concept: "Taman",
+    src: "/assets/photobooth/frames/botanical.webp",
+    layouts: ["strip", "grid", "portrait", "duet"],
+    footer: "drawn",
+    layer: "background",
+    footerFade: "#F3EADB",
   },
 ];
 
@@ -169,16 +192,18 @@ export interface PhotoboothFont {
   name: string;
   /** nama family yang dipakai canvas + CSS */
   family: string;
+  /** ukuran contoh "Aa" di tab Font — disamakan tampaknya (script lebih besar, Cinzel lebih kecil) */
+  samplePx: number;
 }
 
 /** Pilihan font — disamakan dengan inveet (Playfair default). */
 export const FONTS: PhotoboothFont[] = [
-  { id: "playfair", name: "Playfair", family: "'Playfair Display', serif" },
-  { id: "cormorant", name: "Cormorant", family: "'Cormorant Garamond', serif" },
-  { id: "cinzel", name: "Cinzel", family: "Cinzel, serif" },
-  { id: "dancing", name: "Dancing", family: "'Dancing Script', cursive" },
-  { id: "caveat", name: "Caveat", family: "Caveat, cursive" },
-  { id: "montserrat", name: "Montserrat", family: "Montserrat, sans-serif" },
+  { id: "playfair", name: "Playfair", family: "'Playfair Display', serif", samplePx: 26 },
+  { id: "cormorant", name: "Cormorant", family: "'Cormorant Garamond', serif", samplePx: 26 },
+  { id: "cinzel", name: "Cinzel", family: "Cinzel, serif", samplePx: 21 },
+  { id: "dancing", name: "Dancing", family: "'Dancing Script', cursive", samplePx: 30 },
+  { id: "caveat", name: "Caveat", family: "Caveat, cursive", samplePx: 30 },
+  { id: "montserrat", name: "Montserrat", family: "Montserrat, sans-serif", samplePx: 25 },
 ];
 
 export type ShapeId = "kotak" | "lembut" | "polaroid";

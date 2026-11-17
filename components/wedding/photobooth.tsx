@@ -128,6 +128,33 @@ async function ensureFonts(font: PhotoboothFont) {
 }
 
 /** Gambar strip lengkap ke kanvas (dipakai preview & unduhan). */
+/** #RRGGBB + alpha -> "rgba(r,g,b,a)" (buat fade footer frame background). */
+function hexA(hex: string, alpha: number): string {
+  const h = hex.replace("#", "");
+  const r = parseInt(h.slice(0, 2), 16);
+  const g = parseInt(h.slice(2, 4), 16);
+  const b = parseInt(h.slice(4, 6), 16);
+  return `rgba(${r},${g},${b},${alpha})`;
+}
+
+/** Pasang font dengan ukuran yang muat di maxWidth — huruf dikecilkan,
+ *  bukan digencet horizontal (fillText maxWidth menggencet huruf). */
+function fitFont(
+  ctx: CanvasRenderingContext2D,
+  text: string,
+  family: string,
+  startPx: number,
+  maxWidth: number,
+  minPx: number,
+): void {
+  let px = startPx;
+  ctx.font = `${px}px ${family}`;
+  while (px > minPx && ctx.measureText(text).width > maxWidth) {
+    px -= 2;
+    ctx.font = `${px}px ${family}`;
+  }
+}
+
 export async function renderStrip(canvas: HTMLCanvasElement, opts: StripOptions): Promise<void> {
   const { layout, shots, frame, imageFrame, font, shape, filter, caption } = opts;
   const g = layoutGeometry(layout);
@@ -137,9 +164,36 @@ export async function renderStrip(canvas: HTMLCanvasElement, opts: StripOptions)
   if (!ctx) return;
   await ensureFonts(font);
 
-  // Latar + foto
+  // Latar: warna dasar, lalu frame gambar "background" (ala inveet) kalau ada
   ctx.fillStyle = frame.bg;
   ctx.fillRect(0, 0, g.w, g.h);
+  if (imageFrame?.layer === "background") {
+    try {
+      const bg = await loadImage(imageFrame.src);
+      // Cover-fit: gambar full menutupi kanvas, kelebihannya dipotong.
+      const s = Math.max(g.w / bg.naturalWidth, g.h / bg.naturalHeight);
+      const sw = g.w / s;
+      const sh = g.h / s;
+      const sx = (bg.naturalWidth - sw) / 2;
+      const sy = (bg.naturalHeight - sh) / 2;
+      ctx.drawImage(bg, sx, sy, sw, sh, 0, 0, g.w, g.h);
+      // Fade footer ke warna krem supaya teks nama/tanggal terbaca.
+      if (imageFrame.footerFade) {
+        const footerTop = g.h - g.footerH;
+        const grad = ctx.createLinearGradient(0, footerTop - 60, 0, footerTop + 60);
+        grad.addColorStop(0, hexA(imageFrame.footerFade, 0));
+        grad.addColorStop(1, hexA(imageFrame.footerFade, 1));
+        ctx.fillStyle = grad;
+        ctx.fillRect(0, footerTop - 60, g.w, 120);
+        ctx.fillStyle = imageFrame.footerFade;
+        ctx.fillRect(0, footerTop + 60, g.w, g.h - footerTop - 60);
+      }
+    } catch {
+      /* background gagal: lanjut dengan warna dasar */
+    }
+  }
+
+  // Foto
   for (let i = 0; i < layout.shots; i++) {
     const slot = g.slots[i];
     const src = shots[i];
@@ -182,8 +236,10 @@ export async function renderStrip(canvas: HTMLCanvasElement, opts: StripOptions)
     }
   }
 
-  // Overlay frame gambar (kalau ada), lalu garis tepi
-  if (imageFrame) {
+  // Overlay frame gambar (kalau ada), lalu garis tepi.
+  // Frame "background" tidak digambar ulang di sini dan tidak pakai garis
+  // tepi kode (gambarnya sudah membawa border/dekorasinya sendiri).
+  if (imageFrame?.layer === "overlay") {
     try {
       const overlay = await loadImage(imageFrame.src);
       ctx.drawImage(overlay, 0, 0, g.w, g.h);
@@ -191,9 +247,11 @@ export async function renderStrip(canvas: HTMLCanvasElement, opts: StripOptions)
       /* overlay gagal: lanjut tanpa overlay */
     }
   }
-  ctx.strokeStyle = frame.border;
-  ctx.lineWidth = 3;
-  ctx.strokeRect(16, 16, g.w - 32, g.h - 32);
+  if (imageFrame?.layer !== "background") {
+    ctx.strokeStyle = frame.border;
+    ctx.lineWidth = 3;
+    ctx.strokeRect(16, 16, g.w - 32, g.h - 32);
+  }
 
   // Footer
   if (!imageFrame || imageFrame.footer === "drawn") {
@@ -208,16 +266,16 @@ export async function renderStrip(canvas: HTMLCanvasElement, opts: StripOptions)
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
     const scriptLike = font.id === "dancing" || font.id === "caveat";
-    ctx.font = `${scriptLike ? 76 : 46}px ${font.family}`;
-    ctx.fillText(caption.names, g.w / 2, footerTop + 88, g.w - 120);
-    ctx.font = "22px Marcellus, serif";
+    fitFont(ctx, caption.names, font.family, scriptLike ? 72 : 46, g.w - 120, 32);
+    ctx.fillText(caption.names, g.w / 2, footerTop + 88);
     try {
-      (ctx as CanvasRenderingContext2D & { letterSpacing: string }).letterSpacing = "5px";
+      (ctx as CanvasRenderingContext2D & { letterSpacing: string }).letterSpacing = "4px";
     } catch {
       /* abaikan */
     }
     const sub = caption.tag ? `${caption.date}  ·  ${caption.tag}` : caption.date;
-    ctx.fillText(sub, g.w / 2, footerTop + 138, g.w - 120);
+    fitFont(ctx, sub, "Marcellus, serif", 22, g.w - 120, 16);
+    ctx.fillText(sub, g.w / 2, footerTop + 146);
     try {
       (ctx as CanvasRenderingContext2D & { letterSpacing: string }).letterSpacing = "0px";
     } catch {
@@ -291,7 +349,7 @@ const STEP_NAMES: Record<Step, string> = {
 const STEP_NUM: Record<Step, number> = { layout: 1, access: 2, camera: 2, review: 2, result: 3 };
 
 /** Tipografi UI studio: Montserrat biasa (ramah, umum) — bukan script/serif undangan. Warna brand tetap sama. */
-const PB_BODY = "font-montserrat text-[15px] leading-relaxed text-(--theme-muted)";
+const PB_BODY = "font-montserrat text-[15px] leading-relaxed text-balance text-(--theme-muted)";
 const PB_KICKER = "font-montserrat text-[12px] font-semibold uppercase tracking-[0.08em] text-(--theme-accent)";
 const PB_TITLE = "font-montserrat text-[28px] font-semibold leading-tight text-(--theme-muted)";
 
@@ -922,12 +980,13 @@ export function PhotoboothStudio({ caption }: { caption: PhotoboothCaption }) {
           <p className={`mx-auto mt-2 max-w-80 text-center ${PB_BODY}`}>{T.resultDesc}</p>
 
           <div className="mx-auto mt-6 max-w-[340px]">
-            <canvas ref={previewRef} className="w-full rounded-2xl shadow-[0_16px_30px_-12px_rgba(63,74,44,0.45)]" />
-            <p className="mt-3 text-center font-montserrat text-[14px] text-(--theme-muted)">{T.privacy}</p>
+            <canvas ref={previewRef} className="mx-auto block max-h-[68vh] w-auto max-w-full rounded-2xl shadow-[0_16px_30px_-12px_rgba(63,74,44,0.45)]" />
+            <p className="mt-3 text-center font-montserrat text-[14px] text-balance text-(--theme-muted)">{T.privacy}</p>
           </div>
 
-          {/* tab pengaturan */}
-          <div className="mt-8 flex justify-center gap-2">
+          {/* tab pengaturan — menempel di atas saat discroll */}
+          <div className="sticky top-0 z-10 -mx-5 mt-8 border-b border-(--pt-sage)/30 bg-white/95 px-5 py-3 backdrop-blur">
+            <div className="flex justify-center gap-2">
             {(
               [
                 ["frame", T.tabFrame],
@@ -940,11 +999,12 @@ export function PhotoboothStudio({ caption }: { caption: PhotoboothCaption }) {
                 key={id}
                 type="button"
                 onClick={() => setTab(id)}
-                className={`rounded-full px-4 py-2 font-montserrat font-semibold text-[12px] uppercase tracking-[0.08em] cursor-pointer ${tab === id ? "bg-(--theme-primary) text-white" : "bg-(--theme-surface) text-(--theme-text)"}`}
+                className={`rounded-full px-4 py-2 font-montserrat font-semibold text-[12px] uppercase tracking-[0.08em] cursor-pointer ${tab === id ? "bg-(--theme-text) text-white" : "bg-(--theme-surface) text-(--theme-text)"}`}
               >
                 {label}
               </button>
             ))}
+            </div>
           </div>
 
           {tab === "frame" && (
@@ -980,13 +1040,13 @@ export function PhotoboothStudio({ caption }: { caption: PhotoboothCaption }) {
                           setFrameId(f.id);
                         }
                       }}
-                      className={`overflow-hidden rounded-2xl border-2 text-left cursor-pointer ${active ? "border-(--theme-primary)" : "border-transparent"}`}
+                      className={`overflow-hidden rounded-2xl border-2 text-left cursor-pointer ${active ? "border-(--theme-text)" : "border-transparent"}`}
                     >
                       <span
                         className="relative block h-20"
                         style={
                           isImage
-                            ? { backgroundColor: "#FFFDF8" }
+                            ? { backgroundColor: "var(--theme-surface)" }
                             : { backgroundColor: (f as PhotoboothFrame).bg, border: `3px solid ${(f as PhotoboothFrame).border}` }
                         }
                       >
@@ -999,7 +1059,7 @@ export function PhotoboothStudio({ caption }: { caption: PhotoboothCaption }) {
                           </span>
                         )}
                         {active && (
-                          <span className="absolute top-1.5 right-1.5 grid size-5 place-items-center rounded-full bg-(--theme-primary) text-white">
+                          <span className="absolute top-1.5 right-1.5 grid size-5 place-items-center rounded-full bg-(--theme-text) text-white">
                             <Check size={12} />
                           </span>
                         )}
@@ -1023,9 +1083,9 @@ export function PhotoboothStudio({ caption }: { caption: PhotoboothCaption }) {
                     key={f.id}
                     type="button"
                     onClick={() => setFontId(f.id)}
-                    className={`rounded-2xl border-2 bg-white px-2 py-3 text-center cursor-pointer ${fontId === f.id ? "border-(--theme-primary)" : "border-(--pt-sage)/40"}`}
+                    className={`rounded-2xl border-2 bg-white px-2 py-3 text-center cursor-pointer ${fontId === f.id ? "border-(--theme-text)" : "border-(--pt-sage)/40"}`}
                   >
-                    <span className="block text-[26px] leading-none text-(--theme-text)" style={{ fontFamily: f.family }}>
+                    <span className="flex h-9 items-center justify-center text-(--theme-text)" style={{ fontFamily: f.family, fontSize: f.samplePx, lineHeight: 1 }}>
                       Aa
                     </span>
                     <span className="mt-1.5 block font-montserrat text-[13px] text-(--theme-muted)">{f.name}</span>
@@ -1044,11 +1104,11 @@ export function PhotoboothStudio({ caption }: { caption: PhotoboothCaption }) {
                     key={s.id}
                     type="button"
                     onClick={() => setShapeId(s.id)}
-                    className={`rounded-2xl border-2 bg-white px-2 py-3 text-center cursor-pointer ${shapeId === s.id ? "border-(--theme-primary)" : "border-(--pt-sage)/40"}`}
+                    className={`rounded-2xl border-2 bg-white px-2 py-3 text-center cursor-pointer ${shapeId === s.id ? "border-(--theme-text)" : "border-(--pt-sage)/40"}`}
                   >
                     <span className={`mx-auto block h-14 w-11 ${s.id === "lembut" ? "rounded-xl" : ""} ${s.id === "polaroid" ? "border-[6px] border-b-[16px] border-white shadow" : ""} bg-(--theme-surface)`} />
                     <span className="mt-2 block font-montserrat font-semibold text-[12px] uppercase tracking-[0.08em] text-(--theme-text)">{s.name}</span>
-                    <span className="mt-0.5 block font-montserrat text-[13px] leading-tight text-(--theme-muted)">{s.desc}</span>
+                    <span className="mt-0.5 block min-h-8 font-montserrat text-[13px] leading-tight text-(--theme-muted) line-clamp-2">{s.desc}</span>
                   </button>
                 ))}
               </div>
@@ -1058,13 +1118,13 @@ export function PhotoboothStudio({ caption }: { caption: PhotoboothCaption }) {
           {tab === "filter" && (
             <div className="mt-5">
               <p className="text-center font-montserrat text-[15px] text-(--theme-muted)">{T.filterHint}</p>
-              <div className="mt-4 flex flex-wrap justify-center gap-2">
+              <div className="mt-4 grid grid-cols-3 gap-2">
                 {FILTERS.map((f) => (
                   <button
                     key={f.id}
                     type="button"
                     onClick={() => setFilterId(f.id)}
-                    className={`rounded-full px-4 py-2 font-montserrat text-[15px] font-medium cursor-pointer ${filterId === f.id ? "bg-(--theme-text) text-white" : "bg-(--theme-surface) text-(--theme-text)"}`}
+                    className={`w-full rounded-full px-2 py-2 font-montserrat text-[15px] font-medium cursor-pointer ${filterId === f.id ? "bg-(--theme-text) text-white" : "bg-(--theme-surface) text-(--theme-text)"}`}
                   >
                     {f.name}
                   </button>
@@ -1072,7 +1132,7 @@ export function PhotoboothStudio({ caption }: { caption: PhotoboothCaption }) {
                 <button
                   type="button"
                   onClick={() => setFilterId(DEFAULT_FILTER_ID)}
-                  className="rounded-full bg-(--theme-surface) px-4 py-2 font-montserrat text-[15px] text-(--theme-text) cursor-pointer"
+                  className="w-full rounded-full bg-(--theme-surface) px-2 py-2 font-montserrat text-[15px] text-(--theme-text) cursor-pointer"
                 >
                   Reset
                 </button>
@@ -1081,16 +1141,16 @@ export function PhotoboothStudio({ caption }: { caption: PhotoboothCaption }) {
           )}
 
           <div className="mt-8 flex flex-col items-center gap-3">
-            <PtButton friendly onClick={() => void saveStrip()}>
+            <PtButton friendly onClick={() => void saveStrip()} className="w-full">
               <Download size={14} />
               {T.save}
             </PtButton>
-            <div className="flex gap-3">
-              <PtButton friendly outline onClick={() => void shareStrip()}>
+            <div className="flex w-full gap-3">
+              <PtButton friendly outline onClick={() => void shareStrip()} className="flex-1">
                 <Share2 size={14} />
                 {T.share}
               </PtButton>
-              <PtButton friendly outline onClick={restart}>
+              <PtButton friendly outline onClick={restart} className="flex-1">
                 <RotateCcw size={14} />
                 {T.restart}
               </PtButton>
