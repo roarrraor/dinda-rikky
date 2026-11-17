@@ -151,6 +151,16 @@ function hexA(hex: string, alpha: number): string {
   return `rgba(${r},${g},${b},${alpha})`;
 }
 
+/** Tinta footer yang kontras dengan warna latar (terang → tinta gelap, gelap → tinta terang). */
+function contrastInk(hex: string): string {
+  const h = hex.replace("#", "");
+  const r = parseInt(h.slice(0, 2), 16) / 255;
+  const g = parseInt(h.slice(2, 4), 16) / 255;
+  const b = parseInt(h.slice(4, 6), 16) / 255;
+  const lum = 0.2126 * r + 0.7152 * g + 0.0722 * b;
+  return lum > 0.6 ? "#3F4A2C" : "#FFFDF8";
+}
+
 /** Pasang font dengan ukuran yang muat di maxWidth — huruf dikecilkan,
  *  bukan digencet horizontal (fillText maxWidth menggencet huruf). */
 function fitFont(
@@ -399,13 +409,21 @@ export async function renderStrip(canvas: HTMLCanvasElement, opts: StripOptions)
     const nameY = zoneCenter - 27;
     const dateY = nameY + NAME_DATE_GAP;
     const dividerY = nameY - DIVIDER_GAP;
-    ctx.strokeStyle = frame.accent;
+    // Warna teks footer harus kontras dengan latarnya. Frame gambar latar
+    // (background) menutup warna frame warna di bawahnya, jadi tintanya
+    // dihitung dari warna footerFade-nya — bukan dari frame warna terakhir
+    // yang dipilih (itu yang bikin teks terang "nempel" pas pindah dari
+    // frame gelap ke Botanical). Frame overlay tetap pakai tinta frame warna.
+    const isBgFrame = imageFrame?.layer === "background";
+    const footerInk = isBgFrame ? contrastInk(imageFrame.footerFade ?? "#F3EADB") : frame.ink;
+    const footerAccent = isBgFrame ? footerInk : frame.accent;
+    ctx.strokeStyle = footerAccent;
     ctx.lineWidth = 2;
     ctx.beginPath();
     ctx.moveTo(g.w / 2 - 90, dividerY);
     ctx.lineTo(g.w / 2 + 90, dividerY);
     ctx.stroke();
-    ctx.fillStyle = frame.ink;
+    ctx.fillStyle = footerInk;
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
     const scriptLike = font.id === "dancing" || font.id === "caveat";
@@ -1264,7 +1282,7 @@ export function PhotoboothStudio({ caption }: { caption: PhotoboothCaption }) {
                           setFrameId(f.id);
                         }
                       }}
-                      className="w-24 shrink-0 cursor-pointer text-center"
+                      className="w-24 shrink-0 cursor-pointer"
                     >
                       <span
                         className={`relative block h-20 overflow-hidden rounded-2xl border-2 ${active ? "border-(--theme-text)" : "border-transparent"}`}
@@ -1286,12 +1304,12 @@ export function PhotoboothStudio({ caption }: { caption: PhotoboothCaption }) {
                             }}
                           />
                         ) : (
-                          <span className="absolute inset-x-3 bottom-2 block text-center font-montserrat text-[13px] leading-tight" style={{ color: (f as PhotoboothFrame).ink }}>
+                          <span className="absolute inset-0 flex items-center justify-center px-2 text-center font-montserrat text-[13px] font-medium leading-tight" style={{ color: (f as PhotoboothFrame).ink }}>
                             {f.name}
                           </span>
                         )}
                         {isImage && (
-                          <span className="absolute inset-x-3 bottom-2 block text-center font-montserrat text-[13px] leading-tight text-(--theme-text)">
+                          <span className="absolute inset-0 flex items-center justify-center px-2 text-center font-montserrat text-[13px] font-medium leading-tight text-(--theme-text)">
                             {f.name}
                           </span>
                         )}
@@ -1300,9 +1318,6 @@ export function PhotoboothStudio({ caption }: { caption: PhotoboothCaption }) {
                             <Check size={12} />
                           </span>
                         )}
-                      </span>
-                      <span className="mt-1.5 block font-montserrat text-[13px] font-medium leading-tight text-(--theme-text)">
-                        {f.name}
                       </span>
                     </button>
                   );
@@ -1355,7 +1370,7 @@ export function PhotoboothStudio({ caption }: { caption: PhotoboothCaption }) {
           {tab === "filter" && (
             <div className="mt-5">
               <p className="text-center font-montserrat text-[15px] text-(--theme-muted)">{T.filterHint}</p>
-              <div className="pb-scroll -mx-5 mt-4 flex gap-3 overflow-x-auto px-5 pb-2">
+              <div className="pb-scroll -mx-5 mt-4 flex gap-3 overflow-x-auto px-5 pt-2 pb-2">
                 {FILTERS.map((f) => {
                   const active = filterId === f.id;
                   return (
