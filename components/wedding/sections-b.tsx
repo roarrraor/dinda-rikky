@@ -2,7 +2,6 @@
 
 import Image from "next/image";
 import { motion } from "motion/react";
-import { useId } from "react";
 import { CalendarPlus, Cake, Coffee, DoorOpen, Heart, Instagram, MapPin, Utensils, type LucideIcon } from "lucide-react";
 import { ASSETS, COPY, ID } from "@/lib/wedding/data";
 import { displayName, formatDate } from "@/lib/wedding/format";
@@ -40,7 +39,6 @@ function scallopOval(lobes: number, rx: number, ry: number, depth: number) {
   }
   return `M${pts.join("L")}Z`;
 }
-const PHOTO_FRAME_PATH = scallopOval(26, 49, 54, 3.2);
 const MONOGRAM_PATH = scallopOval(22, 48, 53, 3.5);
 
 /** Ornamen kecil: + ◆ + */
@@ -58,42 +56,24 @@ function Chevrons({ className = "", down = false }: { className?: string; down?:
 
 /* ---------- Mempelai ---------- */
 
+/* Frame oval mempelai (gambar utuh: pita + kupu-kupu, jangan dihapus).
+   Foto dipasang sebagai elips di dalam bukaan oval; frame menutupinya. */
 function PhotoFrame({ src, alt }: { src: string; alt: string }) {
-  const id = useId().replace(/:/g, "");
   return (
     <div className="relative">
-      <div className="relative" style={{ aspectRatio: "100 / 110" }}>
-        <svg
-          aria-hidden
-          viewBox="0 0 100 110"
-          className="absolute inset-0 size-full"
-        >
-          <defs>
-            <pattern id={`${id}-g`} width="10" height="10" patternUnits="userSpaceOnUse">
-              <rect width="10" height="10" fill="white" />
-              <rect width="5" height="10" style={{ fill: "var(--pt-pink)" }} opacity="0.75" />
-              <rect width="10" height="5" style={{ fill: "var(--pt-pink)" }} opacity="0.75" />
-            </pattern>
-          </defs>
-          <path d={PHOTO_FRAME_PATH} transform="translate(0 2.5)" fill="black" opacity="0.12" />
-          <path d={PHOTO_FRAME_PATH} fill={`url(#${id}-g)`} stroke="var(--theme-accent)" strokeWidth="0.6" />
-          <ellipse cx="50" cy="55" rx="38.5" ry="43.5" fill="white" />
-        </svg>
+      <div className="relative" style={{ aspectRatio: "1096 / 1409" }}>
         <div
           className="absolute overflow-hidden rounded-[50%]"
-          style={{ inset: "15% 13.5% 15% 13.5%" }}
+          style={{ inset: "12.8% 16% 17.9% 15.8%" }}
         >
           <Image src={src} alt={alt} fill sizes="300px" className="object-cover" />
         </div>
-      </div>
-      <div aria-hidden className="absolute -top-[7%] left-1/2 w-[22%] -translate-x-1/2">
         <Image
-          src={ASSETS.bow.src}
+          src={ASSETS.ovalFrame.src}
           alt=""
-          width={ASSETS.bow.width}
-          height={ASSETS.bow.height}
-          sizes="90px"
-          className="h-auto w-full"
+          fill
+          sizes="400px"
+          className="object-fill"
         />
       </div>
     </div>
@@ -127,7 +107,7 @@ function PersonCard({ p, showPhoto, mirror }: { p: Person; showPhoto: boolean; m
       <Reveal className={`relative ${showPhoto ? "-mt-[34cqw]" : ""}`}>
         <div
           className={`relative rounded-t-full bg-(--pt-pink)/70 px-[12%] pb-[26cqw] text-center ${
-            showPhoto ? "pt-[38cqw]" : "pt-[22cqw]"
+            showPhoto ? "pt-[44cqw]" : "pt-[22cqw]"
           }`}
         >
           <Stagger delay={0.2}>

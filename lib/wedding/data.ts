@@ -20,6 +20,7 @@ export const ASSETS = {
   rosebud: asset("rosebud.webp", 360, 205),
   venue: asset("venue.webp", 900, 580),
   bow: asset("bow.webp", 289, 359),
+  ovalFrame: asset("oval-frame.webp", 1096, 1409),
   cosmos: asset("cosmos.webp", 196, 360),
   teacup: asset("teacup.webp", 365, 323),
   grass: asset("grass.webp", 1000, 982),
