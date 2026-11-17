@@ -358,7 +358,7 @@ export async function renderStrip(canvas: HTMLCanvasElement, opts: StripOptions)
           ctx.shadowColor = "rgba(0,0,0,0.28)";
           ctx.shadowBlur = 14;
           ctx.shadowOffsetY = 5;
-          if (shape === "lembut") roundRectPath(ctx, slot.x, slot.y, slot.w, slot.h, 26);
+          if (shape === "lembut") roundRectPath(ctx, slot.x, slot.y, slot.w, slot.h, 12);
           else {
             ctx.beginPath();
             ctx.rect(slot.x, slot.y, slot.w, slot.h);
@@ -368,7 +368,7 @@ export async function renderStrip(canvas: HTMLCanvasElement, opts: StripOptions)
           ctx.restore();
         }
         ctx.save();
-        if (shape === "lembut") roundRectPath(ctx, slot.x, slot.y, slot.w, slot.h, 26);
+        if (shape === "lembut") roundRectPath(ctx, slot.x, slot.y, slot.w, slot.h, 12);
         else ctx.rect(slot.x, slot.y, slot.w, slot.h);
         ctx.clip();
         if (filter.ops.length > 0 && !canvasFilterSupported()) {
@@ -393,13 +393,13 @@ export async function renderStrip(canvas: HTMLCanvasElement, opts: StripOptions)
         ctx.restore();
         if (shape !== "polaroid") {
           ctx.save();
-          if (shape === "lembut") roundRectPath(ctx, slot.x, slot.y, slot.w, slot.h, 26);
+          if (shape === "lembut") roundRectPath(ctx, slot.x, slot.y, slot.w, slot.h, 12);
           else {
             ctx.beginPath();
             ctx.rect(slot.x, slot.y, slot.w, slot.h);
           }
           ctx.strokeStyle = "rgba(255,255,255,0.95)";
-          ctx.lineWidth = 3;
+          ctx.lineWidth = 2;
           ctx.stroke();
           ctx.restore();
         }
@@ -1256,7 +1256,7 @@ export function PhotoboothStudio({ caption }: { caption: PhotoboothCaption }) {
           <p className={`mx-auto mt-2 max-w-80 text-center ${PB_BODY}`}>{T.resultDesc}</p>
 
           <div className="mx-auto mt-6 max-w-[340px] rounded-3xl bg-white p-3 shadow-[0_16px_30px_-12px_rgba(63,74,44,0.35)]">
-            <canvas ref={previewRef} className="mx-auto block max-h-[62vh] w-auto max-w-full rounded-2xl" />
+            <canvas ref={previewRef} className="mx-auto block max-h-[62vh] w-auto max-w-full" />
           </div>
           <p className="mt-3 flex items-center justify-center gap-1.5 text-center font-montserrat text-[14px] text-(--theme-muted)">
             <Lock size={13} />
