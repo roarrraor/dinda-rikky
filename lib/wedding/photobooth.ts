@@ -214,22 +214,27 @@ export const SHAPES: { id: ShapeId; name: string; desc: string }[] = [
   { id: "polaroid", name: "Polaroid", desc: "Bingkai putih tebal ala polaroid." },
 ];
 
+export type FilterOp = ["grayscale" | "sepia" | "saturate" | "contrast" | "brightness" | "hue-rotate", number];
+
 export interface PhotoboothFilter {
   id: string;
   name: string;
   /** nilai CSS filter — dipakai di preview video & saat menggambar ke kanvas */
   css: string;
+  /** langkah yang sama dalam bentuk data — dipakai fallback piksel di
+   *  browser yang tidak mendukung ctx.filter (mis. Safari lama) */
+  ops: FilterOp[];
 }
 
 export const FILTERS: PhotoboothFilter[] = [
-  { id: "asli", name: "Asli", css: "none" },
-  { id: "klasik", name: "Klasik", css: "saturate(1.15) contrast(1.06) sepia(0.12)" },
-  { id: "mono", name: "Mono", css: "grayscale(1)" },
-  { id: "noir", name: "Noir", css: "grayscale(1) contrast(1.35) brightness(0.95)" },
-  { id: "sepia", name: "Sepia", css: "sepia(0.85)" },
-  { id: "hangat", name: "Hangat", css: "sepia(0.4) saturate(1.5) contrast(1.05)" },
-  { id: "sejuk", name: "Sejuk", css: "saturate(1.15) hue-rotate(-18deg) brightness(1.06)" },
-  { id: "pudar", name: "Pudar", css: "contrast(0.82) brightness(1.12) saturate(0.65)" },
+  { id: "asli", name: "Asli", css: "none", ops: [] },
+  { id: "klasik", name: "Klasik", css: "saturate(1.15) contrast(1.06) sepia(0.12)", ops: [["saturate", 1.15], ["contrast", 1.06], ["sepia", 0.12]] },
+  { id: "mono", name: "Mono", css: "grayscale(1)", ops: [["grayscale", 1]] },
+  { id: "noir", name: "Noir", css: "grayscale(1) contrast(1.35) brightness(0.95)", ops: [["grayscale", 1], ["contrast", 1.35], ["brightness", 0.95]] },
+  { id: "sepia", name: "Sepia", css: "sepia(0.85)", ops: [["sepia", 0.85]] },
+  { id: "hangat", name: "Hangat", css: "sepia(0.4) saturate(1.5) contrast(1.05)", ops: [["sepia", 0.4], ["saturate", 1.5], ["contrast", 1.05]] },
+  { id: "sejuk", name: "Sejuk", css: "saturate(1.15) hue-rotate(-18deg) brightness(1.06)", ops: [["saturate", 1.15], ["hue-rotate", -18], ["brightness", 1.06]] },
+  { id: "pudar", name: "Pudar", css: "contrast(0.82) brightness(1.12) saturate(0.65)", ops: [["contrast", 0.82], ["brightness", 1.12], ["saturate", 0.65]] },
 ];
 
 export const DEFAULT_FILTER_ID = "klasik";
@@ -279,6 +284,7 @@ export const PHOTOBOOTH_COPY = {
   saved: "Strip tersimpan di perangkatmu.",
   shareFallback: "Bagikan tidak didukung di browser ini — strip sudah diunduh saja.",
   privacy: "Foto diproses di perangkatmu dan tidak dikirim ke server.",
+  privacyShort: "Foto diproses di perangkatmu",
   auto: "Otomatis",
   autoOn: "Mode otomatis aktif — semua pose diambil berurutan.",
   grid: "Garis bantu",

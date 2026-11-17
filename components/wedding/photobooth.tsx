@@ -8,13 +8,19 @@ import {
   Camera,
   Check,
   ChevronLeft,
+  Columns2,
   Download,
   ImagePlus,
   LayoutGrid,
+  Lightbulb,
+  Lock,
+  RectangleVertical,
   RotateCcw,
+  Rows3,
   Share2,
   SwitchCamera,
   Trash2,
+  UserRound,
   Wand2,
   X,
   Zap,
@@ -46,6 +52,14 @@ import {
   type ShapeId,
 } from "@/lib/wedding/photobooth";
 import { PtButton } from "./primitives";
+import { DISCOVERED_FRAMES } from "@/lib/wedding/photobooth-assets.generated";
+
+/** Semua frame gambar: hardcode + yang ketemu otomatis dari folder
+ *  (Roar cukup upload file baru, lihat scripts/gen-photobooth-assets.mjs). */
+const ALL_IMAGE_FRAMES: ImageFrame[] = [
+  ...IMAGE_FRAMES,
+  ...DISCOVERED_FRAMES.filter((d) => !IMAGE_FRAMES.some((h) => h.id === d.id)),
+];
 
 export interface PhotoboothCaption {
   names: string;
@@ -157,6 +171,104 @@ function fitFont(
   }
 }
 
+/** Apakah browser ini mendukung ctx.filter (Safari lama tidak)? Dicek sekali. */
+let canvasFilterOK: boolean | null = null;
+function canvasFilterSupported(): boolean {
+  if (canvasFilterOK !== null) return canvasFilterOK;
+  try {
+    const c = document.createElement("canvas");
+    const x = c.getContext("2d");
+    if (!x) {
+      canvasFilterOK = false;
+      return false;
+    }
+    const f = x as CanvasRenderingContext2D & { filter: string };
+    f.filter = "grayscale(1)";
+    canvasFilterOK = f.filter === "grayscale(1)";
+  } catch {
+    canvasFilterOK = false;
+  }
+  return canvasFilterOK;
+}
+
+/** Putar hue satu piksel (RGB 0-255) sebanyak deg derajat. */
+function hueRotate(r: number, g: number, b: number, deg: number): [number, number, number] {
+  const rn = r / 255;
+  const gn = g / 255;
+  const bn = b / 255;
+  const max = Math.max(rn, gn, bn);
+  const min = Math.min(rn, gn, bn);
+  const l = (max + min) / 2;
+  if (max === min) {
+    const v = Math.round(l * 255);
+    return [v, v, v];
+  }
+  const d = max - min;
+  const s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+  let h = 0;
+  if (max === rn) h = (gn - bn) / d + (gn < bn ? 6 : 0);
+  else if (max === gn) h = (bn - rn) / d + 2;
+  else h = (rn - gn) / d + 4;
+  h = (h * 60 + deg) % 360;
+  if (h < 0) h += 360;
+  const q = l < 0.5 ? l * (1 + s) : l + s - l * s;
+  const p = 2 * l - q;
+  const hk = h / 360;
+  const conv = (t: number) => {
+    let tt = t;
+    if (tt < 0) tt += 1;
+    if (tt > 1) tt -= 1;
+    if (tt < 1 / 6) return p + (q - p) * 6 * tt;
+    if (tt < 1 / 2) return q;
+    if (tt < 2 / 3) return p + (q - p) * (2 / 3 - tt) * 6;
+    return p;
+  };
+  return [Math.round(conv(hk + 1 / 3) * 255), Math.round(conv(hk) * 255), Math.round(conv(hk - 1 / 3) * 255)];
+}
+
+/** Terapkan langkah filter ke data piksel (fallback kalau ctx.filter tidak ada).
+ *  Uint8ClampedArray otomatis menjepit nilai ke 0-255 saat ditulis. */
+function applyFilterOps(data: Uint8ClampedArray, ops: import("@/lib/wedding/photobooth").FilterOp[]): void {
+  for (let i = 0; i < data.length; i += 4) {
+    let r = data[i];
+    let g = data[i + 1];
+    let b = data[i + 2];
+    for (const [kind, v] of ops) {
+      if (kind === "grayscale") {
+        const grey = 0.299 * r + 0.587 * g + 0.114 * b;
+        r += (grey - r) * v;
+        g += (grey - g) * v;
+        b += (grey - b) * v;
+      } else if (kind === "sepia") {
+        const sr = 0.393 * r + 0.769 * g + 0.189 * b;
+        const sg = 0.349 * r + 0.686 * g + 0.168 * b;
+        const sb = 0.272 * r + 0.534 * g + 0.131 * b;
+        r += (sr - r) * v;
+        g += (sg - g) * v;
+        b += (sb - b) * v;
+      } else if (kind === "saturate") {
+        const grey = 0.299 * r + 0.587 * g + 0.114 * b;
+        r = grey + (r - grey) * v;
+        g = grey + (g - grey) * v;
+        b = grey + (b - grey) * v;
+      } else if (kind === "contrast") {
+        r = (r - 128) * v + 128;
+        g = (g - 128) * v + 128;
+        b = (b - 128) * v + 128;
+      } else if (kind === "brightness") {
+        r *= v;
+        g *= v;
+        b *= v;
+      } else if (kind === "hue-rotate") {
+        [r, g, b] = hueRotate(r, g, b, v);
+      }
+    }
+    data[i] = r;
+    data[i + 1] = g;
+    data[i + 2] = b;
+  }
+}
+
 export async function renderStrip(canvas: HTMLCanvasElement, opts: StripOptions): Promise<void> {
   const { layout, shots, frame, imageFrame, font, shape, filter, caption } = opts;
   const g = layoutGeometry(layout);
@@ -217,8 +329,25 @@ export async function renderStrip(canvas: HTMLCanvasElement, opts: StripOptions)
         if (shape === "lembut") roundRectPath(ctx, slot.x, slot.y, slot.w, slot.h, 26);
         else ctx.rect(slot.x, slot.y, slot.w, slot.h);
         ctx.clip();
-        ctx.filter = filter.css === "none" ? "none" : filter.css;
-        ctx.drawImage(img, c.sx, c.sy, c.sw, c.sh, slot.x, slot.y, slot.w, slot.h);
+        if (filter.ops.length > 0 && !canvasFilterSupported()) {
+          // Safari lama: ctx.filter diabaikan diam-diam — filter piksel manual.
+          const tmp = document.createElement("canvas");
+          tmp.width = slot.w;
+          tmp.height = slot.h;
+          const tctx = tmp.getContext("2d");
+          if (tctx) {
+            tctx.drawImage(img, c.sx, c.sy, c.sw, c.sh, 0, 0, slot.w, slot.h);
+            const imageData = tctx.getImageData(0, 0, slot.w, slot.h);
+            applyFilterOps(imageData.data, filter.ops);
+            tctx.putImageData(imageData, 0, 0);
+            ctx.drawImage(tmp, slot.x, slot.y);
+          } else {
+            ctx.drawImage(img, c.sx, c.sy, c.sw, c.sh, slot.x, slot.y, slot.w, slot.h);
+          }
+        } else {
+          ctx.filter = filter.css === "none" ? "none" : filter.css;
+          ctx.drawImage(img, c.sx, c.sy, c.sw, c.sh, slot.x, slot.y, slot.w, slot.h);
+        }
         ctx.restore();
       } catch {
         ctx.fillStyle = frame.accent;
@@ -340,20 +469,22 @@ function removeMyStrip(id: string) {
 type Step = "layout" | "access" | "camera" | "review" | "result";
 type Tab = "frame" | "font" | "shape" | "filter";
 
-const STEP_NAMES: Record<Step, string> = {
-  layout: T.step1,
-  access: T.step2,
-  camera: T.step2,
-  review: T.step2,
-  result: T.step3,
-};
-
 const STEP_NUM: Record<Step, number> = { layout: 1, access: 2, camera: 2, review: 2, result: 3 };
 
-/** Tipografi UI studio: Montserrat biasa (ramah, umum) — bukan script/serif undangan. Warna brand tetap sama. */
+/** Tipografi UI studio (desain baru Roar, 2026-11-18): judul serif Playfair
+ *  tebal warna hijau tua, isi Montserrat biasa. Warna brand tetap sama. */
 const PB_BODY = "font-montserrat text-[15px] leading-relaxed text-balance text-(--theme-muted)";
-const PB_KICKER = "font-montserrat text-[12px] font-semibold uppercase tracking-[0.08em] text-(--theme-accent)";
-const PB_TITLE = "font-montserrat text-[28px] font-semibold leading-tight text-(--theme-muted)";
+const PB_KICKER = "font-montserrat text-[12px] font-semibold uppercase tracking-[0.14em] text-(--theme-primary)";
+const PB_TITLE = "font-playfair text-[32px] font-bold leading-tight text-(--theme-text)";
+/** Latar krem desain baru (bukan putih). */
+const PB_CREAM = "bg-[#FAF6EE]";
+/** Ikon tata letak per id (dipakai kartu langkah 1). */
+const LAYOUT_ICONS: Record<PhotoboothLayout["id"], typeof Rows3> = {
+  strip: Rows3,
+  grid: LayoutGrid,
+  portrait: RectangleVertical,
+  duet: Columns2,
+};
 
 export function PhotoboothStudio({ caption }: { caption: PhotoboothCaption }) {
   const [step, setStep] = useState<Step>("layout");
@@ -383,7 +514,7 @@ export function PhotoboothStudio({ caption }: { caption: PhotoboothCaption }) {
   const fileRef = useRef<HTMLInputElement | null>(null);
 
   const frame = FRAMES.find((f) => f.id === frameId) ?? FRAMES[0];
-  const imageFrame = imageFrameId ? (IMAGE_FRAMES.find((f) => f.id === imageFrameId) ?? null) : null;
+  const imageFrame = imageFrameId ? (ALL_IMAGE_FRAMES.find((f) => f.id === imageFrameId) ?? null) : null;
   const font = FONTS.find((f) => f.id === fontId) ?? FONTS[0];
   const filter = FILTERS.find((f) => f.id === filterId) ?? FILTERS[0];
   const shotsTaken = shots.filter(Boolean).length;
@@ -627,23 +758,55 @@ export function PhotoboothStudio({ caption }: { caption: PhotoboothCaption }) {
   // Frame gambar hanya tampil untuk layout yang didukung ukurannya.
   const visibleFrames = [
     ...FRAMES,
-    ...IMAGE_FRAMES.filter((f) => f.layouts.includes(layout.id)),
+    ...ALL_IMAGE_FRAMES.filter((f) => f.layouts.includes(layout.id)),
   ].filter((f) => concept === "Semua" || f.concept === concept);
 
+  // Tombol kembali di bar atas (desain baru): mundur satu langkah.
+  const goBack = () => {
+    if (step === "layout") return;
+    if (step === "access") setStep("layout");
+    else if (step === "camera") {
+      stopCamera();
+      setStep(shotsTaken > 0 ? "review" : "access");
+    } else if (step === "review") {
+      setStep("camera");
+      if (camState !== "live") void startCamera(facing);
+    } else setStep("review");
+  };
+
   return (
-    <div className="mx-auto flex min-h-dvh w-full max-w-[480px] flex-col bg-white shadow-[0_0_60px_rgba(0,0,0,0.10)]">
-      {/* header langkah */}
-      <header className="flex items-center justify-between gap-2 border-b border-(--pt-sage)/40 px-4 py-3">
-        <Link href="/" className="flex items-center gap-1 font-montserrat font-semibold text-[12px] uppercase tracking-[0.08em] text-(--theme-primary)">
-          <ChevronLeft size={14} />
-          {step === "layout" ? "Undangan" : "Kembali"}
-        </Link>
-        <p className="font-montserrat text-[14px] font-medium text-(--theme-muted)">
-          Langkah {STEP_NUM[step]} dari 3 · {STEP_NAMES[step]}
-        </p>
-        <p className="hidden font-montserrat font-semibold text-[11px] tracking-[0.08em] text-(--theme-text) min-[380px]:block">
-          {caption.names}
-        </p>
+    <div className={`mx-auto flex min-h-dvh w-full max-w-[480px] flex-col ${PB_CREAM} shadow-[0_0_60px_rgba(0,0,0,0.10)]`}>
+      {/* bar atas desain baru: tombol kembali bulat + progres tersegmen + N/3 */}
+      <header className="flex items-center gap-3 px-5 pt-5 pb-2">
+        {step === "layout" ? (
+          <Link
+            href="/"
+            aria-label="Kembali ke undangan"
+            className="grid size-10 shrink-0 place-items-center rounded-full bg-white text-(--theme-text) shadow-[0_2px_10px_rgba(63,74,44,0.12)]"
+          >
+            <ChevronLeft size={20} />
+          </Link>
+        ) : (
+          <button
+            type="button"
+            onClick={goBack}
+            aria-label="Kembali"
+            className="grid size-10 shrink-0 cursor-pointer place-items-center rounded-full bg-white text-(--theme-text) shadow-[0_2px_10px_rgba(63,74,44,0.12)]"
+          >
+            <ChevronLeft size={20} />
+          </button>
+        )}
+        <div className="flex flex-1 gap-1.5" aria-hidden>
+          {[1, 2, 3].map((n) => (
+            <span
+              key={n}
+              className={`h-1.5 flex-1 rounded-full ${n <= STEP_NUM[step] ? "bg-(--theme-primary)" : "bg-[#E4DFD3]"}`}
+            />
+          ))}
+        </div>
+        <span className="font-montserrat text-[14px] font-semibold text-(--theme-text)">
+          {STEP_NUM[step]}/3
+        </span>
       </header>
 
       {notice && (
@@ -658,59 +821,74 @@ export function PhotoboothStudio({ caption }: { caption: PhotoboothCaption }) {
 
       {/* ---------- LANGKAH 1: tata letak ---------- */}
       {step === "layout" && (
-        <main className="flex-1 px-5 pt-8 pb-10 text-center">
-          <p className={PB_KICKER}>Photobooth</p>
+        <main className="flex-1 px-5 pt-4 pb-10 text-center">
+          <p className={PB_KICKER}>Photobooth · Langkah 1</p>
           <h1 className={`mt-1 ${PB_TITLE}`}>Abadikan momen ini</h1>
           <p className={`mx-auto mt-2 max-w-80 ${PB_BODY}`}>{T.step1Desc}</p>
 
           <div className="mt-8 grid grid-cols-2 gap-3 text-left">
-            {LAYOUTS.map((l) => (
-              <button
-                key={l.id}
-                type="button"
-                onClick={() => pickLayout(l)}
-                className="relative rounded-3xl border border-(--pt-sage)/60 bg-(--theme-surface) p-4 text-left transition-transform active:scale-[0.98] cursor-pointer"
-              >
-                {l.badge && (
-                  <span className="absolute -top-2.5 right-3 rounded-full bg-[#E8A33D] px-2.5 py-0.5 font-montserrat font-semibold text-[10px] uppercase tracking-[0.08em] text-white">
-                    {l.badge}
+            {LAYOUTS.map((l) => {
+              const Icon = LAYOUT_ICONS[l.id];
+              return (
+                <button
+                  key={l.id}
+                  type="button"
+                  onClick={() => pickLayout(l)}
+                  className="relative rounded-3xl bg-white p-5 text-left shadow-[0_6px_20px_-8px_rgba(63,74,44,0.25)] transition-transform active:scale-[0.98] cursor-pointer"
+                >
+                  {l.badge && (
+                    <span className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-[#E8A33D] px-2.5 py-0.5 font-montserrat font-semibold text-[10px] uppercase tracking-[0.08em] whitespace-nowrap text-white">
+                      Populer
+                    </span>
+                  )}
+                  <span className="grid size-14 place-items-center rounded-2xl bg-(--theme-surface) text-(--theme-primary)">
+                    <Icon size={28} />
                   </span>
-                )}
-                <span className="font-montserrat text-[16px] font-semibold text-(--theme-text)">{l.name}</span>
-                <span className="mt-1 block font-montserrat text-[14px] leading-relaxed text-(--theme-muted)">{l.desc}</span>
-                <span className="mt-3 flex items-center gap-2 font-montserrat font-semibold text-[11px] uppercase tracking-[0.08em] text-(--theme-primary)">
-                  <Aperture size={13} />
-                  {l.shots} foto · {l.orientation}
-                </span>
-              </button>
-            ))}
+                  <span className="mt-3 block font-montserrat text-[17px] font-semibold text-(--theme-text)">{l.name}</span>
+                  <span className="mt-1 block font-montserrat text-[14px] leading-relaxed text-(--theme-muted)">{l.desc}</span>
+                  <span className="mt-3 block font-montserrat font-semibold text-[11px] uppercase tracking-[0.08em] text-(--theme-primary)">
+                    {l.shots} foto · {l.orientation}
+                  </span>
+                </button>
+              );
+            })}
           </div>
 
-          <p className={`mx-auto mt-8 max-w-80 ${PB_BODY}`}>{T.tip}</p>
-          <p className="mt-6 font-montserrat text-[14px] text-(--theme-muted)">{T.privacy}</p>
+          <div className="mx-auto mt-8 max-w-80 space-y-3 text-left">
+            <p className="flex items-start gap-2.5 font-montserrat text-[14px] leading-relaxed text-(--theme-muted)">
+              <Lightbulb size={16} className="mt-0.5 shrink-0 text-[#E8A33D]" />
+              {T.tip}
+            </p>
+            <p className="flex items-start gap-2.5 font-montserrat text-[14px] leading-relaxed text-(--theme-muted)">
+              <Lock size={15} className="mt-0.5 shrink-0 text-(--theme-muted)" />
+              {T.privacy}
+            </p>
+          </div>
         </main>
       )}
 
       {/* ---------- LANGKAH 2a: akses kamera ---------- */}
       {step === "access" && (
         <main className="flex flex-1 flex-col items-center justify-center px-6 py-10 text-center">
-          <span className="grid size-16 place-items-center rounded-full bg-(--theme-surface) text-(--theme-primary)">
-            <Camera size={26} />
+          <span className="grid size-44 place-items-center rounded-full bg-(--theme-surface)">
+            <span className="grid size-28 place-items-center rounded-full bg-white text-(--theme-primary) shadow-[0_4px_16px_rgba(63,74,44,0.12)]">
+              <Camera size={40} />
+            </span>
           </span>
-          <h1 className={`mt-4 ${PB_TITLE}`}>{T.cameraTitle}</h1>
+          <h1 className={`mt-8 ${PB_TITLE}`}>{T.cameraTitle}</h1>
           <p className={`mt-2 max-w-72 ${PB_BODY}`}>{T.cameraDesc}</p>
-          <div className="mt-8 flex w-full max-w-72 flex-col gap-3">
-            <PtButton friendly
+          <div className="mt-8 flex w-full max-w-80 flex-col gap-3">
+            <PtButton friendly className="w-full"
               onClick={() => {
                 setStep("camera");
                 void startCamera(facing);
               }}
             >
-              <Camera size={14} />
+              <Camera size={16} />
               {T.toCamera}
             </PtButton>
-            <PtButton friendly outline onClick={() => fileRef.current?.click()}>
-              <ImagePlus size={14} />
+            <PtButton friendly outline className="w-full" onClick={() => fileRef.current?.click()}>
+              <ImagePlus size={16} />
               {T.fromGallery}
             </PtButton>
             <button
@@ -737,20 +915,20 @@ export function PhotoboothStudio({ caption }: { caption: PhotoboothCaption }) {
 
       {/* ---------- LANGKAH 2b: kamera ---------- */}
       {step === "camera" && (
-        <main className="flex flex-1 flex-col bg-[#101214] text-white">
-          <div className="flex items-center justify-between px-4 pt-3">
+        <main className="flex flex-1 flex-col px-5 pt-2 pb-8">
+          <div className="flex items-center justify-between">
             <div className="flex gap-1.5">
               {shots.map((s, i) => (
                 <span
                   key={i}
-                  className={`size-2.5 rounded-full ${s ? "bg-[#E8A33D]" : i === target ? "bg-white" : "bg-white/30"}`}
+                  className={`size-2.5 rounded-full ${s ? "bg-(--theme-primary)" : i === target ? "bg-(--theme-text)" : "bg-[#D8D2C4]"}`}
                 />
               ))}
             </div>
-            <p className="font-montserrat text-[15px] text-white/80">{T.shotsTaken(shotsTaken, layout.shots)}</p>
+            <p className="font-montserrat text-[14px] font-medium text-(--theme-muted)">{T.shotsTaken(shotsTaken, layout.shots)}</p>
           </div>
 
-          <div className="relative mx-4 mt-3 flex-1 overflow-hidden rounded-3xl bg-black">
+          <div className="relative mt-3 flex-1 overflow-hidden rounded-3xl bg-[#101214] shadow-[0_10px_28px_-12px_rgba(63,74,44,0.4)]">
             {camState === "live" ? (
               <video
                 ref={videoRef}
@@ -764,20 +942,30 @@ export function PhotoboothStudio({ caption }: { caption: PhotoboothCaption }) {
                 }}
               />
             ) : (
-              <div className="absolute inset-0 grid place-items-center px-6 text-center">
+              <div className={`absolute inset-0 grid place-items-center px-6 py-10 text-center ${PB_CREAM}`}>
                 {camState === "denied" ? (
-                  <div>
-                    <p className="font-montserrat text-[15px] font-semibold uppercase tracking-[0.08em]">{T.cameraDenied}</p>
-                    <p className="mt-2 font-montserrat text-[16px] leading-relaxed text-white/75">{T.cameraDeniedDesc}</p>
+                  <div className="flex flex-col items-center">
+                    <span className="grid size-28 place-items-center rounded-full bg-(--theme-surface)">
+                      <span className="grid size-18 place-items-center rounded-full bg-white text-(--theme-primary) shadow-[0_4px_16px_rgba(63,74,44,0.12)]">
+                        <Camera size={32} />
+                      </span>
+                    </span>
+                    <p className="mt-5 font-playfair text-[26px] font-bold leading-tight text-(--theme-text)">{T.cameraDenied}</p>
+                    <p className="mt-2 max-w-72 font-montserrat text-[15px] leading-relaxed text-(--theme-muted)">{T.cameraDeniedDesc}</p>
                     <PtButton friendly className="mt-5" onClick={() => fileRef.current?.click()}>
-                      <ImagePlus size={14} />
+                      <ImagePlus size={16} />
                       {T.fromGallery}
                     </PtButton>
                   </div>
                 ) : (
-                  <div>
-                    <p className="font-montserrat text-[15px] font-semibold uppercase tracking-[0.08em]">{T.waitingCamera}</p>
-                    <p className="mt-2 font-montserrat text-[16px] leading-relaxed text-white/75">{T.waitingCameraDesc}</p>
+                  <div className="flex flex-col items-center">
+                    <span className="grid size-28 place-items-center rounded-full bg-(--theme-surface)">
+                      <span className="grid size-18 place-items-center rounded-full bg-white text-(--theme-primary) shadow-[0_4px_16px_rgba(63,74,44,0.12)]">
+                        <Camera size={32} />
+                      </span>
+                    </span>
+                    <p className="mt-5 font-playfair text-[26px] font-bold leading-tight text-(--theme-text)">{T.waitingCamera}</p>
+                    <p className="mt-2 max-w-72 font-montserrat text-[15px] leading-relaxed text-(--theme-muted)">{T.waitingCameraDesc}</p>
                   </div>
                 )}
               </div>
@@ -800,18 +988,18 @@ export function PhotoboothStudio({ caption }: { caption: PhotoboothCaption }) {
               <div className="absolute right-3 bottom-3 flex items-center gap-2 rounded-full bg-black/60 py-1 pr-3 pl-1">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img src={shots[target] ?? shots.filter(Boolean).at(-1) ?? ""} alt={T.lastShot} className="size-9 rounded-full object-cover" />
-                <span className="font-montserrat text-[13px] font-medium">{T.lastShot}</span>
+                <span className="font-montserrat text-[13px] font-medium text-white">{T.lastShot}</span>
               </div>
             )}
           </div>
 
           {/* kontrol kamera */}
-          <div className="px-4 pt-3 pb-5">
+          <div className="pt-4">
             <div className="flex items-center justify-between gap-2">
               <button
                 type="button"
                 onClick={() => setGridOn((v) => !v)}
-                className={`flex items-center gap-1.5 rounded-full px-3 py-2 font-montserrat text-[14px] font-medium cursor-pointer ${gridOn ? "bg-[#E8A33D] text-black" : "bg-white/10 text-white"}`}
+                className={`flex items-center gap-1.5 rounded-full px-3.5 py-2.5 font-montserrat text-[14px] font-medium cursor-pointer ${gridOn ? "bg-(--theme-primary) text-white" : "bg-(--theme-surface) text-(--theme-text)"}`}
               >
                 <LayoutGrid size={15} />
                 {T.grid}
@@ -819,16 +1007,16 @@ export function PhotoboothStudio({ caption }: { caption: PhotoboothCaption }) {
               <button
                 type="button"
                 onClick={() => setShowFilters((v) => !v)}
-                className={`relative flex items-center gap-1.5 rounded-full px-3 py-2 font-montserrat text-[14px] font-medium cursor-pointer ${showFilters ? "bg-[#E8A33D] text-black" : "bg-white/10 text-white"}`}
+                className={`relative flex items-center gap-1.5 rounded-full px-3.5 py-2.5 font-montserrat text-[14px] font-medium cursor-pointer ${showFilters ? "bg-(--theme-primary) text-white" : "bg-(--theme-surface) text-(--theme-text)"}`}
               >
                 <Wand2 size={15} />
                 {filter.name}
-                {filterId !== "asli" && <span className="absolute -top-0.5 -right-0.5 size-2.5 rounded-full bg-[#E8A33D] ring-2 ring-[#101214]" />}
+                {filterId !== "asli" && <span className="absolute -top-0.5 -right-0.5 size-2.5 rounded-full bg-[#E8A33D] ring-2 ring-[#FAF6EE]" />}
               </button>
               <button
                 type="button"
                 onClick={() => setAutoOn((v) => !v)}
-                className={`flex items-center gap-1.5 rounded-full px-3 py-2 font-montserrat text-[14px] font-medium cursor-pointer ${autoOn ? "bg-[#E8A33D] text-black" : "bg-white/10 text-white"}`}
+                className={`flex items-center gap-1.5 rounded-full px-3.5 py-2.5 font-montserrat text-[14px] font-medium cursor-pointer ${autoOn ? "bg-(--theme-primary) text-white" : "bg-(--theme-surface) text-(--theme-text)"}`}
               >
                 <Zap size={15} />
                 {T.auto}
@@ -842,7 +1030,7 @@ export function PhotoboothStudio({ caption }: { caption: PhotoboothCaption }) {
                     key={f.id}
                     type="button"
                     onClick={() => setFilterId(f.id)}
-                    className={`shrink-0 rounded-full px-3.5 py-1.5 font-montserrat text-[14px] font-medium cursor-pointer ${filterId === f.id ? "bg-white text-black" : "bg-white/10 text-white"}`}
+                    className={`shrink-0 rounded-full px-3.5 py-1.5 font-montserrat text-[14px] font-medium cursor-pointer ${filterId === f.id ? "bg-(--theme-primary) text-white" : "bg-(--theme-surface) text-(--theme-text)"}`}
                   >
                     {f.name}
                   </button>
@@ -850,7 +1038,7 @@ export function PhotoboothStudio({ caption }: { caption: PhotoboothCaption }) {
                 <button
                   type="button"
                   onClick={() => setFilterId(DEFAULT_FILTER_ID)}
-                  className="shrink-0 rounded-full bg-white/10 px-3.5 py-1.5 font-montserrat text-[14px] text-white cursor-pointer"
+                  className="shrink-0 rounded-full bg-(--theme-surface) px-3.5 py-1.5 font-montserrat text-[14px] text-(--theme-text) cursor-pointer"
                 >
                   Reset
                 </button>
@@ -861,14 +1049,14 @@ export function PhotoboothStudio({ caption }: { caption: PhotoboothCaption }) {
               <button
                 type="button"
                 onClick={() => setZoom(1)}
-                className={`rounded-full px-3 py-1.5 font-montserrat text-[12px] font-semibold cursor-pointer ${zoom === 1 ? "bg-white text-black" : "bg-white/10 text-white"}`}
+                className={`rounded-full px-3 py-1.5 font-montserrat text-[12px] font-semibold cursor-pointer ${zoom === 1 ? "bg-(--theme-primary) text-white" : "bg-white text-(--theme-text)"}`}
               >
                 1×
               </button>
               <button
                 type="button"
                 onClick={() => setZoom(2)}
-                className={`rounded-full px-3 py-1.5 font-montserrat text-[12px] font-semibold cursor-pointer ${zoom === 2 ? "bg-white text-black" : "bg-white/10 text-white"}`}
+                className={`rounded-full px-3 py-1.5 font-montserrat text-[12px] font-semibold cursor-pointer ${zoom === 2 ? "bg-(--theme-primary) text-white" : "bg-white text-(--theme-text)"}`}
               >
                 2×
               </button>
@@ -880,9 +1068,9 @@ export function PhotoboothStudio({ caption }: { caption: PhotoboothCaption }) {
                 step={0.1}
                 value={zoom}
                 onChange={(e) => setZoom(Number(e.target.value))}
-                className="h-1 flex-1 accent-[#E8A33D]"
+                className="h-1 flex-1 accent-(--theme-primary)"
               />
-              <ZoomIn size={16} className="text-white/70" />
+              <ZoomIn size={16} className="text-(--theme-muted)" />
             </div>
 
             <div className="mt-4 flex items-center justify-between">
@@ -892,7 +1080,7 @@ export function PhotoboothStudio({ caption }: { caption: PhotoboothCaption }) {
                   stopCamera();
                   setStep(shotsTaken > 0 ? "review" : "access");
                 }}
-                className="flex items-center gap-1 font-montserrat text-[15px] font-medium text-white/80 cursor-pointer"
+                className="flex items-center gap-1 font-montserrat text-[15px] font-medium text-(--theme-text) cursor-pointer"
               >
                 <ChevronLeft size={16} />
                 Kembali
@@ -902,7 +1090,7 @@ export function PhotoboothStudio({ caption }: { caption: PhotoboothCaption }) {
                 aria-label="Ambil foto"
                 disabled={camState !== "live" || countdown !== null}
                 onClick={() => void takeShot(target)}
-                className="grid size-16 place-items-center rounded-full bg-white text-black shadow-[0_0_0_6px_rgba(255,255,255,0.25)] transition-transform active:scale-95 disabled:opacity-50 cursor-pointer"
+                className="grid size-16 place-items-center rounded-full bg-(--theme-primary) text-white shadow-[0_0_0_6px_rgba(111,148,64,0.25)] transition-transform active:scale-95 disabled:opacity-50 cursor-pointer"
               >
                 {autoOn ? <Zap size={26} /> : <Aperture size={28} />}
               </button>
@@ -913,13 +1101,13 @@ export function PhotoboothStudio({ caption }: { caption: PhotoboothCaption }) {
                   setFacing(next);
                   void startCamera(next);
                 }}
-                className="flex items-center gap-1 font-montserrat text-[15px] font-medium text-white/80 cursor-pointer"
+                className="flex items-center gap-1 font-montserrat text-[15px] font-medium text-(--theme-text) cursor-pointer"
               >
                 <SwitchCamera size={16} />
                 {T.switchCamera}
               </button>
             </div>
-            {autoOn && <p className="mt-2 text-center font-montserrat text-[14px] font-medium text-[#E8A33D]">{T.autoOn}</p>}
+            {autoOn && <p className="mt-2 text-center font-montserrat text-[14px] font-medium text-(--theme-primary)">{T.autoOn}</p>}
           </div>
           <input
             ref={fileRef}
@@ -937,38 +1125,50 @@ export function PhotoboothStudio({ caption }: { caption: PhotoboothCaption }) {
 
       {/* ---------- LANGKAH 2c: review pose ---------- */}
       {step === "review" && (
-        <main className="flex-1 px-5 pt-8 pb-10 text-center">
-          <h1 className={PB_TITLE}>{T.reviewTitle}</h1>
+        <main className="flex-1 px-5 pt-4 pb-10 text-center">
+          <p className={PB_KICKER}>Ambil foto · Langkah 2</p>
+          <h1 className={`mt-1 ${PB_TITLE}`}>{T.reviewTitle}</h1>
           <p className={`mx-auto mt-2 max-w-80 ${PB_BODY}`}>{T.reviewDesc}</p>
-          <div className={`mt-6 grid gap-3 ${layout.shots > 2 ? "grid-cols-2" : "grid-cols-1"}`}>
+          <div className={`mt-8 grid gap-4 ${layout.shots > 2 ? "grid-cols-2" : "grid-cols-1"}`}>
             {shots.map((s, i) => (
               <button
                 key={i}
                 type="button"
                 onClick={() => retakeOne(i)}
-                className="group relative overflow-hidden rounded-2xl border border-(--pt-sage)/50 cursor-pointer"
+                aria-label={T.retakeOne(i + 1)}
+                className="group relative cursor-pointer text-left"
               >
-                {s ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img src={s} alt={`Bidikan ${i + 1}`} className="aspect-4/3 w-full object-cover" />
-                ) : (
-                  <span className="grid aspect-4/3 w-full place-items-center bg-(--theme-surface) font-montserrat text-[16px] text-(--theme-muted)">
-                    Belum ada foto
-                  </span>
-                )}
-                <span className="absolute inset-x-0 bottom-0 bg-black/55 px-3 py-1.5 text-center font-montserrat text-[14px] font-medium text-white">
-                  {T.retakeOne(i + 1)}
+                <span className="block overflow-hidden rounded-3xl bg-white shadow-[0_6px_20px_-8px_rgba(63,74,44,0.25)]">
+                  {s ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={s}
+                      alt={`Bidikan ${i + 1}`}
+                      className="aspect-4/3 w-full object-cover"
+                      style={{ filter: filter.css === "none" ? undefined : filter.css }}
+                    />
+                  ) : (
+                    <span className="grid aspect-4/3 w-full place-items-center bg-(--theme-surface)">
+                      <UserRound size={44} className="text-(--theme-accent)" />
+                    </span>
+                  )}
+                </span>
+                <span className="absolute -top-2.5 -left-2.5 grid size-8 place-items-center rounded-full bg-(--theme-text) font-montserrat text-[15px] font-semibold text-white shadow">
+                  {i + 1}
+                </span>
+                <span className="absolute -right-2.5 -bottom-2.5 grid size-10 place-items-center rounded-full bg-white text-(--theme-primary) shadow-[0_4px_14px_rgba(63,74,44,0.25)]">
+                  <RotateCcw size={18} />
                 </span>
               </button>
             ))}
           </div>
-          <div className="mt-8 flex flex-col items-center gap-3">
-            <PtButton friendly disabled={!shots.every(Boolean)} onClick={() => setStep("result")}>
-              <Check size={14} />
+          <div className="mx-auto mt-10 flex w-full max-w-80 flex-col items-center gap-3">
+            <PtButton friendly disabled={!shots.every(Boolean)} onClick={() => setStep("result")} className="w-full">
+              <Check size={16} />
               {T.toFrame}
             </PtButton>
-            <PtButton friendly outline onClick={retakeAll}>
-              <RotateCcw size={14} />
+            <PtButton friendly outline onClick={retakeAll} className="w-full">
+              <RotateCcw size={16} />
               {T.retakeAll}
             </PtButton>
           </div>
@@ -977,18 +1177,22 @@ export function PhotoboothStudio({ caption }: { caption: PhotoboothCaption }) {
 
       {/* ---------- LANGKAH 3: hasil ---------- */}
       {step === "result" && (
-        <main className="flex-1 px-5 pt-8 pb-10">
-          <h1 className={`text-center ${PB_TITLE}`}>{T.resultTitle}</h1>
+        <main className="flex-1 px-5 pt-4 pb-10">
+          <p className={`text-center ${PB_KICKER}`}>Buat hasil · Langkah 3</p>
+          <h1 className={`mt-1 text-center ${PB_TITLE}`}>{T.resultTitle}</h1>
           <p className={`mx-auto mt-2 max-w-80 text-center ${PB_BODY}`}>{T.resultDesc}</p>
 
-          <div className="mx-auto mt-6 max-w-[340px]">
-            <canvas ref={previewRef} className="mx-auto block max-h-[68vh] w-auto max-w-full rounded-2xl shadow-[0_16px_30px_-12px_rgba(63,74,44,0.45)]" />
-            <p className="mt-3 text-center font-montserrat text-[14px] text-balance text-(--theme-muted)">{T.privacy}</p>
+          <div className="mx-auto mt-6 max-w-[340px] rounded-3xl bg-white p-3 shadow-[0_16px_30px_-12px_rgba(63,74,44,0.35)]">
+            <canvas ref={previewRef} className="mx-auto block max-h-[62vh] w-auto max-w-full rounded-2xl" />
           </div>
+          <p className="mt-3 flex items-center justify-center gap-1.5 text-center font-montserrat text-[14px] text-(--theme-muted)">
+            <Lock size={13} />
+            {T.privacyShort}
+          </p>
 
           {/* tab pengaturan — menempel di atas saat discroll */}
-          <div className="sticky top-0 z-10 -mx-5 mt-8 border-b border-(--pt-sage)/30 bg-white/95 px-5 py-3 backdrop-blur">
-            <div className="flex justify-center gap-2">
+          <div className="sticky top-0 z-10 -mx-5 mt-8 border-b border-(--pt-sage)/30 bg-[#FAF6EE]/95 px-5 py-3 backdrop-blur">
+            <div className="flex justify-center gap-6">
             {(
               [
                 ["frame", T.tabFrame],
@@ -1001,9 +1205,10 @@ export function PhotoboothStudio({ caption }: { caption: PhotoboothCaption }) {
                 key={id}
                 type="button"
                 onClick={() => setTab(id)}
-                className={`rounded-full px-4 py-2 font-montserrat font-semibold text-[12px] uppercase tracking-[0.08em] cursor-pointer ${tab === id ? "bg-(--theme-text) text-white" : "bg-(--theme-surface) text-(--theme-text)"}`}
+                className={`relative pb-1.5 font-montserrat font-semibold text-[13px] uppercase tracking-[0.08em] cursor-pointer ${tab === id ? "text-(--theme-text)" : "text-(--theme-muted)"}`}
               >
                 {label}
+                {tab === id && <span className="absolute inset-x-0 -bottom-px h-0.5 rounded-full bg-(--theme-primary)" />}
               </button>
             ))}
             </div>
@@ -1026,7 +1231,7 @@ export function PhotoboothStudio({ caption }: { caption: PhotoboothCaption }) {
                   </button>
                 ))}
               </div>
-              <div className="mt-4 grid grid-cols-3 gap-2.5">
+              <div className="-mx-5 mt-4 flex gap-3 overflow-x-auto px-5 pb-1">
                 {visibleFrames.map((f) => {
                   const isImage = "src" in f;
                   const active = isImage ? imageFrameId === f.id : !imageFrameId && frameId === f.id;
@@ -1042,10 +1247,10 @@ export function PhotoboothStudio({ caption }: { caption: PhotoboothCaption }) {
                           setFrameId(f.id);
                         }
                       }}
-                      className={`overflow-hidden rounded-2xl border-2 text-left cursor-pointer ${active ? "border-(--theme-text)" : "border-transparent"}`}
+                      className="w-24 shrink-0 cursor-pointer text-center"
                     >
                       <span
-                        className="relative block h-20"
+                        className={`relative block h-20 overflow-hidden rounded-2xl border-2 ${active ? "border-(--theme-text)" : "border-transparent"}`}
                         style={
                           isImage
                             ? { backgroundColor: "var(--theme-surface)" }
@@ -1079,7 +1284,7 @@ export function PhotoboothStudio({ caption }: { caption: PhotoboothCaption }) {
                           </span>
                         )}
                       </span>
-                      <span className="block bg-white px-2 py-1.5 text-center font-montserrat text-[13px] font-medium leading-tight text-(--theme-text)">
+                      <span className="mt-1.5 block font-montserrat text-[13px] font-medium leading-tight text-(--theme-text)">
                         {f.name}
                       </span>
                     </button>
@@ -1156,19 +1361,27 @@ export function PhotoboothStudio({ caption }: { caption: PhotoboothCaption }) {
           )}
 
           <div className="mt-8 flex flex-col items-center gap-3">
-            <PtButton friendly onClick={() => void saveStrip()} className="w-full">
-              <Download size={14} />
-              {T.save}
-            </PtButton>
-            <div className="flex w-full gap-3">
-              <PtButton friendly outline onClick={() => void shareStrip()} className="flex-1">
-                <Share2 size={14} />
-                {T.share}
+            <div className="flex w-full items-center gap-3">
+              <PtButton friendly onClick={() => void saveStrip()} className="flex-1">
+                <Download size={16} />
+                {T.save}
               </PtButton>
-              <PtButton friendly outline onClick={restart} className="flex-1">
-                <RotateCcw size={14} />
-                {T.restart}
-              </PtButton>
+              <button
+                type="button"
+                onClick={() => void shareStrip()}
+                aria-label={T.share}
+                className="grid size-12 shrink-0 cursor-pointer place-items-center rounded-full bg-white text-(--theme-primary) shadow-[0_4px_14px_rgba(63,74,44,0.20)]"
+              >
+                <Share2 size={20} />
+              </button>
+              <button
+                type="button"
+                onClick={restart}
+                aria-label={T.restart}
+                className="grid size-12 shrink-0 cursor-pointer place-items-center rounded-full bg-white text-(--theme-primary) shadow-[0_4px_14px_rgba(63,74,44,0.20)]"
+              >
+                <RotateCcw size={20} />
+              </button>
             </div>
             <Link href="/" className="mt-1 font-montserrat text-[15px] font-medium text-(--theme-muted) underline underline-offset-4">
               {T.backToInvite}

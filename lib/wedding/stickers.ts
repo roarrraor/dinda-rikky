@@ -1,13 +1,15 @@
 /**
  * Stiker yang bisa dipilih tamu saat mengirim ucapan.
  *
- * File gambar ada di `public/assets/stickers/` (PNG transparan, 512x512).
- * Untuk menambah opsi stiker baru:
- * 1. Taruh file PNG transparan di folder itu.
- * 2. Tambah satu entri di `STICKERS` di bawah (key unik, tanpa spasi).
- * 3. Tidak perlu migrasi — kolom `sticker` di tabel `wishes` hanya
- *    menyimpan key-nya (lihat `supabase/migrations/0002_wish_sticker.sql`).
+ * File gambar ada di `public/assets/stickers/` (GIF/PNG transparan).
+ * Untuk menambah stiker baru: TARUH SAJA filenya di folder itu, lalu
+ * deploy ulang — stiker langsung muncul di picker, tanpa ubah file ini.
+ * (Daftar file dibaca otomatis sebelum build, lihat
+ * scripts/gen-photobooth-assets.mjs.) Entri `STICKERS` di bawah hanya
+ * untuk stiker bawaan; kolom `sticker` di tabel `wishes` hanya menyimpan
+ * key-nya (lihat `supabase/migrations/0002_wish_sticker.sql`).
  */
+import { DISCOVERED_STICKERS } from "./photobooth-assets.generated";
 
 export interface StickerOption {
   /** Kunci yang disimpan di database. */
@@ -97,13 +99,23 @@ export const STICKERS: StickerOption[] = [
   },
 ];
 
+/** Semua stiker: bawaan + yang ketemu otomatis dari folder (upload saja). */
+export function allStickers(): StickerOption[] {
+  return [
+    ...STICKERS,
+    ...DISCOVERED_STICKERS.filter(
+      (d) => !STICKERS.some((s) => s.key === d.key || s.src === d.src),
+    ),
+  ];
+}
+
 /** Path gambar untuk key stiker, atau null kalau key tidak dikenal. */
 export function stickerSrc(key: string | null | undefined): string | null {
   if (!key) return null;
-  return STICKERS.find((s) => s.key === key)?.src ?? null;
+  return allStickers().find((s) => s.key === key)?.src ?? null;
 }
 
 /** True kalau key adalah salah satu stiker di atas. */
 export function isStickerKey(key: string): boolean {
-  return STICKERS.some((s) => s.key === key);
+  return allStickers().some((s) => s.key === key);
 }

@@ -7,7 +7,7 @@ import dayjs from "dayjs";
 import { AnimatePresence, motion } from "motion/react";
 import { Camera, Check, CheckCircle2, ChevronDown, ChevronRight, ChevronUp, Copy, Images, MessageCircle, Minus, Plus, Send, Smile, X } from "lucide-react";
 import { ASSETS, COPY, ID, paletteVars } from "@/lib/wedding/data";
-import { STICKERS, stickerSrc } from "@/lib/wedding/stickers";
+import { allStickers, stickerSrc } from "@/lib/wedding/stickers";
 import { formatDate } from "@/lib/wedding/format";
 import { sanitizeRichText } from "@/lib/wedding/sanitize";
 import { useRsvpForm, type RsvpForm } from "./use-rsvp-form";
@@ -999,7 +999,7 @@ export function RsvpSection({
                             Pilih stiker untuk ucapanmu
                           </p>
                           <div className="mt-2 grid max-h-44 grid-cols-4 gap-2 overflow-y-auto pr-1">
-                            {STICKERS.map((s) => (
+                            {allStickers().map((s) => (
                               <button
                                 key={s.key}
                                 type="button"
