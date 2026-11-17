@@ -186,15 +186,30 @@ let canvasFilterOK: boolean | null = null;
 function canvasFilterSupported(): boolean {
   if (canvasFilterOK !== null) return canvasFilterOK;
   try {
-    const c = document.createElement("canvas");
-    const x = c.getContext("2d");
-    if (!x) {
+    // Uji PERILAKU, bukan properti: gambar piksel merah dengan filter
+    // grayscale lalu baca balik — kalau jadi abu-abu, ctx.filter jalan.
+    // Cek properti saja tidak cukup: Safari lama menerima assignment
+    // filter (jadi expando) tapi mengabaikannya saat menggambar, jadi
+    // filter "lolos" tes tapi tidak pernah diterapkan ke preview.
+    const src = document.createElement("canvas");
+    src.width = 1;
+    src.height = 1;
+    const sctx = src.getContext("2d");
+    const dst = document.createElement("canvas");
+    dst.width = 1;
+    dst.height = 1;
+    const dctx = dst.getContext("2d");
+    if (!sctx || !dctx) {
       canvasFilterOK = false;
       return false;
     }
-    const f = x as CanvasRenderingContext2D & { filter: string };
-    f.filter = "grayscale(1)";
-    canvasFilterOK = f.filter === "grayscale(1)";
+    sctx.fillStyle = "#ff0000";
+    sctx.fillRect(0, 0, 1, 1);
+    (dctx as CanvasRenderingContext2D & { filter: string }).filter = "grayscale(1)";
+    dctx.drawImage(src, 0, 0);
+    const px = dctx.getImageData(0, 0, 1, 1).data;
+    // merah (255,0,0) jadi abu-abu (~76,76,76) kalau filter jalan
+    canvasFilterOK = px[0] === px[1] && px[1] === px[2] && px[0] < 200;
   } catch {
     canvasFilterOK = false;
   }
@@ -335,6 +350,23 @@ export async function renderStrip(canvas: HTMLCanvasElement, opts: StripOptions)
       try {
         const img = await loadImage(src);
         const c = coverCrop(img.naturalWidth, img.naturalHeight, slot.w / slot.h);
+        // Bayangan lembut + border putih tipis di sekeliling foto, biar foto
+        // kelihatan "nempel" di frame (kaya cetakan foto), bukan ditempel
+        // di atasnya. Polaroid sudah punya kartu putih + bayangan sendiri.
+        if (shape !== "polaroid") {
+          ctx.save();
+          ctx.shadowColor = "rgba(0,0,0,0.28)";
+          ctx.shadowBlur = 14;
+          ctx.shadowOffsetY = 5;
+          if (shape === "lembut") roundRectPath(ctx, slot.x, slot.y, slot.w, slot.h, 26);
+          else {
+            ctx.beginPath();
+            ctx.rect(slot.x, slot.y, slot.w, slot.h);
+          }
+          ctx.fillStyle = "#FFFFFF";
+          ctx.fill();
+          ctx.restore();
+        }
         ctx.save();
         if (shape === "lembut") roundRectPath(ctx, slot.x, slot.y, slot.w, slot.h, 26);
         else ctx.rect(slot.x, slot.y, slot.w, slot.h);
@@ -359,6 +391,18 @@ export async function renderStrip(canvas: HTMLCanvasElement, opts: StripOptions)
           ctx.drawImage(img, c.sx, c.sy, c.sw, c.sh, slot.x, slot.y, slot.w, slot.h);
         }
         ctx.restore();
+        if (shape !== "polaroid") {
+          ctx.save();
+          if (shape === "lembut") roundRectPath(ctx, slot.x, slot.y, slot.w, slot.h, 26);
+          else {
+            ctx.beginPath();
+            ctx.rect(slot.x, slot.y, slot.w, slot.h);
+          }
+          ctx.strokeStyle = "rgba(255,255,255,0.95)";
+          ctx.lineWidth = 3;
+          ctx.stroke();
+          ctx.restore();
+        }
       } catch {
         ctx.fillStyle = frame.accent;
         ctx.fillRect(slot.x, slot.y, slot.w, slot.h);
@@ -368,12 +412,6 @@ export async function renderStrip(canvas: HTMLCanvasElement, opts: StripOptions)
       ctx.globalAlpha = 0.35;
       ctx.fillRect(slot.x, slot.y, slot.w, slot.h);
       ctx.globalAlpha = 1;
-    }
-    if (shape === "lembut") {
-      ctx.strokeStyle = "rgba(0,0,0,0.08)";
-      ctx.lineWidth = 2;
-      roundRectPath(ctx, slot.x, slot.y, slot.w, slot.h, 26);
-      ctx.stroke();
     }
   }
 
