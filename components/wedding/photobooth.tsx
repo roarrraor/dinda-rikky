@@ -118,7 +118,7 @@ async function ensureFonts(font: PhotoboothFont) {
     await Promise.race([
       Promise.all([
         document.fonts.load(`72px ${font.family}`),
-        document.fonts.load(`24px Marcellus, serif`),
+        document.fonts.load(`600 26px "Playfair Display", serif`),
       ]),
       new Promise((r) => setTimeout(r, 1500)),
     ]);
@@ -146,12 +146,14 @@ function fitFont(
   startPx: number,
   maxWidth: number,
   minPx: number,
+  weight = "",
 ): void {
   let px = startPx;
-  ctx.font = `${px}px ${family}`;
+  const font = (p: number) => `${weight ? `${weight} ` : ""}${p}px ${family}`;
+  ctx.font = font(px);
   while (px > minPx && ctx.measureText(text).width > maxWidth) {
     px -= 2;
-    ctx.font = `${px}px ${family}`;
+    ctx.font = font(px);
   }
 }
 
@@ -268,13 +270,13 @@ export async function renderStrip(canvas: HTMLCanvasElement, opts: StripOptions)
     const scriptLike = font.id === "dancing" || font.id === "caveat";
     fitFont(ctx, caption.names, font.family, scriptLike ? 72 : 46, g.w - 120, 32);
     ctx.fillText(caption.names, g.w / 2, footerTop + 88);
+    const sub = caption.tag ? `${caption.date}  ·  ${caption.tag}` : caption.date;
     try {
-      (ctx as CanvasRenderingContext2D & { letterSpacing: string }).letterSpacing = "4px";
+      (ctx as CanvasRenderingContext2D & { letterSpacing: string }).letterSpacing = "3px";
     } catch {
       /* abaikan */
     }
-    const sub = caption.tag ? `${caption.date}  ·  ${caption.tag}` : caption.date;
-    fitFont(ctx, sub, "Marcellus, serif", 26, g.w - 120, 18);
+    fitFont(ctx, sub, `"Playfair Display", serif`, 26, g.w - 120, 18, "600");
     ctx.fillText(sub, g.w / 2, footerTop + 146);
     try {
       (ctx as CanvasRenderingContext2D & { letterSpacing: string }).letterSpacing = "0px";
@@ -1043,7 +1045,7 @@ export function PhotoboothStudio({ caption }: { caption: PhotoboothCaption }) {
                       className={`overflow-hidden rounded-2xl border-2 text-left cursor-pointer ${active ? "border-(--theme-text)" : "border-transparent"}`}
                     >
                       <span
-                        className={`relative block ${isImage ? "h-24" : "h-20"}`}
+                        className="relative block h-20"
                         style={
                           isImage
                             ? { backgroundColor: "var(--theme-surface)" }
@@ -1051,8 +1053,16 @@ export function PhotoboothStudio({ caption }: { caption: PhotoboothCaption }) {
                         }
                       >
                         {isImage ? (
-                          // eslint-disable-next-line @next/next/no-img-element
-                          <img src={(f as ImageFrame).src} alt={f.name} className="mx-auto h-full w-auto max-w-full object-contain" />
+                          <span
+                            aria-hidden
+                            className="block h-full w-full"
+                            style={{
+                              backgroundImage: `url(${(f as ImageFrame).src})`,
+                              backgroundSize: "cover",
+                              backgroundPosition: "top center",
+                              backgroundRepeat: "no-repeat",
+                            }}
+                          />
                         ) : (
                           <span className="absolute inset-x-3 bottom-2 block text-center font-montserrat text-[13px] leading-tight" style={{ color: (f as PhotoboothFrame).ink }}>
                             {caption.names}
