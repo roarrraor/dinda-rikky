@@ -303,14 +303,6 @@ export async function renderStrip(canvas: HTMLCanvasElement, opts: StripOptions)
   if (!ctx) return;
   await ensureFonts(font);
 
-  // Sudut luar strip membulat, selaras dengan foto (bentuk Lembut) — fokus
-  // ke rounded corners: seluruh isi strip di-clip ke rounded rect, jadi
-  // sudut kanvas transparan (preview + hasil save sama-sama membulat).
-  const STRIP_RADIUS = 36;
-  ctx.save();
-  roundRectPath(ctx, 0, 0, g.w, g.h, STRIP_RADIUS);
-  ctx.clip();
-
   // Latar: warna dasar, lalu frame gambar "background" (ala inveet) kalau ada
   ctx.fillStyle = frame.bg;
   ctx.fillRect(0, 0, g.w, g.h);
@@ -445,8 +437,7 @@ export async function renderStrip(canvas: HTMLCanvasElement, opts: StripOptions)
   if (imageFrame?.layer !== "background") {
     ctx.strokeStyle = frame.border;
     ctx.lineWidth = 1;
-    roundRectPath(ctx, 16, 16, g.w - 32, g.h - 32, STRIP_RADIUS - 16);
-    ctx.stroke();
+    ctx.strokeRect(16, 16, g.w - 32, g.h - 32);
   }
 
   // Footer — teks (nama + tanggal/hashtag) dipusatkan vertikal di zona
@@ -507,8 +498,6 @@ export async function renderStrip(canvas: HTMLCanvasElement, opts: StripOptions)
       /* abaikan */
     }
   }
-
-  ctx.restore();
 }
 
 function downloadBlob(blob: Blob, filename: string) {
