@@ -337,11 +337,19 @@ export async function renderStrip(canvas: HTMLCanvasElement, opts: StripOptions)
     const slot = g.slots[i];
     const src = shots[i];
     if (shape === "polaroid") {
+      // Kartu polaroid di baris terbawah memanjang sampai ke zona footer
+      // (24px dari tepi bawah kanvas), supaya teks nama + tanggal/hashtag
+      // duduk di atas kartu putih — bukan mepet atau ketumpuk di tepi
+      // kartu. Berlaku di semua layout (strip, grid, potret, duet).
+      const maxBottom = Math.max(...g.slots.map((s) => s.y + s.h));
+      const isLastRow = slot.y + slot.h === maxBottom;
+      const cardBottom = isLastRow ? g.h - 24 : slot.y + slot.h + 58;
+      const cardH = cardBottom - (slot.y - 14);
       ctx.fillStyle = "#FFFFFF";
       ctx.shadowColor = "rgba(0,0,0,0.18)";
       ctx.shadowBlur = 18;
       ctx.shadowOffsetY = 6;
-      ctx.fillRect(slot.x - 14, slot.y - 14, slot.w + 28, slot.h + 28 + 44);
+      ctx.fillRect(slot.x - 14, slot.y - 14, slot.w + 28, cardH);
       ctx.shadowColor = "transparent";
       ctx.shadowBlur = 0;
       ctx.shadowOffsetY = 0;
@@ -452,9 +460,16 @@ export async function renderStrip(canvas: HTMLCanvasElement, opts: StripOptions)
     // dihitung dari warna footerFade-nya — bukan dari frame warna terakhir
     // yang dipilih (itu yang bikin teks terang "nempel" pas pindah dari
     // frame gelap ke Botanical). Frame overlay tetap pakai tinta frame warna.
+    // Bentuk polaroid: teks duduk di atas kartu putih, jadi tintanya selalu
+    // gelap supaya terbaca di semua frame.
     const isBgFrame = imageFrame?.layer === "background";
-    const footerInk = isBgFrame ? contrastInk(imageFrame.footerFade ?? "#F3EADB") : frame.ink;
-    const footerAccent = isBgFrame ? footerInk : frame.accent;
+    const footerInk =
+      shape === "polaroid"
+        ? "#3F4A2C"
+        : isBgFrame
+          ? contrastInk(imageFrame.footerFade ?? "#F3EADB")
+          : frame.ink;
+    const footerAccent = shape === "polaroid" ? "#3F4A2C" : isBgFrame ? footerInk : frame.accent;
     ctx.strokeStyle = footerAccent;
     ctx.lineWidth = 2;
     ctx.beginPath();
