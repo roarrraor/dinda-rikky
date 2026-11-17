@@ -62,3 +62,21 @@ body {
 .hide-scrollbar::-webkit-scrollbar {
   display: none;
 }
+
+/* Baris geser photobooth (frame/filter): scrollbar hijau yang kelihatan
+   di atas latar krem — jangan putih, nanti tidak kelihatan. */
+.pb-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: #6f9440 #e6e0d2;
+}
+.pb-scroll::-webkit-scrollbar {
+  height: 6px;
+}
+.pb-scroll::-webkit-scrollbar-track {
+  background: #e6e0d2;
+  border-radius: 999px;
+}
+.pb-scroll::-webkit-scrollbar-thumb {
+  background: #6f9440;
+  border-radius: 999px;
+}

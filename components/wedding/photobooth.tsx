@@ -761,6 +761,9 @@ export function PhotoboothStudio({ caption }: { caption: PhotoboothCaption }) {
     ...ALL_IMAGE_FRAMES.filter((f) => f.layouts.includes(layout.id)),
   ].filter((f) => concept === "Semua" || f.concept === concept);
 
+  /** Foto contoh buat pratinjau lingkaran filter (foto pertama yang ada). */
+  const sampleShot = shots.find(Boolean) ?? null;
+
   // Tombol kembali di bar atas (desain baru): mundur satu langkah.
   const goBack = () => {
     if (step === "layout") return;
@@ -1231,7 +1234,7 @@ export function PhotoboothStudio({ caption }: { caption: PhotoboothCaption }) {
                   </button>
                 ))}
               </div>
-              <div className="-mx-5 mt-4 flex gap-3 overflow-x-auto px-5 pb-1">
+              <div className="pb-scroll -mx-5 mt-4 flex gap-3 overflow-x-auto px-5 pb-2">
                 {visibleFrames.map((f) => {
                   const isImage = "src" in f;
                   const active = isImage ? imageFrameId === f.id : !imageFrameId && frameId === f.id;
@@ -1270,12 +1273,12 @@ export function PhotoboothStudio({ caption }: { caption: PhotoboothCaption }) {
                           />
                         ) : (
                           <span className="absolute inset-x-3 bottom-2 block text-center font-montserrat text-[13px] leading-tight" style={{ color: (f as PhotoboothFrame).ink }}>
-                            {caption.names}
+                            {f.name}
                           </span>
                         )}
                         {isImage && (
                           <span className="absolute inset-x-3 bottom-2 block text-center font-montserrat text-[13px] leading-tight text-(--theme-text)">
-                            {caption.names}
+                            {f.name}
                           </span>
                         )}
                         {active && (
@@ -1338,23 +1341,51 @@ export function PhotoboothStudio({ caption }: { caption: PhotoboothCaption }) {
           {tab === "filter" && (
             <div className="mt-5">
               <p className="text-center font-montserrat text-[15px] text-(--theme-muted)">{T.filterHint}</p>
-              <div className="mt-4 grid grid-cols-3 gap-2">
-                {FILTERS.map((f) => (
-                  <button
-                    key={f.id}
-                    type="button"
-                    onClick={() => setFilterId(f.id)}
-                    className={`w-full rounded-full px-2 py-2 font-montserrat text-[15px] font-medium cursor-pointer ${filterId === f.id ? "bg-(--theme-text) text-white" : "bg-(--theme-surface) text-(--theme-text)"}`}
-                  >
-                    {f.name}
-                  </button>
-                ))}
+              <div className="pb-scroll -mx-5 mt-4 flex gap-3 overflow-x-auto px-5 pb-2">
+                {FILTERS.map((f) => {
+                  const active = filterId === f.id;
+                  return (
+                    <button
+                      key={f.id}
+                      type="button"
+                      onClick={() => setFilterId(f.id)}
+                      className="w-20 shrink-0 cursor-pointer text-center"
+                    >
+                      <span className={`relative mx-auto block size-16 overflow-hidden rounded-full ${active ? "ring-2 ring-(--theme-text) ring-offset-2 ring-offset-[#FAF6EE]" : "ring-1 ring-(--pt-sage)/50"}`}>
+                        {sampleShot ? (
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img
+                            src={sampleShot}
+                            alt={f.name}
+                            className="h-full w-full object-cover"
+                            style={{ filter: f.css === "none" ? undefined : f.css }}
+                          />
+                        ) : (
+                          <span className="block h-full w-full bg-(--theme-surface)" />
+                        )}
+                        {active && (
+                          <span className="absolute top-0.5 right-0.5 grid size-5 place-items-center rounded-full bg-(--theme-text) text-white">
+                            <Check size={12} />
+                          </span>
+                        )}
+                      </span>
+                      <span className="mt-1.5 block font-montserrat text-[13px] font-medium leading-tight text-(--theme-text)">
+                        {f.name}
+                      </span>
+                    </button>
+                  );
+                })}
                 <button
                   type="button"
                   onClick={() => setFilterId(DEFAULT_FILTER_ID)}
-                  className="w-full rounded-full bg-(--theme-surface) px-2 py-2 font-montserrat text-[15px] text-(--theme-text) cursor-pointer"
+                  className="w-20 shrink-0 cursor-pointer text-center"
                 >
-                  Reset
+                  <span className="mx-auto grid size-16 place-items-center rounded-full bg-(--theme-surface) text-(--theme-primary) ring-1 ring-(--pt-sage)/50">
+                    <RotateCcw size={22} />
+                  </span>
+                  <span className="mt-1.5 block font-montserrat text-[13px] font-medium leading-tight text-(--theme-text)">
+                    Reset
+                  </span>
                 </button>
               </div>
             </div>
