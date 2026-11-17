@@ -274,7 +274,7 @@ export async function renderStrip(canvas: HTMLCanvasElement, opts: StripOptions)
       /* abaikan */
     }
     const sub = caption.tag ? `${caption.date}  ·  ${caption.tag}` : caption.date;
-    fitFont(ctx, sub, "Marcellus, serif", 22, g.w - 120, 16);
+    fitFont(ctx, sub, "Marcellus, serif", 26, g.w - 120, 18);
     ctx.fillText(sub, g.w / 2, footerTop + 146);
     try {
       (ctx as CanvasRenderingContext2D & { letterSpacing: string }).letterSpacing = "0px";
@@ -1043,7 +1043,7 @@ export function PhotoboothStudio({ caption }: { caption: PhotoboothCaption }) {
                       className={`overflow-hidden rounded-2xl border-2 text-left cursor-pointer ${active ? "border-(--theme-text)" : "border-transparent"}`}
                     >
                       <span
-                        className="relative block h-20"
+                        className={`relative block ${isImage ? "h-24" : "h-20"}`}
                         style={
                           isImage
                             ? { backgroundColor: "var(--theme-surface)" }
@@ -1052,7 +1052,7 @@ export function PhotoboothStudio({ caption }: { caption: PhotoboothCaption }) {
                       >
                         {isImage ? (
                           // eslint-disable-next-line @next/next/no-img-element
-                          <img src={(f as ImageFrame).src} alt={f.name} className="h-full w-full object-cover" />
+                          <img src={(f as ImageFrame).src} alt={f.name} className="mx-auto h-full w-auto max-w-full object-contain" />
                         ) : (
                           <span className="absolute inset-x-3 bottom-2 block text-center font-montserrat text-[13px] leading-tight" style={{ color: (f as PhotoboothFrame).ink }}>
                             {caption.names}
