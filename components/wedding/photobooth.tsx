@@ -1068,6 +1068,11 @@ export function PhotoboothStudio({ caption }: { caption: PhotoboothCaption }) {
                             {caption.names}
                           </span>
                         )}
+                        {isImage && (
+                          <span className="absolute inset-x-3 bottom-2 block text-center font-montserrat text-[13px] leading-tight text-(--theme-text)">
+                            {caption.names}
+                          </span>
+                        )}
                         {active && (
                           <span className="absolute top-1.5 right-1.5 grid size-5 place-items-center rounded-full bg-(--theme-text) text-white">
                             <Check size={12} />
