@@ -132,7 +132,7 @@ async function ensureFonts(font: PhotoboothFont) {
     await Promise.race([
       Promise.all([
         document.fonts.load(`72px ${font.family}`),
-        document.fonts.load(`600 26px "Playfair Display", serif`),
+        document.fonts.load(`600 22px "Montserrat", sans-serif`),
       ]),
       new Promise((r) => setTimeout(r, 1500)),
     ]);
@@ -384,29 +384,41 @@ export async function renderStrip(canvas: HTMLCanvasElement, opts: StripOptions)
     ctx.strokeRect(16, 16, g.w - 32, g.h - 32);
   }
 
-  // Footer
+  // Footer — teks (nama + tanggal/hashtag) dipusatkan vertikal di zona
+  // antara foto terbawah dan tepi bawah kanvas, biar tidak mepet bawah.
   if (!imageFrame || imageFrame.footer === "drawn") {
-    const footerTop = g.h - g.footerH;
+    const lastSlot = g.slots[g.slots.length - 1];
+    const zoneCenter = (lastSlot.y + lastSlot.h + g.h) / 2;
+    // Jarak antar baris (tengah teks ke tengah teks) + pembatas ke nama.
+    const NAME_DATE_GAP = 58;
+    const DIVIDER_GAP = 54;
+    // Titik tengah blok (pembatas sampai bawah tanggal) ada 7.5px di bawah
+    // tengah nama — jadi tengah nama = tengah zona - 7.5.
+    const nameY = zoneCenter - 7.5;
+    const dateY = nameY + NAME_DATE_GAP;
+    const dividerY = nameY - DIVIDER_GAP;
     ctx.strokeStyle = frame.accent;
     ctx.lineWidth = 2;
     ctx.beginPath();
-    ctx.moveTo(g.w / 2 - 90, footerTop + 34);
-    ctx.lineTo(g.w / 2 + 90, footerTop + 34);
+    ctx.moveTo(g.w / 2 - 90, dividerY);
+    ctx.lineTo(g.w / 2 + 90, dividerY);
     ctx.stroke();
     ctx.fillStyle = frame.ink;
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
     const scriptLike = font.id === "dancing" || font.id === "caveat";
     fitFont(ctx, caption.names, font.family, scriptLike ? 72 : 46, g.w - 120, 32);
-    ctx.fillText(caption.names, g.w / 2, footerTop + 88);
+    ctx.fillText(caption.names, g.w / 2, nameY);
     const sub = caption.tag ? `${caption.date}  ·  ${caption.tag}` : caption.date;
     try {
-      (ctx as CanvasRenderingContext2D & { letterSpacing: string }).letterSpacing = "3px";
+      (ctx as CanvasRenderingContext2D & { letterSpacing: string }).letterSpacing = "2px";
     } catch {
       /* abaikan */
     }
-    fitFont(ctx, sub, `"Playfair Display", serif`, 26, g.w - 120, 18, "600");
-    ctx.fillText(sub, g.w / 2, footerTop + 146);
+    // Tanggal + hashtag pakai Montserrat (sans, bersih) — bukan serif
+    // ber-spasi lebar yang terkesan alay.
+    fitFont(ctx, sub, `"Montserrat", sans-serif`, 22, g.w - 120, 18, "600");
+    ctx.fillText(sub, g.w / 2, dateY);
     try {
       (ctx as CanvasRenderingContext2D & { letterSpacing: string }).letterSpacing = "0px";
     } catch {
