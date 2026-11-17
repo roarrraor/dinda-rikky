@@ -4,6 +4,37 @@
 import type { ImageFrame } from "./photobooth";
 import type { StickerOption } from "./stickers";
 
-export const DISCOVERED_FRAMES: ImageFrame[] = [];
+export const DISCOVERED_FRAMES: ImageFrame[] = [
+  {
+    "id": "langit-malam",
+    "name": "Langit Malam",
+    "concept": "Klasik",
+    "src": "/assets/photobooth/frames/langit-malam--klasik--fade-F5EEDC.webp",
+    "layouts": [
+      "strip",
+      "grid",
+      "portrait",
+      "duet"
+    ],
+    "footer": "drawn",
+    "layer": "background",
+    "footerFade": "#F5EEDC"
+  },
+  {
+    "id": "senja",
+    "name": "Senja",
+    "concept": "Klasik",
+    "src": "/assets/photobooth/frames/senja--klasik--fade-F9F4E8.webp",
+    "layouts": [
+      "strip",
+      "grid",
+      "portrait",
+      "duet"
+    ],
+    "footer": "drawn",
+    "layer": "background",
+    "footerFade": "#F9F4E8"
+  }
+];
 
 export const DISCOVERED_STICKERS: StickerOption[] = [];
