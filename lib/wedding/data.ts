@@ -259,8 +259,8 @@ const galleryPhotos = [
   "/assets/illustrations/gallery-1.webp",
   "/assets/illustrations/gallery-2.webp",
   "/assets/illustrations/gallery-3.webp",
-  // "/assets/illustrations/gallery-4.webp",
-  // "/assets/illustrations/gallery-5.webp",
+  "/assets/illustrations/gallery-4.webp",
+  "/assets/illustrations/gallery-5.webp",
 ];
 
 export const WEDDING: WeddingData = {
