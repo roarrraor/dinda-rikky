@@ -358,23 +358,6 @@ export async function renderStrip(canvas: HTMLCanvasElement, opts: StripOptions)
       try {
         const img = await loadImage(src);
         const c = coverCrop(img.naturalWidth, img.naturalHeight, slot.w / slot.h);
-        // Bayangan lembut + border putih tipis di sekeliling foto, biar foto
-        // kelihatan "nempel" di frame (kaya cetakan foto), bukan ditempel
-        // di atasnya. Polaroid sudah punya kartu putih + bayangan sendiri.
-        if (shape !== "polaroid") {
-          ctx.save();
-          ctx.shadowColor = "rgba(0,0,0,0.28)";
-          ctx.shadowBlur = 14;
-          ctx.shadowOffsetY = 5;
-          if (shape === "lembut") roundRectPath(ctx, slot.x, slot.y, slot.w, slot.h, 18);
-          else {
-            ctx.beginPath();
-            ctx.rect(slot.x, slot.y, slot.w, slot.h);
-          }
-          ctx.fillStyle = "#FFFFFF";
-          ctx.fill();
-          ctx.restore();
-        }
         ctx.save();
         if (shape === "lembut") roundRectPath(ctx, slot.x, slot.y, slot.w, slot.h, 18);
         else ctx.rect(slot.x, slot.y, slot.w, slot.h);
@@ -400,6 +383,30 @@ export async function renderStrip(canvas: HTMLCanvasElement, opts: StripOptions)
         }
         ctx.restore();
         if (shape !== "polaroid") {
+          // Bayangan DALAM foto (inner shadow): foto tampak berada di balik
+          // frame, bukan melayang di atasnya. Bayangan lama di bawah foto
+          // (drop shadow) sudah dihapus. Polaroid tidak diubah — kartunya
+          // memang sudah punya bayangan sendiri.
+          const SH = 16; // kedalaman bayangan ke dalam foto
+          ctx.save();
+          if (shape === "lembut") roundRectPath(ctx, slot.x, slot.y, slot.w, slot.h, 18);
+          else {
+            ctx.beginPath();
+            ctx.rect(slot.x, slot.y, slot.w, slot.h);
+          }
+          ctx.clip();
+          const edge = (x0: number, y0: number, x1: number, y1: number) => {
+            const g = ctx.createLinearGradient(x0, y0, x1, y1);
+            g.addColorStop(0, "rgba(0,0,0,0.28)");
+            g.addColorStop(1, "rgba(0,0,0,0)");
+            ctx.fillStyle = g;
+            ctx.fillRect(slot.x, slot.y, slot.w, slot.h);
+          };
+          edge(slot.x, slot.y, slot.x, slot.y + SH); // atas
+          edge(slot.x, slot.y + slot.h, slot.x, slot.y + slot.h - SH); // bawah
+          edge(slot.x, slot.y, slot.x + SH, slot.y); // kiri
+          edge(slot.x + slot.w, slot.y, slot.x + slot.w - SH, slot.y); // kanan
+          ctx.restore();
           ctx.save();
           if (shape === "lembut") roundRectPath(ctx, slot.x, slot.y, slot.w, slot.h, 18);
           else {
