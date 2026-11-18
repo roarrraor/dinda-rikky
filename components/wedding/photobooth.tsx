@@ -387,7 +387,11 @@ export async function renderStrip(canvas: HTMLCanvasElement, opts: StripOptions)
           // frame, bukan melayang di atasnya. Bayangan lama di bawah foto
           // (drop shadow) sudah dihapus. Polaroid tidak diubah — kartunya
           // memang sudah punya bayangan sendiri.
-          const SH = 34; // kedalaman bayangan ke dalam foto
+          // Gradasi dibuat HALUS (ease-out, 5 stop, tanpa plateau): alpha
+          // turun terus dari tepi ke dalam, jadi tidak ada garis/band yang
+          // kelihatan. Versi sebelumnya (plateau 0.55 → 0.40 di 40% lalu
+          // jatuh ke 0) terlalu tebal dan gradasinya kasar.
+          const SH = 22; // kedalaman bayangan ke dalam foto
           ctx.save();
           if (shape === "lembut") roundRectPath(ctx, slot.x, slot.y, slot.w, slot.h, 18);
           else {
@@ -397,8 +401,10 @@ export async function renderStrip(canvas: HTMLCanvasElement, opts: StripOptions)
           ctx.clip();
           const edge = (x0: number, y0: number, x1: number, y1: number) => {
             const g = ctx.createLinearGradient(x0, y0, x1, y1);
-            g.addColorStop(0, "rgba(0,0,0,0.55)");
-            g.addColorStop(0.4, "rgba(0,0,0,0.40)");
+            g.addColorStop(0, "rgba(0,0,0,0.34)");
+            g.addColorStop(0.25, "rgba(0,0,0,0.20)");
+            g.addColorStop(0.5, "rgba(0,0,0,0.10)");
+            g.addColorStop(0.75, "rgba(0,0,0,0.04)");
             g.addColorStop(1, "rgba(0,0,0,0)");
             ctx.fillStyle = g;
             ctx.fillRect(slot.x, slot.y, slot.w, slot.h);
