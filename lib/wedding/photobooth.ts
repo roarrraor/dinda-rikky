@@ -25,7 +25,7 @@
  *    `public/assets/photobooth/frames/README.md`.
  */
 
-export type LayoutId = "duo" | "trio" | "classic";
+export type LayoutId = "strip" | "grid" | "portrait" | "duet";
 
 export interface PhotoboothLayout {
   id: LayoutId;
@@ -40,41 +40,45 @@ export interface PhotoboothLayout {
   outW: number;
 }
 
-/** Tiga strip vertikal (desain Roar 2026-11-18, dari mockup): Duo 2 pose,
- *  Classic 4 pose (bawaan terpilih), Trio 3 pose. Grid 2×2, Potret, dan
- *  Duet dihapus — semua pilihan sekarang strip vertikal. */
 export const LAYOUTS: PhotoboothLayout[] = [
   {
-    id: "duo",
-    name: "Duo",
-    desc: "Dua pose dalam satu strip.",
-    shots: 2,
-    orientation: "Vertikal",
-    photoAspect: 4 / 3,
-    outW: 900,
-  },
-  {
-    id: "classic",
-    name: "Classic",
-    desc: "Empat pose, strip klasik.",
-    shots: 4,
-    orientation: "Vertikal",
-    photoAspect: 4 / 3,
-    outW: 900,
-  },
-  {
-    id: "trio",
-    name: "Trio",
-    desc: "Tiga pose, strip klasik.",
+    id: "strip",
+    name: "Photostrip",
+    desc: "Strip klasik tiga pose, memanjang ke bawah.",
     shots: 3,
     orientation: "Vertikal",
+    badge: "Paling populer",
     photoAspect: 4 / 3,
     outW: 900,
   },
+  {
+    id: "grid",
+    name: "Grid 2×2",
+    desc: "Empat pose dalam kotak yang rapi.",
+    shots: 4,
+    orientation: "Persegi",
+    photoAspect: 1,
+    outW: 1080,
+  },
+  {
+    id: "portrait",
+    name: "Potret",
+    desc: "Satu pose besar, vertikal.",
+    shots: 1,
+    orientation: "Vertikal",
+    photoAspect: 4 / 5,
+    outW: 900,
+  },
+  {
+    id: "duet",
+    name: "Duet",
+    desc: "Dua pose berdampingan, melebar.",
+    shots: 2,
+    orientation: "Horizontal",
+    photoAspect: 4 / 3,
+    outW: 1200,
+  },
 ];
-
-/** Layout bawaan terpilih (Classic, sesuai mockup Roar). */
-export const DEFAULT_LAYOUT_ID: LayoutId = "classic";
 
 export interface StripGeometry {
   w: number;
@@ -88,16 +92,18 @@ export interface StripGeometry {
   slots: { x: number; y: number; w: number; h: number }[];
 }
 
-/** Geometri kanvas output untuk satu layout (dipakai preview & unduhan).
- *  Semua layout sekarang strip vertikal satu kolom. */
+/** Geometri kanvas output untuk satu layout (dipakai preview & unduhan). */
 export function layoutGeometry(layout: PhotoboothLayout): StripGeometry {
   const pad = 48;
   const gap = 24;
   const footerH = 192;
-  const photoW = layout.outW - pad * 2;
+  const photoW =
+    layout.id === "grid" || layout.id === "duet"
+      ? (layout.outW - pad * 2 - gap) / 2
+      : layout.outW - pad * 2;
   const photoH = Math.round(photoW / layout.photoAspect);
-  const cols = 1;
-  const rows = layout.shots;
+  const cols = layout.id === "grid" || layout.id === "duet" ? 2 : 1;
+  const rows = Math.ceil(layout.shots / cols);
   const h = pad + rows * photoH + (rows - 1) * gap + footerH + pad;
   const slots = Array.from({ length: layout.shots }, (_, i) => {
     const r = Math.floor(i / cols);
@@ -165,7 +171,7 @@ export const IMAGE_FRAMES: ImageFrame[] = [
     name: "Renda Teh",
     concept: "Klasik",
     src: "/assets/photobooth/frames/renda-teh-strip.svg",
-    layouts: ["trio"],
+    layouts: ["strip"],
     footer: "drawn",
     layer: "overlay",
   },
@@ -174,7 +180,7 @@ export const IMAGE_FRAMES: ImageFrame[] = [
     name: "Botanical",
     concept: "Klasik",
     src: "/assets/photobooth/frames/botanical.webp",
-    layouts: ["duo", "trio", "classic"],
+    layouts: ["strip", "grid", "portrait", "duet"],
     footer: "drawn",
     layer: "background",
     footerFade: "#F3EADB",
@@ -240,12 +246,6 @@ export const DEFAULT_SHAPE_ID: ShapeId = "lembut";
 export const PHOTOBOOTH_COPY = {
   title: "Photobooth",
   tagline: "Berpose sebentar. Bawa pulang ceritanya.",
-  /** kicker langkah 1 (desain Roar 2026-11-18, dari mockup) */
-  coupleDate: "Dinda & Rikky · 20.12.26",
-  /** label strip yang terpilih di langkah 1 */
-  selected: "Terpilih",
-  /** tombol langkah 1: buka galeri strip tersimpan di perangkat ini */
-  viewGuestPhotos: "Lihat foto tamu",
   step1: "Pilih tata letak",
   step1Desc: "Pilih satu gaya, lalu abadikan momenmu dalam beberapa jepretan.",
   step2: "Ambil foto",

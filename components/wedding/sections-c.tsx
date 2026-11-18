@@ -7,6 +7,7 @@ import dayjs from "dayjs";
 import { AnimatePresence, motion } from "motion/react";
 import { Camera, Check, CheckCircle2, ChevronDown, ChevronRight, ChevronUp, Copy, Images, MessageCircle, Minus, Plus, Send, Smile, X } from "lucide-react";
 import { ASSETS, COPY, ID, paletteVars } from "@/lib/wedding/data";
+import { LAYOUTS } from "@/lib/wedding/photobooth";
 import { allStickers, stickerSrc } from "@/lib/wedding/stickers";
 import { formatDate } from "@/lib/wedding/format";
 import { sanitizeRichText } from "@/lib/wedding/sanitize";
@@ -310,7 +311,9 @@ export function GallerySection({ photos }: { photos: string[] }) {
  * Photobooth versi kita (bukan mirror inveet): studio kamera di rute
  * `/photobooth` — pilih tata letak, ambil foto (kamera / galeri), atur
  * bingkai, simpan / bagikan. Foto diproses di perangkat tamu.
- * Galeri di bawah ini menampilkan strip yang disimpan di perangkat ini.
+ * Di halaman depan, keempat pilihan tata letak ditampilkan sebagai strip
+ * hasil jadi (contoh, pakai ilustrasi pose Dinda & Rikky) ala mockup Roar.
+ * Ketuk salah satu strip untuk membuka photobooth.
  */
 export function PhotoboothSection({
   caption,
@@ -321,6 +324,14 @@ export function PhotoboothSection({
   const [wallOpen, setWallOpen] = useState(false);
   const { poses } = ASSETS;
 
+  /** Foto contoh per layout (ilustrasi pose, urutan sama tiap strip). */
+  const samplePhotos: Record<string, readonly { src: string }[]> = {
+    strip: [poses[0], poses[1], poses[2]],
+    grid: [poses[0], poses[1], poses[2], poses[3]],
+    portrait: [poses[0]],
+    duet: [poses[0], poses[1]],
+  };
+
   return (
     <section id="pt-photobooth" className="@container relative bg-(--pt-leaf) px-6 pt-10 pb-12 text-center">
       <Reveal>
@@ -328,21 +339,40 @@ export function PhotoboothSection({
         <p className={`mx-auto mt-3 max-w-76 ${BODY}`}>{COPY.photoboothNote}</p>
       </Reveal>
 
-      <Reveal delay={0.1} className="mx-auto mt-8 w-[42cqw] -rotate-3">
-        <div className="bg-white px-[7%] pt-[7%] shadow-[0_16px_24px_-12px_rgb(63_74_44/0.55)]">
-          <div className="space-y-[5%]">
-            {poses.map((p) => (
-              <div key={p.src} className="relative aspect-5/4 overflow-hidden">
-                <Image src={p.src} alt="" fill sizes="160px" className="object-cover object-bottom" />
-              </div>
-            ))}
-          </div>
-          <div className="py-[10%] font-sans text-(--theme-text)">
-            <p className="text-[8px] font-semibold tracking-[0.3em] uppercase">{caption.names}</p>
-            <p className="mt-0.5 text-[7px] tracking-[0.3em]">{caption.date}</p>
-          </div>
-        </div>
-      </Reveal>
+      {/* 4 pilihan tata letak sebagai strip hasil jadi (contoh) */}
+      <div className="mx-auto mt-8 grid max-w-md grid-cols-2 gap-4">
+        {LAYOUTS.map((l) => {
+          const photos = samplePhotos[l.id] ?? [];
+          const twoCol = l.id === "grid" || l.id === "duet";
+          const photoAspect =
+            l.id === "grid" ? "aspect-square" : l.id === "portrait" ? "aspect-[4/5]" : "aspect-[4/3]";
+          return (
+            <div key={l.id} className="flex flex-col items-center">
+              <button
+                type="button"
+                onClick={() => router.push("/photobooth")}
+                aria-label={`Coba photobooth ${l.name}`}
+                className="w-full cursor-pointer bg-white px-2 pt-2 shadow-[0_16px_24px_-12px_rgb(63_74_44/0.55)] transition-transform active:scale-[0.98]"
+              >
+                <div className={twoCol ? "grid grid-cols-2 gap-1.5" : "space-y-1.5"}>
+                  {photos.map((p) => (
+                    <div key={p.src} className={`relative overflow-hidden ${photoAspect}`}>
+                      <Image src={p.src} alt="" fill sizes="200px" className="object-cover object-bottom" />
+                    </div>
+                  ))}
+                </div>
+                <div className="py-2.5 font-sans text-(--theme-text)">
+                  <p className="text-[8px] font-semibold tracking-[0.3em] uppercase">{caption.names}</p>
+                  <p className="mt-0.5 text-[7px] tracking-[0.3em]">{caption.date}</p>
+                </div>
+              </button>
+              <span className="mt-2.5 font-montserrat text-[13px] font-semibold text-(--theme-text)">
+                {l.name} ({l.shots} Pose)
+              </span>
+            </div>
+          );
+        })}
+      </div>
 
       <Reveal className="mt-9 flex flex-col items-center gap-3">
         <PtButton onClick={() => router.push("/photobooth")}>
