@@ -45,7 +45,16 @@ export function Lightbox({
       body.style.position = prevPosition;
       body.style.top = prevTop;
       body.style.width = prevWidth;
-      window.scrollTo(0, savedY);
+      // html memakai scroll-behavior: smooth, jadi kembalikan posisi secara
+      // instan (matikan smooth sementara) dan setelah gaya body pulih (rAF),
+      // supaya tidak menganimasi dari atas ke galeri / berakhir di atas.
+      const root = document.documentElement;
+      const prevBehavior = root.style.scrollBehavior;
+      root.style.scrollBehavior = "auto";
+      requestAnimationFrame(() => {
+        window.scrollTo(0, savedY);
+        root.style.scrollBehavior = prevBehavior;
+      });
     };
   }, []);
 

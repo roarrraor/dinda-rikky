@@ -583,8 +583,8 @@ const DEFAULT_LAYOUT: PhotoboothLayout = LAYOUTS.find((l) => l.id === DEFAULT_LA
  *  pilih layout di langkah 1: 4 strip tersusun di cincin 3D, drag buat
  *  putar (momentum + snap), ketuk strip buat fokus. Strip tengah = terpilih. */
 const RING_STEP = 360 / LAYOUTS.length; // 90
-const RING_RADIUS = 180;
-const RING_CARD_W = 150;
+const RING_RADIUS = 130;
+const RING_CARD_W = 120;
 /** Tinggi slot foto 4:3 (sama dengan slot hasil jadi) + tinggi kartu per layout. */
 const RING_SLOT_H = ((RING_CARD_W - 16) * 3) / 4;
 const ringCardH = (shots: number) => 16 + shots * RING_SLOT_H + (shots - 1) * 6;
@@ -848,7 +848,7 @@ function StripRing({
       onPointerUp={onPointerUp}
       onPointerCancel={onPointerCancel}
       onClick={onClick}
-      className="relative h-[520px] touch-pan-y overflow-hidden outline-none select-none"
+      className="relative h-[440px] touch-pan-y overflow-hidden outline-none select-none"
       style={{ perspective: `${RING_PERSPECTIVE}px` }}
     >
       <div
