@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useCallback, useEffect, useRef, useState } from "react";
+import NextImage from "next/image";
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import {
   Aperture,
@@ -50,6 +51,7 @@ import {
   type ShapeId,
 } from "@/lib/wedding/photobooth";
 import { PtButton } from "./primitives";
+import { ASSETS } from "@/lib/wedding/data";
 import { DISCOVERED_FRAMES } from "@/lib/wedding/photobooth-assets.generated";
 
 /** Semua frame gambar: hardcode + yang ketemu otomatis dari folder
@@ -578,6 +580,338 @@ const PB_CREAM = "bg-[#FAF6EE]";
 /** Layout bawaan langkah 1 (Classic, sesuai mockup Roar). */
 const DEFAULT_LAYOUT: PhotoboothLayout = LAYOUTS.find((l) => l.id === DEFAULT_LAYOUT_ID) ?? LAYOUTS[0];
 
+/** Foto contoh per layout buat pratinjau strip (ilustrasi pose). */
+const SAMPLE_PHOTOS: Record<string, readonly { src: string }[]> = {
+  duo: [ASSETS.poses[0], ASSETS.poses[1]],
+  classic: [ASSETS.poses[0], ASSETS.poses[1], ASSETS.poses[2], ASSETS.poses[3]],
+  trio: [ASSETS.poses[0], ASSETS.poses[1], ASSETS.poses[2]],
+  portrait: [ASSETS.poses[0]],
+};
+
+/** Carousel melingkar (ala React Bits Circular Carousel, preset orbit) buat
+ *  pilih layout di langkah 1: 4 strip tersusun di cincin 3D, drag buat
+ *  putar (momentum + snap), ketuk strip buat fokus. Strip tengah = terpilih. */
+const RING_STEP = 360 / LAYOUTS.length; // 90
+const RING_RADIUS = 180;
+const RING_CARD_W = 150;
+const RING_CARD_H = 320;
+const RING_PERSPECTIVE = 900;
+const RING_TILT = -6;
+const RING_SPRING = 118;
+const RING_MOMENTUM = 0.6;
+const RING_SETTLE = 9;
+
+const wrapAngle = (deg: number) => ((((deg + 180) % 360) + 360) % 360) - 180;
+
+function StripRing({
+  activeId,
+  onSelect,
+}: {
+  activeId: PhotoboothLayout["id"];
+  onSelect: (l: PhotoboothLayout) => void;
+}) {
+  const initialIndex = Math.max(0, LAYOUTS.findIndex((l) => l.id === activeId));
+  const stageRef = useRef<HTMLDivElement>(null);
+  const ringRef = useRef<HTMLDivElement>(null);
+  const cardRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const angleRef = useRef(-initialIndex * RING_STEP);
+  const velocityRef = useRef(0);
+  const targetRef = useRef<number | null>(null);
+  const lastRef = useRef(0);
+  const rafRef = useRef(0);
+  const dragRef = useRef<{
+    id: number;
+    x: number;
+    y: number;
+    angle: number;
+    moved: boolean;
+    samples: { t: number; angle: number }[];
+  } | null>(null);
+  const [active, setActive] = useState(initialIndex);
+  const activeRef = useRef(initialIndex);
+  const onSelectRef = useRef(onSelect);
+  onSelectRef.current = onSelect;
+
+  /** Tulis posisi cincin + kartu ke DOM, dan laporkan strip yang di tengah. */
+  const render = useCallback(() => {
+    const ring = ringRef.current;
+    if (ring) {
+      ring.style.transform = `rotateX(${RING_TILT}deg) rotateY(${angleRef.current}deg)`;
+    }
+    for (let i = 0; i < LAYOUTS.length; i++) {
+      const card = cardRefs.current[i];
+      if (!card) continue;
+      const base = i * RING_STEP;
+      const world = wrapAngle(base + angleRef.current);
+      const facing = Math.cos((world * Math.PI) / 180);
+      // billboard: kartu selalu menghadap kamera meski posisinya di cincin
+      card.style.transform = `rotateY(${base}deg) translateZ(${RING_RADIUS}px) rotateY(${-(base + angleRef.current)}deg)`;
+      const fade = 0.55 * Math.pow((1 - facing) / 2, 1.25);
+      card.style.opacity = String(1 - fade);
+    }
+    const idx =
+      ((Math.round(-angleRef.current / RING_STEP) % LAYOUTS.length) + LAYOUTS.length) %
+      LAYOUTS.length;
+    if (idx !== activeRef.current) {
+      activeRef.current = idx;
+      setActive(idx);
+      onSelectRef.current(LAYOUTS[idx]);
+    }
+  }, []);
+
+  const frame = useCallback(
+    (now: number) => {
+      rafRef.current = 0;
+      const dt = lastRef.current ? Math.min((now - lastRef.current) / 1000, 0.05) : 1 / 60;
+      lastRef.current = now;
+      let busy = false;
+      if (dragRef.current) {
+        busy = true; // sudut diatur langsung dari pointermove
+      } else if (targetRef.current !== null) {
+        // pegas menuju target (snap / fokus)
+        let remaining = dt;
+        const damping = 2 * Math.sqrt(RING_SPRING);
+        while (remaining > 0) {
+          const h = Math.min(remaining, 1 / 240);
+          const accel =
+            RING_SPRING * (targetRef.current - angleRef.current) - damping * velocityRef.current;
+          velocityRef.current += accel * h;
+          angleRef.current += velocityRef.current * h;
+          remaining -= h;
+        }
+        if (
+          Math.abs(targetRef.current - angleRef.current) < 0.01 &&
+          Math.abs(velocityRef.current) < 0.05
+        ) {
+          angleRef.current = targetRef.current;
+          velocityRef.current = 0;
+          targetRef.current = null;
+        }
+        busy = true;
+      } else {
+        // meluncur bebas (momentum), lalu snap ke strip terdekat
+        const tau = 0.18 + RING_MOMENTUM * 1.5;
+        velocityRef.current += (0 - velocityRef.current) * (1 - Math.exp(-dt / tau));
+        angleRef.current += velocityRef.current * dt;
+        if (Math.abs(velocityRef.current) < RING_SETTLE) {
+          const snapped = Math.round(angleRef.current / RING_STEP) * RING_STEP;
+          if (Math.abs(snapped - angleRef.current) > 0.01) {
+            targetRef.current = snapped;
+          } else {
+            angleRef.current = snapped;
+            velocityRef.current = 0;
+          }
+        }
+        busy = Math.abs(velocityRef.current) > 0.01 || targetRef.current !== null;
+      }
+      render();
+      if (busy && !document.hidden) {
+        rafRef.current = requestAnimationFrame(frame);
+      } else {
+        lastRef.current = 0;
+      }
+    },
+    [render],
+  );
+
+  const wake = useCallback(() => {
+    if (!rafRef.current) rafRef.current = requestAnimationFrame(frame);
+  }, [frame]);
+
+  /** Putar strip ke-i ke tengah (ketuk / keyboard). */
+  const focusIndex = useCallback(
+    (index: number) => {
+      let target = -index * RING_STEP;
+      target += 360 * Math.round((angleRef.current - target) / 360);
+      targetRef.current = target;
+      wake();
+    },
+    [wake],
+  );
+
+  const stepBy = useCallback(
+    (delta: number) => {
+      const base = targetRef.current ?? Math.round(angleRef.current / RING_STEP) * RING_STEP;
+      targetRef.current = base - delta * RING_STEP;
+      wake();
+    },
+    [wake],
+  );
+
+  useLayoutEffect(() => {
+    render();
+    wake();
+    return () => {
+      if (rafRef.current) cancelAnimationFrame(rafRef.current);
+      rafRef.current = 0;
+    };
+  }, [render, wake]);
+
+  const onPointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (e.pointerType === "mouse" && e.button !== 0) return;
+    const stage = stageRef.current;
+    if (!stage) return;
+    dragRef.current = {
+      id: e.pointerId,
+      x: e.clientX,
+      y: e.clientY,
+      angle: angleRef.current,
+      moved: false,
+      samples: [{ t: performance.now(), angle: angleRef.current }],
+    };
+    targetRef.current = null;
+    velocityRef.current = 0;
+    try {
+      stage.setPointerCapture(e.pointerId);
+    } catch {
+      /* abaikan */
+    }
+    wake();
+  };
+
+  const onPointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
+    const drag = dragRef.current;
+    if (!drag || drag.id !== e.pointerId) return;
+    const dx = e.clientX - drag.x;
+    const dy = e.clientY - drag.y;
+    if (!drag.moved) {
+      if (Math.abs(dx) < 5) return;
+      // geser vertikal di layar sentuh = scroll halaman, bukan putar cincin
+      if (Math.abs(dy) > Math.abs(dx) * 1.2 && e.pointerType !== "mouse") {
+        dragRef.current = null;
+        return;
+      }
+      drag.moved = true;
+    }
+    const perPixel = 180 / (Math.PI * RING_RADIUS);
+    angleRef.current = drag.angle + dx * perPixel;
+    const now = performance.now();
+    drag.samples.push({ t: now, angle: angleRef.current });
+    while (drag.samples.length > 2 && now - drag.samples[0].t > 110) drag.samples.shift();
+    wake();
+  };
+
+  const onPointerUp = (e: React.PointerEvent<HTMLDivElement>) => {
+    const drag = dragRef.current;
+    if (!drag || drag.id !== e.pointerId) return;
+    dragRef.current = null;
+    if (!drag.moved) {
+      // ketuk: fokus strip yang diketuk
+      const card = (e.target as HTMLElement).closest?.("[data-ring-index]");
+      if (card) focusIndex(Number(card.getAttribute("data-ring-index")));
+      return;
+    }
+    const s = drag.samples;
+    const first = s[0];
+    const last = s[s.length - 1];
+    const span = (last.t - first.t) / 1000;
+    const velocity =
+      span > 0.008 ? Math.max(-1400, Math.min(1400, (last.angle - first.angle) / span)) : 0;
+    velocityRef.current = velocity;
+    const tau = 0.18 + RING_MOMENTUM * 1.5;
+    targetRef.current =
+      Math.round((angleRef.current + velocity * tau * 0.55) / RING_STEP) * RING_STEP;
+    wake();
+  };
+
+  const onPointerCancel = (e: React.PointerEvent<HTMLDivElement>) => {
+    const drag = dragRef.current;
+    if (!drag || drag.id !== e.pointerId) return;
+    dragRef.current = null;
+    targetRef.current = Math.round(angleRef.current / RING_STEP) * RING_STEP;
+    wake();
+  };
+
+  const onKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
+    if (e.key === "ArrowRight") {
+      stepBy(1);
+      e.preventDefault();
+    } else if (e.key === "ArrowLeft") {
+      stepBy(-1);
+      e.preventDefault();
+    }
+  };
+
+  return (
+    <div
+      ref={stageRef}
+      role="listbox"
+      aria-label="Pilih tata letak photobooth"
+      tabIndex={0}
+      onKeyDown={onKeyDown}
+      onPointerDown={onPointerDown}
+      onPointerMove={onPointerMove}
+      onPointerUp={onPointerUp}
+      onPointerCancel={onPointerCancel}
+      className="relative h-[400px] touch-pan-y overflow-hidden outline-none select-none"
+      style={{ perspective: `${RING_PERSPECTIVE}px` }}
+    >
+      <div
+        ref={ringRef}
+        className="absolute left-1/2 top-1/2 h-0 w-0 will-change-transform"
+        style={{ transformStyle: "preserve-3d" }}
+      >
+        {LAYOUTS.map((l, i) => {
+          const photos = SAMPLE_PHOTOS[l.id] ?? [];
+          const isActive = i === active;
+          return (
+            <div
+              key={l.id}
+              ref={(el) => {
+                cardRefs.current[i] = el;
+              }}
+              data-ring-index={i}
+              role="option"
+              aria-selected={isActive}
+              aria-label={`${l.name} (${l.shots}-Pose)`}
+              className="absolute cursor-pointer will-change-transform"
+              style={{
+                width: RING_CARD_W,
+                height: RING_CARD_H,
+                marginLeft: -RING_CARD_W / 2,
+                marginTop: -RING_CARD_H / 2,
+              }}
+            >
+              <div
+                className={`relative h-full w-full rounded-2xl bg-white p-2 shadow-[0_6px_20px_-8px_rgba(63,74,44,0.25)] ${
+                  isActive ? "ring-2 ring-(--theme-primary)" : ""
+                }`}
+              >
+                {isActive && (
+                  <span className="absolute -top-3 left-1/2 z-10 flex -translate-x-1/2 items-center gap-1 rounded-full bg-white px-2.5 py-1 font-montserrat text-[11px] font-semibold whitespace-nowrap text-(--theme-text) shadow-[0_2px_8px_rgba(63,74,44,0.2)]">
+                    <Check size={12} className="text-(--theme-primary)" />
+                    {T.selected}
+                  </span>
+                )}
+                <span className="flex h-[270px] flex-col gap-1.5">
+                  {photos.map((p) => (
+                    <span key={p.src} className="relative min-h-0 flex-1 overflow-hidden rounded-lg">
+                      <NextImage
+                        src={p.src}
+                        alt=""
+                        fill
+                        sizes="160px"
+                        draggable={false}
+                        className="pointer-events-none object-cover object-bottom"
+                      />
+                    </span>
+                  ))}
+                </span>
+                <span className="mt-2 block text-center font-sans text-(--theme-text)">
+                  <span className="block text-[8px] font-semibold tracking-[0.3em] uppercase">
+                    Dinda &amp; Rikky
+                  </span>
+                  <span className="mt-0.5 block text-[7px] tracking-[0.3em]">20.12.26</span>
+                </span>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
 export function PhotoboothStudio({ caption }: { caption: PhotoboothCaption }) {
   const [step, setStep] = useState<Step>("layout");
   const [layout, setLayout] = useState<PhotoboothLayout>(DEFAULT_LAYOUT);
@@ -935,51 +1269,22 @@ export function PhotoboothStudio({ caption }: { caption: PhotoboothCaption }) {
       {/* ---------- LANGKAH 1: tata letak (desain Roar 2026-11-18, dari mockup) ---------- */}
       {step === "layout" && (
         <main className="flex-1 px-5 pt-2 pb-10 text-center">
-          <p className={PB_KICKER}>{T.coupleDate}</p>
+          <p className={PB_KICKER}>{T.step1}</p>
           <h1 className={`mt-1 ${PB_TITLE}`}>{T.title}</h1>
           <p className={`mx-auto mt-2 max-w-80 ${PB_BODY}`}>{T.tagline}</p>
 
-          {/* tiga strip berdampingan, tinggi mengikuti jumlah pose */}
-          <div className="mt-9 flex items-start justify-center gap-3">
-            {LAYOUTS.map((l) => {
-              const selected = l.id === layout.id;
-              return (
-                <div key={l.id} className="flex w-[23%] max-w-28 flex-col items-center">
-                  <button
-                    type="button"
-                    onClick={() => pickLayout(l)}
-                    aria-pressed={selected}
-                    aria-label={`${l.name} (${l.shots}-Pose)`}
-                    className={`relative w-full cursor-pointer rounded-2xl bg-white p-2 shadow-[0_6px_20px_-8px_rgba(63,74,44,0.25)] transition-transform active:scale-[0.98] ${
-                      selected ? "ring-2 ring-(--theme-primary)" : ""
-                    }`}
-                  >
-                    {selected && (
-                      <span className="absolute -top-3 left-1/2 flex -translate-x-1/2 items-center gap-1 rounded-full bg-white px-2.5 py-1 font-montserrat text-[11px] font-semibold whitespace-nowrap text-(--theme-text) shadow-[0_2px_8px_rgba(63,74,44,0.2)]">
-                        <Check size={12} className="text-(--theme-primary)" />
-                        {T.selected}
-                      </span>
-                    )}
-                    <span className="flex flex-col gap-2">
-                      {Array.from({ length: l.shots }, (_, i) => (
-                        <span
-                          key={i}
-                          className="grid aspect-[4/3] place-items-center rounded-lg border border-dashed border-[#C9C2B2]"
-                        >
-                          <UserRound size={26} className="text-[#C9C2B2]" />
-                        </span>
-                      ))}
-                    </span>
-                  </button>
-                  <span className="mt-3 font-montserrat text-[13px] font-semibold text-(--theme-text)">
-                    {l.name} ({l.shots}-Pose)
-                  </span>
-                </div>
-              );
-            })}
+          {/* carousel melingkar: drag buat putar, ketuk strip buat pilih */}
+          <div className="mt-6">
+            <StripRing activeId={layout.id} onSelect={pickLayout} />
           </div>
 
-          <div className="mx-auto mt-9 flex w-full max-w-80 flex-col gap-3">
+          {/* layout terpilih */}
+          <p className="font-montserrat text-[17px] font-semibold text-(--theme-text)">
+            {layout.name} ({layout.shots}-Pose)
+          </p>
+          <p className={`mx-auto mt-1 max-w-80 ${PB_BODY}`}>{layout.desc}</p>
+
+          <div className="mx-auto mt-6 flex w-full max-w-80 flex-col gap-3">
             <PtButton friendly className="w-full" onClick={startPhotos}>
               <Camera size={16} />
               {T.step2}

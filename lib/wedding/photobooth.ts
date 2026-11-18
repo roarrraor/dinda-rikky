@@ -250,8 +250,6 @@ export const DEFAULT_SHAPE_ID: ShapeId = "lembut";
 export const PHOTOBOOTH_COPY = {
   title: "Photobooth",
   tagline: "Berpose sebentar. Bawa pulang ceritanya.",
-  /** kicker langkah 1 (desain Roar 2026-11-18, dari mockup) */
-  coupleDate: "Dinda & Rikky · 20.12.26",
   /** label strip yang terpilih di langkah 1 */
   selected: "Terpilih",
   /** tombol langkah 1: buka galeri strip tersimpan di perangkat ini */
