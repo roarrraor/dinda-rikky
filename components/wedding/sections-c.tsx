@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useMemo, useRef, useState, type CSSProperties, type FormEvent } from "react";
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type CSSProperties, type FormEvent } from "react";
 import { createPortal } from "react-dom";
 import dayjs from "dayjs";
 import { AnimatePresence, motion } from "motion/react";
@@ -113,42 +113,196 @@ export function DressCodeSection({
 
 /* ---------- Galeri ---------- */
 
+/**
+ * Galeri parallax carousel (ala React Bits Parallax Carousel, dibuat sendiri —
+ * komponen aslinya PRO berbayar, jadi tidak diinstal): deretan foto polaroid
+ * yang miring kiri-kanan selang-seling kayak digantung di tali, dengan
+ * lakban kecil di atas tiap foto. Saat bidang bergeser dari tengah, gambar
+ * di dalamnya ikut bergeser berlawanan (parallax) dan memudar ke hitam-putih.
+ * Drag / geser buat pindah foto, ketuk foto tengah buat lightbox.
+ */
+const GAL_SPRING = 60;
+const GAL_DAMP = 2 * Math.sqrt(GAL_SPRING);
+
 export function GallerySection({ photos }: { photos: string[] }) {
   const [open, setOpen] = useState<number | null>(null);
   const [current, setCurrent] = useState(0);
-  const [dragX, setDragX] = useState(0);
-  const [dragging, setDragging] = useState(false);
-  const startX = useRef(0);
-  const dragXRef = useRef(0);
-  const dragged = useRef(false);
-  const tapPhoto = useRef<string | null>(null);
-  // Penjaga drag lewat ref (bukan state) supaya tidak kena closure basi:
-  // pointerup/cancel yang datang dari render lama tetap tahu drag sedang jalan.
-  const dragActive = useRef(false);
   const n = photos.length;
-  // Posisi relatif tiap foto terhadap yang sedang tampil (loop): 0 = utama,
-  // ±1 = tetangga kiri/kanan, selebihnya di luar layar.
-  const rel = (i: number) => {
-    let r = (i - current) % n;
-    if (r > n / 2) r -= n;
-    if (r < -n / 2) r += n;
-    return r;
-  };
-  const go = (d: number) => setCurrent((c) => (c + d + n) % n);
-  // Commit drag: geser cukup jauh -> pindah foto. Dipakai pointerup DAN
-  // pointercancel (sebagian browser mengakhiri drag dengan cancel, bukan up).
-  const commitDrag = () => {
-    const dx = dragXRef.current;
-    dragXRef.current = 0;
-    setDragX(0);
-    if (dx < -60) go(1);
-    else if (dx > 60) go(-1);
-  };
-  const endDrag = () => {
-    if (!dragActive.current) return;
+  const wrapRef = useRef<HTMLDivElement>(null);
+  const trackRef = useRef<HTMLUListElement>(null);
+  const planeRefs = useRef<(HTMLLIElement | null)[]>([]);
+  const imgRefs = useRef<(HTMLSpanElement | null)[]>([]);
+  const dimsRef = useRef({ w: 0, plane: 0, step: 0 });
+  const posRef = useRef(0);
+  const targetRef = useRef(0);
+  const velRef = useRef(0);
+  const lastRef = useRef(0);
+  const rafRef = useRef(0);
+  const dragActive = useRef(false);
+  const drag = useRef<{
+    id: number;
+    x: number;
+    pos: number;
+    moved: boolean;
+    samples: { t: number; pos: number }[];
+  } | null>(null);
+  const tapPhoto = useRef<string | null>(null);
+  const currentRef = useRef(0);
+
+  /** Ukur lebar wadah (cqw = % lebar section): bidang 64cqw, jeda 9cqw. */
+  const measure = useCallback(() => {
+    const el = wrapRef.current;
+    if (!el) return;
+    const w = el.getBoundingClientRect().width;
+    if (w > 0) dimsRef.current = { w, plane: w * 0.64, step: w * 0.73 };
+  }, []);
+
+  /** Tulis posisi track + parallax tiap bidang langsung ke DOM (per frame). */
+  const render = useCallback(() => {
+    const { w, plane, step } = dimsRef.current;
+    const track = trackRef.current;
+    if (!track || !w) return;
+    const pos = posRef.current;
+    const tx = (w - plane) / 2 - pos * step;
+    track.style.transform = `translateX(${tx}px)`;
+    for (let i = 0; i < n; i++) {
+      const li = planeRefs.current[i];
+      const img = imgRefs.current[i];
+      const centerX = i * step + plane / 2 + tx;
+      const dist = centerX - w / 2;
+      const ad = Math.abs(dist) / step;
+      const k = Math.max(0, Math.min(1, (ad - 0.25) / 0.75));
+      if (li) {
+        const s = 1 - k * 0.08;
+        li.style.transform = `rotate(${(i % 2 === 0 ? -1 : 1) * 3}deg) scale(${s})`;
+      }
+      if (img) {
+        const shift = Math.max(-18, Math.min(18, -dist * 0.06));
+        img.style.transform = `translateX(${shift}px) scale(1.18)`;
+        img.style.filter = `grayscale(${k})`;
+      }
+    }
+    const idx = Math.max(0, Math.min(n - 1, Math.round(pos)));
+    if (idx !== currentRef.current) {
+      currentRef.current = idx;
+      setCurrent(idx);
+    }
+  }, [n]);
+
+  /** Loop rAF: pegas menuju target (lembut, kayak lerp parallax). */
+  const frame = useCallback(
+    (now: number) => {
+      rafRef.current = 0;
+      const dt = lastRef.current ? Math.min((now - lastRef.current) / 1000, 0.05) : 1 / 60;
+      lastRef.current = now;
+      let busy = false;
+      if (!drag.current) {
+        const step = 1 / 240;
+        let t = dt;
+        while (t > 0) {
+          const h = Math.min(step, t);
+          const a = GAL_SPRING * (targetRef.current - posRef.current) - GAL_DAMP * velRef.current;
+          velRef.current += a * h;
+          posRef.current += velRef.current * h;
+          t -= h;
+        }
+        if (Math.abs(targetRef.current - posRef.current) < 0.002 && Math.abs(velRef.current) < 0.02) {
+          posRef.current = targetRef.current;
+          velRef.current = 0;
+        } else {
+          busy = true;
+        }
+      } else {
+        busy = true;
+      }
+      render();
+      if (busy && !document.hidden) rafRef.current = requestAnimationFrame(frame);
+      else lastRef.current = 0;
+    },
+    [render],
+  );
+
+  const wake = useCallback(() => {
+    if (!rafRef.current) rafRef.current = requestAnimationFrame(frame);
+  }, [frame]);
+
+  const goTo = useCallback(
+    (i: number) => {
+      targetRef.current = Math.max(0, Math.min(n - 1, i));
+      wake();
+    },
+    [n, wake],
+  );
+
+  /** Geser jari/kursor: posisi mengikuti langsung, dengan batas lunak di ujung. */
+  const handleDragMove = useCallback(
+    (clientX: number) => {
+      const d = drag.current;
+      if (!d) return;
+      const { step } = dimsRef.current;
+      if (!step) return;
+      const dx = clientX - d.x;
+      if (Math.abs(dx) > 8) d.moved = true;
+      let p = d.pos - dx / step;
+      p = Math.max(-0.5, Math.min(n - 1 + 0.5, p));
+      posRef.current = p;
+      targetRef.current = p;
+      const now = performance.now();
+      d.samples.push({ t: now, pos: p });
+      while (d.samples.length > 2 && now - d.samples[0].t > 110) d.samples.shift();
+    },
+    [n],
+  );
+
+  /** Lepas: ketukan (buka lightbox / pindah ke foto itu) atau snap + momentum. */
+  const handleDragEnd = useCallback(() => {
+    const d = drag.current;
+    if (!d) return;
+    drag.current = null;
     dragActive.current = false;
-    setDragging(false);
-  };
+    if (!d.moved) {
+      if (tapPhoto.current !== null) {
+        const i = Number(tapPhoto.current);
+        tapPhoto.current = null;
+        if (i === currentRef.current) setOpen(i);
+        else goTo(i);
+      }
+      return;
+    }
+    let vel = 0;
+    const s = d.samples;
+    if (s.length >= 2) {
+      const a = s[0];
+      const b = s[s.length - 1];
+      const span = (b.t - a.t) / 1000;
+      if (span > 0) vel = (b.pos - a.pos) / span;
+    }
+    velRef.current = 0;
+    targetRef.current = Math.max(0, Math.min(n - 1, Math.round(posRef.current + vel * 0.3)));
+    wake();
+  }, [goTo, n, wake]);
+
+  useEffect(() => {
+    measure();
+    const ro = new ResizeObserver(() => {
+      measure();
+      render();
+      wake();
+    });
+    if (wrapRef.current) ro.observe(wrapRef.current);
+    return () => ro.disconnect();
+  }, [measure, render, wake]);
+
+  useLayoutEffect(() => {
+    measure();
+    render();
+    wake();
+    return () => {
+      if (rafRef.current) cancelAnimationFrame(rafRef.current);
+      rafRef.current = 0;
+    };
+  }, [measure, render, wake]);
+
   if (photos.length === 0) return null;
   const step = (d: number) => setOpen((a) => (a === null ? a : (a + d + photos.length) % photos.length));
 
@@ -157,20 +311,27 @@ export function GallerySection({ photos }: { photos: string[] }) {
       <Reveal className="px-6">
         <SectionTitle>{COPY.galleryTitle}</SectionTitle>
       </Reveal>
-      {/* Expo slider (UI Initiative): foto utama berwarna di tengah, tetangga
-          mengintip dari tepi dalam hitam-putih dan lebih besar; geser untuk
-          ganti foto. Frame tetap polaroid bawaan. */}
+      {/* Parallax carousel: foto polaroid miring selang-seling (kayak digantung
+          di tali), geser buat ganti foto, ketuk foto tengah buat perbesar. */}
       <div
+        ref={wrapRef}
         className="relative mt-6 overflow-hidden py-12 select-none"
         style={{ touchAction: "pan-y" }}
         onPointerDown={(e) => {
           if (e.button !== 0) return;
-          startX.current = e.clientX;
-          dragXRef.current = 0;
-          dragged.current = false;
+          measure();
+          drag.current = {
+            id: e.pointerId,
+            x: e.clientX,
+            pos: posRef.current,
+            moved: false,
+            samples: [{ t: performance.now(), pos: posRef.current }],
+          };
           tapPhoto.current = (e.target as HTMLElement).closest("button")?.dataset.photo ?? null;
+          targetRef.current = posRef.current;
+          velRef.current = 0;
           dragActive.current = true;
-          setDragging(true);
+          wake();
           try {
             // Pola yang sama dengan GiftStack (terbukti jalan): tangkap pointer
             // ke container supaya pointermove/up tetap sampai walau jari/kursor
@@ -179,18 +340,14 @@ export function GallerySection({ photos }: { photos: string[] }) {
           } catch {
             // Fallback kalau capture tidak didukung: dengarkan di window.
             const move = (ev: PointerEvent) => {
-              if (!dragActive.current) return;
-              const dx = ev.clientX - startX.current;
-              if (Math.abs(dx) > 8) dragged.current = true;
-              dragXRef.current = dx;
-              setDragX(dx);
+              if (!drag.current) return;
+              handleDragMove(ev.clientX);
             };
             const up = () => {
               window.removeEventListener("pointermove", move);
               window.removeEventListener("pointerup", up);
               window.removeEventListener("pointercancel", up);
-              endDrag();
-              commitDrag();
+              if (dragActive.current) handleDragEnd();
             };
             window.addEventListener("pointermove", move);
             window.addEventListener("pointerup", up);
@@ -198,85 +355,64 @@ export function GallerySection({ photos }: { photos: string[] }) {
           }
         }}
         onPointerMove={(e) => {
-          if (!dragActive.current) return;
-          const dx = e.clientX - startX.current;
-          if (Math.abs(dx) > 8) dragged.current = true;
-          dragXRef.current = dx;
-          setDragX(dx);
+          if (drag.current) handleDragMove(e.clientX);
         }}
         onPointerUp={() => {
-          if (!dragActive.current) return;
-          endDrag();
-          // Ketukan (bukan geseran): capture membuat klik jatuh ke container,
-          // jadi tap ditangani di sini lewat foto yang ditekan saat pointerdown.
-          if (!dragged.current && tapPhoto.current !== null) {
-            const i = Number(tapPhoto.current);
-            dragXRef.current = 0;
-            setDragX(0);
-            if (rel(i) === 0) setOpen(i);
-            else setCurrent(i);
-            return;
-          }
-          commitDrag();
+          if (dragActive.current) handleDragEnd();
         }}
         onPointerCancel={() => {
-          if (!dragActive.current) return;
-          endDrag();
-          // Drag yang dibatalkan browser tetap di-commit (bukan tap).
-          commitDrag();
+          if (dragActive.current) handleDragEnd();
         }}
       >
-        <ul
-          className="flex gap-[9cqw] px-[18cqw]"
-          style={{
-            transform: `translateX(calc(${-(current + 1) * 73}cqw + ${dragX}px))`,
-            transition: dragging ? "none" : "transform 420ms cubic-bezier(0.16, 1, 0.3, 1)",
-          }}
-        >
-          {/* Daftar diperpanjang di kedua ujung ([terakhir, ...foto, pertama])
-              supaya tetangga kiri/kanan selalu ada, termasuk saat loop. */}
-          {[photos[n - 1], ...photos, photos[0]].map((src, j) => {
-            const i = (j - 1 + n) % n;
-            const r = rel(i);
-            return (
-              <li
-                key={`${src}-${j}`}
-                className="relative w-[64cqw] shrink-0"
-                style={{
-                  transform: `scale(${r === 0 ? 1 : 1.2})`,
-                  transition: dragging ? "none" : "transform 420ms cubic-bezier(0.16, 1, 0.3, 1)",
-                  zIndex: r === 0 ? 10 : 1,
-                  opacity: Math.abs(r) > 2 ? 0 : 1,
+        <ul ref={trackRef} className="flex gap-[9cqw] will-change-transform">
+          {photos.map((src, i) => (
+            <li
+              key={src}
+              ref={(el) => {
+                planeRefs.current[i] = el;
+              }}
+              className="relative w-[64cqw] shrink-0 will-change-transform"
+              style={{ zIndex: i === current ? 10 : 1 }}
+            >
+              <button
+                type="button"
+                data-photo={i}
+                onClick={() => {
+                  // Fallback kalau pointer capture gagal: klik biasa.
+                  // Kalau capture jalan, klik jatuh ke container dan tidak sampai sini.
+                  if (drag.current?.moved) return;
+                  if (i === current) setOpen(i);
+                  else goTo(i);
                 }}
+                aria-label={ID.gallery.view(i + 1)}
+                onDragStart={(e) => e.preventDefault()}
+                className="relative block w-full cursor-zoom-in bg-white p-2 pb-8 shadow-[0_8px_16px_-6px_rgb(63_74_44/0.4)]"
               >
-                <button
-                  type="button"
-                  data-photo={i}
-                  onClick={() => {
-                    // Fallback kalau pointer capture gagal: klik biasa.
-                    // Kalau capture jalan, klik jatuh ke container dan tidak sampai sini.
-                    if (dragged.current) return;
-                    if (r === 0) setOpen(i);
-                    else setCurrent(i);
-                  }}
-                  aria-label={ID.gallery.view(i + 1)}
-                  onDragStart={(e) => e.preventDefault()}
-                  className="block w-full cursor-zoom-in bg-white p-2 pb-8 shadow-[0_8px_16px_-6px_rgb(63_74_44/0.4)]"
-                >
-                  <span className="relative block aspect-3/4 overflow-hidden">
+                {/* lakban kecil di atas polaroid, kayak foto digantung di tali */}
+                <span
+                  aria-hidden
+                  className="absolute -top-2 left-1/2 z-10 h-4 w-10 -translate-x-1/2 -rotate-2 rounded-[2px] bg-[#E9DFC8]/90 shadow-sm"
+                />
+                <span className="relative block aspect-3/4 overflow-hidden">
+                  <span
+                    ref={(el) => {
+                      imgRefs.current[i] = el;
+                    }}
+                    className="absolute inset-0 will-change-transform"
+                  >
                     <Image
                       src={src}
                       alt={ID.gallery.photo(i + 1)}
                       fill
                       sizes="280px"
                       draggable={false}
-                      className={`object-cover transition-[filter] duration-300 ${r === 0 ? "" : "grayscale"}`}
+                      className="object-cover"
                     />
                   </span>
-                </button>
-              </li>
-            );
-          })}
+                </span>
+              </button>
+            </li>
+          ))}
         </ul>
       </div>
       {photos.length > 1 && (

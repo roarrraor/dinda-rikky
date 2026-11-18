@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import NextImage from "next/image";
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import {
@@ -14,6 +13,7 @@ import {
   Images,
   LayoutGrid,
   Lock,
+  MoveHorizontal,
   RotateCcw,
   Share2,
   SwitchCamera,
@@ -51,7 +51,6 @@ import {
   type ShapeId,
 } from "@/lib/wedding/photobooth";
 import { PtButton } from "./primitives";
-import { ASSETS } from "@/lib/wedding/data";
 import { DISCOVERED_FRAMES } from "@/lib/wedding/photobooth-assets.generated";
 
 /** Semua frame gambar: hardcode + yang ketemu otomatis dari folder
@@ -580,21 +579,15 @@ const PB_CREAM = "bg-[#FAF6EE]";
 /** Layout bawaan langkah 1 (Classic, sesuai mockup Roar). */
 const DEFAULT_LAYOUT: PhotoboothLayout = LAYOUTS.find((l) => l.id === DEFAULT_LAYOUT_ID) ?? LAYOUTS[0];
 
-/** Foto contoh per layout buat pratinjau strip (ilustrasi pose). */
-const SAMPLE_PHOTOS: Record<string, readonly { src: string }[]> = {
-  duo: [ASSETS.poses[0], ASSETS.poses[1]],
-  classic: [ASSETS.poses[0], ASSETS.poses[1], ASSETS.poses[2], ASSETS.poses[3]],
-  trio: [ASSETS.poses[0], ASSETS.poses[1], ASSETS.poses[2]],
-  portrait: [ASSETS.poses[0]],
-};
-
 /** Carousel melingkar (ala React Bits Circular Carousel, preset orbit) buat
  *  pilih layout di langkah 1: 4 strip tersusun di cincin 3D, drag buat
  *  putar (momentum + snap), ketuk strip buat fokus. Strip tengah = terpilih. */
 const RING_STEP = 360 / LAYOUTS.length; // 90
 const RING_RADIUS = 180;
 const RING_CARD_W = 150;
-const RING_CARD_H = 320;
+/** Tinggi slot foto 4:3 (sama dengan slot hasil jadi) + tinggi kartu per layout. */
+const RING_SLOT_H = ((RING_CARD_W - 16) * 3) / 4;
+const ringCardH = (shots: number) => 16 + shots * RING_SLOT_H + (shots - 1) * 6;
 const RING_PERSPECTIVE = 900;
 const RING_TILT = -6;
 const RING_SPRING = 118;
@@ -855,7 +848,7 @@ function StripRing({
       onPointerUp={onPointerUp}
       onPointerCancel={onPointerCancel}
       onClick={onClick}
-      className="relative h-[400px] touch-pan-y overflow-hidden outline-none select-none"
+      className="relative h-[520px] touch-pan-y overflow-hidden outline-none select-none"
       style={{ perspective: `${RING_PERSPECTIVE}px` }}
     >
       <div
@@ -864,8 +857,8 @@ function StripRing({
         style={{ transformStyle: "preserve-3d" }}
       >
         {LAYOUTS.map((l, i) => {
-          const photos = SAMPLE_PHOTOS[l.id] ?? [];
           const isActive = i === active;
+          const cardH = ringCardH(l.shots);
           return (
             <div
               key={l.id}
@@ -879,9 +872,9 @@ function StripRing({
               className="absolute cursor-pointer will-change-transform"
               style={{
                 width: RING_CARD_W,
-                height: RING_CARD_H,
+                height: cardH,
                 marginLeft: -RING_CARD_W / 2,
-                marginTop: -RING_CARD_H / 2,
+                marginTop: -cardH / 2,
               }}
             >
               <div
@@ -895,25 +888,16 @@ function StripRing({
                     {T.selected}
                   </span>
                 )}
-                <span className="flex h-[270px] flex-col gap-1.5">
-                  {photos.map((p) => (
-                    <span key={p.src} className="relative min-h-0 flex-1 overflow-hidden rounded-lg">
-                      <NextImage
-                        src={p.src}
-                        alt=""
-                        fill
-                        sizes="160px"
-                        draggable={false}
-                        className="pointer-events-none object-cover object-bottom"
-                      />
+                {/* slot kosong (ikon orang), ratio 4:3 sama dengan hasil jadi */}
+                <span className="flex flex-col gap-1.5">
+                  {Array.from({ length: l.shots }, (_, s) => (
+                    <span
+                      key={s}
+                      className="grid aspect-[4/3] place-items-center rounded-lg border border-dashed border-[#C9C2B2]"
+                    >
+                      <UserRound size={26} className="text-[#C9C2B2]" />
                     </span>
                   ))}
-                </span>
-                <span className="mt-2 block text-center font-sans text-(--theme-text)">
-                  <span className="block text-[8px] font-semibold tracking-[0.3em] uppercase">
-                    Dinda &amp; Rikky
-                  </span>
-                  <span className="mt-0.5 block text-[7px] tracking-[0.3em]">20.12.26</span>
                 </span>
               </div>
             </div>
@@ -1290,8 +1274,14 @@ export function PhotoboothStudio({ caption }: { caption: PhotoboothCaption }) {
             <StripRing activeId={layout.id} onSelect={pickLayout} />
           </div>
 
+          {/* info geser: ada pilihan layout lain di cincin */}
+          <p className="mt-2 flex items-center justify-center gap-2 font-montserrat text-[13px] font-medium text-(--theme-muted)">
+            <MoveHorizontal size={16} className="shrink-0" />
+            Geser untuk melihat layout lainnya
+          </p>
+
           {/* layout terpilih */}
-          <p className="font-montserrat text-[17px] font-semibold text-(--theme-text)">
+          <p className="mt-8 font-montserrat text-[17px] font-semibold text-(--theme-text)">
             {layout.name} ({layout.shots}-Pose)
           </p>
           <p className={`mx-auto mt-1 max-w-80 ${PB_BODY}`}>{layout.desc}</p>
