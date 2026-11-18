@@ -627,6 +627,8 @@ function StripRing({
     moved: boolean;
     samples: { t: number; angle: number }[];
   } | null>(null);
+  /** true kalau pointerup habis drag — klik sesudahnya harus diabaikan. */
+  const suppressClickRef = useRef(false);
   const [active, setActive] = useState(initialIndex);
   const activeRef = useRef(initialIndex);
   const onSelectRef = useRef(onSelect);
@@ -749,8 +751,7 @@ function StripRing({
 
   const onPointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
     if (e.pointerType === "mouse" && e.button !== 0) return;
-    const stage = stageRef.current;
-    if (!stage) return;
+    suppressClickRef.current = false;
     dragRef.current = {
       id: e.pointerId,
       x: e.clientX,
@@ -761,11 +762,6 @@ function StripRing({
     };
     targetRef.current = null;
     velocityRef.current = 0;
-    try {
-      stage.setPointerCapture(e.pointerId);
-    } catch {
-      /* abaikan */
-    }
     wake();
   };
 
@@ -782,6 +778,14 @@ function StripRing({
         return;
       }
       drag.moved = true;
+      // tangkap pointer BARU di sini (bukan di pointerdown) supaya ketuk
+      // biasa tetap menarget kartu, bukan stage — kalau tidak, klik kartu
+      // tidak pernah ketemu karena pointerup ter-target ke stage.
+      try {
+        stageRef.current?.setPointerCapture(e.pointerId);
+      } catch {
+        /* abaikan */
+      }
     }
     const perPixel = 180 / (Math.PI * RING_RADIUS);
     angleRef.current = drag.angle + dx * perPixel;
@@ -795,12 +799,9 @@ function StripRing({
     const drag = dragRef.current;
     if (!drag || drag.id !== e.pointerId) return;
     dragRef.current = null;
-    if (!drag.moved) {
-      // ketuk: fokus strip yang diketuk
-      const card = (e.target as HTMLElement).closest?.("[data-ring-index]");
-      if (card) focusIndex(Number(card.getAttribute("data-ring-index")));
-      return;
-    }
+    // ketuk biasa (tidak gerak) ditangani onClick; di sini cuma momentum.
+    if (!drag.moved) return;
+    suppressClickRef.current = true;
     const s = drag.samples;
     const first = s[0];
     const last = s[s.length - 1];
@@ -812,6 +813,16 @@ function StripRing({
     targetRef.current =
       Math.round((angleRef.current + velocity * tau * 0.55) / RING_STEP) * RING_STEP;
     wake();
+  };
+
+  /** Ketuk strip (bukan drag): fokus strip itu ke tengah. */
+  const onClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (suppressClickRef.current) {
+      suppressClickRef.current = false;
+      return;
+    }
+    const card = (e.target as HTMLElement).closest?.("[data-ring-index]");
+    if (card) focusIndex(Number(card.getAttribute("data-ring-index")));
   };
 
   const onPointerCancel = (e: React.PointerEvent<HTMLDivElement>) => {
@@ -843,6 +854,7 @@ function StripRing({
       onPointerMove={onPointerMove}
       onPointerUp={onPointerUp}
       onPointerCancel={onPointerCancel}
+      onClick={onClick}
       className="relative h-[400px] touch-pan-y overflow-hidden outline-none select-none"
       style={{ perspective: `${RING_PERSPECTIVE}px` }}
     >
