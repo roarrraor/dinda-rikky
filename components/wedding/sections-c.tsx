@@ -326,10 +326,10 @@ export function PhotoboothSection({
 
   /** Foto contoh per layout (ilustrasi pose, urutan sama tiap strip). */
   const samplePhotos: Record<string, readonly { src: string }[]> = {
-    strip: [poses[0], poses[1], poses[2]],
-    grid: [poses[0], poses[1], poses[2], poses[3]],
+    duo: [poses[0], poses[1]],
+    classic: [poses[0], poses[1], poses[2], poses[3]],
+    trio: [poses[0], poses[1], poses[2]],
     portrait: [poses[0]],
-    duet: [poses[0], poses[1]],
   };
 
   return (
@@ -339,13 +339,10 @@ export function PhotoboothSection({
         <p className={`mx-auto mt-3 max-w-76 ${BODY}`}>{COPY.photoboothNote}</p>
       </Reveal>
 
-      {/* 4 pilihan tata letak sebagai strip hasil jadi (contoh) */}
+      {/* 4 pilihan tata letak sebagai strip hasil jadi (contoh, semua strip vertikal) */}
       <div className="mx-auto mt-8 grid max-w-md grid-cols-2 gap-4">
         {LAYOUTS.map((l) => {
           const photos = samplePhotos[l.id] ?? [];
-          const twoCol = l.id === "grid" || l.id === "duet";
-          const photoAspect =
-            l.id === "grid" ? "aspect-square" : l.id === "portrait" ? "aspect-[4/5]" : "aspect-[4/3]";
           return (
             <div key={l.id} className="flex flex-col items-center">
               <button
@@ -354,9 +351,9 @@ export function PhotoboothSection({
                 aria-label={`Coba photobooth ${l.name}`}
                 className="w-full cursor-pointer bg-white px-2 pt-2 shadow-[0_16px_24px_-12px_rgb(63_74_44/0.55)] transition-transform active:scale-[0.98]"
               >
-                <div className={twoCol ? "grid grid-cols-2 gap-1.5" : "space-y-1.5"}>
+                <div className="space-y-1.5">
                   {photos.map((p) => (
-                    <div key={p.src} className={`relative overflow-hidden ${photoAspect}`}>
+                    <div key={p.src} className="relative aspect-[4/3] overflow-hidden">
                       <Image src={p.src} alt="" fill sizes="200px" className="object-cover object-bottom" />
                     </div>
                   ))}

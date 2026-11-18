@@ -11,10 +11,10 @@ export const DISCOVERED_FRAMES: ImageFrame[] = [
     "concept": "Taman",
     "src": "/assets/photobooth/frames/anggrek-ungu--taman--fade-F3E7F7.webp",
     "layouts": [
-      "strip",
-      "grid",
-      "portrait",
-      "duet"
+      "duo",
+      "trio",
+      "classic",
+      "portrait"
     ],
     "footer": "drawn",
     "layer": "background",
@@ -26,10 +26,10 @@ export const DISCOVERED_FRAMES: ImageFrame[] = [
     "concept": "Taman",
     "src": "/assets/photobooth/frames/angsa--taman--fade-F4F0E5.webp",
     "layouts": [
-      "strip",
-      "grid",
-      "portrait",
-      "duet"
+      "duo",
+      "trio",
+      "classic",
+      "portrait"
     ],
     "footer": "drawn",
     "layer": "background",
@@ -41,10 +41,10 @@ export const DISCOVERED_FRAMES: ImageFrame[] = [
     "concept": "Modern",
     "src": "/assets/photobooth/frames/arka--modern--fade-F7F2EC.webp",
     "layouts": [
-      "strip",
-      "grid",
-      "portrait",
-      "duet"
+      "duo",
+      "trio",
+      "classic",
+      "portrait"
     ],
     "footer": "drawn",
     "layer": "background",
@@ -56,10 +56,10 @@ export const DISCOVERED_FRAMES: ImageFrame[] = [
     "concept": "Modern",
     "src": "/assets/photobooth/frames/art-deco--modern--fade-F9F9F3.webp",
     "layouts": [
-      "strip",
-      "grid",
-      "portrait",
-      "duet"
+      "duo",
+      "trio",
+      "classic",
+      "portrait"
     ],
     "footer": "drawn",
     "layer": "background",
@@ -71,10 +71,10 @@ export const DISCOVERED_FRAMES: ImageFrame[] = [
     "concept": "Modern",
     "src": "/assets/photobooth/frames/beludru-hijau--modern--fade-042618.webp",
     "layouts": [
-      "strip",
-      "grid",
-      "portrait",
-      "duet"
+      "duo",
+      "trio",
+      "classic",
+      "portrait"
     ],
     "footer": "drawn",
     "layer": "background",
@@ -86,10 +86,10 @@ export const DISCOVERED_FRAMES: ImageFrame[] = [
     "concept": "Taman",
     "src": "/assets/photobooth/frames/biru-jingga--taman--fade-F9F3E2.webp",
     "layouts": [
-      "strip",
-      "grid",
-      "portrait",
-      "duet"
+      "duo",
+      "trio",
+      "classic",
+      "portrait"
     ],
     "footer": "drawn",
     "layer": "background",
@@ -101,10 +101,10 @@ export const DISCOVERED_FRAMES: ImageFrame[] = [
     "concept": "Taman",
     "src": "/assets/photobooth/frames/bunga-matahari--taman--fade-FFF9DF.webp",
     "layouts": [
-      "strip",
-      "grid",
-      "portrait",
-      "duet"
+      "duo",
+      "trio",
+      "classic",
+      "portrait"
     ],
     "footer": "drawn",
     "layer": "background",
@@ -116,10 +116,10 @@ export const DISCOVERED_FRAMES: ImageFrame[] = [
     "concept": "Modern",
     "src": "/assets/photobooth/frames/celestial--modern--fade-0F2847.webp",
     "layouts": [
-      "strip",
-      "grid",
-      "portrait",
-      "duet"
+      "duo",
+      "trio",
+      "classic",
+      "portrait"
     ],
     "footer": "drawn",
     "layer": "background",
@@ -131,10 +131,10 @@ export const DISCOVERED_FRAMES: ImageFrame[] = [
     "concept": "Taman",
     "src": "/assets/photobooth/frames/duyung--taman--fade-163C4F.webp",
     "layouts": [
-      "strip",
-      "grid",
-      "portrait",
-      "duet"
+      "duo",
+      "trio",
+      "classic",
+      "portrait"
     ],
     "footer": "drawn",
     "layer": "background",
@@ -146,10 +146,10 @@ export const DISCOVERED_FRAMES: ImageFrame[] = [
     "concept": "Modern",
     "src": "/assets/photobooth/frames/galaksi--modern--fade-070613.webp",
     "layouts": [
-      "strip",
-      "grid",
-      "portrait",
-      "duet"
+      "duo",
+      "trio",
+      "classic",
+      "portrait"
     ],
     "footer": "drawn",
     "layer": "background",
@@ -161,10 +161,10 @@ export const DISCOVERED_FRAMES: ImageFrame[] = [
     "concept": "Taman",
     "src": "/assets/photobooth/frames/hibiskus--taman--fade-EBFCFC.webp",
     "layouts": [
-      "strip",
-      "grid",
-      "portrait",
-      "duet"
+      "duo",
+      "trio",
+      "classic",
+      "portrait"
     ],
     "footer": "drawn",
     "layer": "background",
@@ -176,10 +176,10 @@ export const DISCOVERED_FRAMES: ImageFrame[] = [
     "concept": "Taman",
     "src": "/assets/photobooth/frames/hortensia--taman--fade-EEF7FC.webp",
     "layouts": [
-      "strip",
-      "grid",
-      "portrait",
-      "duet"
+      "duo",
+      "trio",
+      "classic",
+      "portrait"
     ],
     "footer": "drawn",
     "layer": "background",
@@ -191,10 +191,10 @@ export const DISCOVERED_FRAMES: ImageFrame[] = [
     "concept": "Taman",
     "src": "/assets/photobooth/frames/jeruk--taman--fade-FBBF8B.webp",
     "layouts": [
-      "strip",
-      "grid",
-      "portrait",
-      "duet"
+      "duo",
+      "trio",
+      "classic",
+      "portrait"
     ],
     "footer": "drawn",
     "layer": "background",
@@ -206,10 +206,10 @@ export const DISCOVERED_FRAMES: ImageFrame[] = [
     "concept": "Klasik",
     "src": "/assets/photobooth/frames/langit-malam--klasik--fade-F5EEDC.webp",
     "layouts": [
-      "strip",
-      "grid",
-      "portrait",
-      "duet"
+      "duo",
+      "trio",
+      "classic",
+      "portrait"
     ],
     "footer": "drawn",
     "layer": "background",
@@ -221,10 +221,10 @@ export const DISCOVERED_FRAMES: ImageFrame[] = [
     "concept": "Taman",
     "src": "/assets/photobooth/frames/laut--taman--fade-FAF9F4.webp",
     "layouts": [
-      "strip",
-      "grid",
-      "portrait",
-      "duet"
+      "duo",
+      "trio",
+      "classic",
+      "portrait"
     ],
     "footer": "drawn",
     "layer": "background",
@@ -236,10 +236,10 @@ export const DISCOVERED_FRAMES: ImageFrame[] = [
     "concept": "Taman",
     "src": "/assets/photobooth/frames/lavender--taman--fade-EDECF4.webp",
     "layouts": [
-      "strip",
-      "grid",
-      "portrait",
-      "duet"
+      "duo",
+      "trio",
+      "classic",
+      "portrait"
     ],
     "footer": "drawn",
     "layer": "background",
@@ -251,10 +251,10 @@ export const DISCOVERED_FRAMES: ImageFrame[] = [
     "concept": "Taman",
     "src": "/assets/photobooth/frames/lemon--taman--fade-FBF8ED.webp",
     "layouts": [
-      "strip",
-      "grid",
-      "portrait",
-      "duet"
+      "duo",
+      "trio",
+      "classic",
+      "portrait"
     ],
     "footer": "drawn",
     "layer": "background",
@@ -266,10 +266,10 @@ export const DISCOVERED_FRAMES: ImageFrame[] = [
     "concept": "Modern",
     "src": "/assets/photobooth/frames/mahkota--modern--fade-380411.webp",
     "layouts": [
-      "strip",
-      "grid",
-      "portrait",
-      "duet"
+      "duo",
+      "trio",
+      "classic",
+      "portrait"
     ],
     "footer": "drawn",
     "layer": "background",
@@ -281,10 +281,10 @@ export const DISCOVERED_FRAMES: ImageFrame[] = [
     "concept": "Taman",
     "src": "/assets/photobooth/frames/marmer-hijau--taman--fade-0E241C.webp",
     "layouts": [
-      "strip",
-      "grid",
-      "portrait",
-      "duet"
+      "duo",
+      "trio",
+      "classic",
+      "portrait"
     ],
     "footer": "drawn",
     "layer": "background",
@@ -296,10 +296,10 @@ export const DISCOVERED_FRAMES: ImageFrame[] = [
     "concept": "Taman",
     "src": "/assets/photobooth/frames/matcha--taman--fade-D6DBC0.webp",
     "layouts": [
-      "strip",
-      "grid",
-      "portrait",
-      "duet"
+      "duo",
+      "trio",
+      "classic",
+      "portrait"
     ],
     "footer": "drawn",
     "layer": "background",
@@ -311,10 +311,10 @@ export const DISCOVERED_FRAMES: ImageFrame[] = [
     "concept": "Modern",
     "src": "/assets/photobooth/frames/mawar-hitam--modern--fade-1A1A1A.webp",
     "layouts": [
-      "strip",
-      "grid",
-      "portrait",
-      "duet"
+      "duo",
+      "trio",
+      "classic",
+      "portrait"
     ],
     "footer": "drawn",
     "layer": "background",
@@ -326,10 +326,10 @@ export const DISCOVERED_FRAMES: ImageFrame[] = [
     "concept": "Taman",
     "src": "/assets/photobooth/frames/mawar-merah--taman--fade-430F1B.webp",
     "layouts": [
-      "strip",
-      "grid",
-      "portrait",
-      "duet"
+      "duo",
+      "trio",
+      "classic",
+      "portrait"
     ],
     "footer": "drawn",
     "layer": "background",
@@ -341,10 +341,10 @@ export const DISCOVERED_FRAMES: ImageFrame[] = [
     "concept": "Taman",
     "src": "/assets/photobooth/frames/mawar-pink--taman--fade-F8EFE5.webp",
     "layouts": [
-      "strip",
-      "grid",
-      "portrait",
-      "duet"
+      "duo",
+      "trio",
+      "classic",
+      "portrait"
     ],
     "footer": "drawn",
     "layer": "background",
@@ -356,10 +356,10 @@ export const DISCOVERED_FRAMES: ImageFrame[] = [
     "concept": "Taman",
     "src": "/assets/photobooth/frames/mawar-putih--taman--fade-F1F1F0.webp",
     "layouts": [
-      "strip",
-      "grid",
-      "portrait",
-      "duet"
+      "duo",
+      "trio",
+      "classic",
+      "portrait"
     ],
     "footer": "drawn",
     "layer": "background",
@@ -371,10 +371,10 @@ export const DISCOVERED_FRAMES: ImageFrame[] = [
     "concept": "Taman",
     "src": "/assets/photobooth/frames/mediterania--taman--fade-F2E9DA.webp",
     "layouts": [
-      "strip",
-      "grid",
-      "portrait",
-      "duet"
+      "duo",
+      "trio",
+      "classic",
+      "portrait"
     ],
     "footer": "drawn",
     "layer": "background",
@@ -386,10 +386,10 @@ export const DISCOVERED_FRAMES: ImageFrame[] = [
     "concept": "Modern",
     "src": "/assets/photobooth/frames/neon--modern--fade-1F1F21.webp",
     "layouts": [
-      "strip",
-      "grid",
-      "portrait",
-      "duet"
+      "duo",
+      "trio",
+      "classic",
+      "portrait"
     ],
     "footer": "drawn",
     "layer": "background",
@@ -401,10 +401,10 @@ export const DISCOVERED_FRAMES: ImageFrame[] = [
     "concept": "Taman",
     "src": "/assets/photobooth/frames/pelangi--taman--fade-FAFAF5.webp",
     "layouts": [
-      "strip",
-      "grid",
-      "portrait",
-      "duet"
+      "duo",
+      "trio",
+      "classic",
+      "portrait"
     ],
     "footer": "drawn",
     "layer": "background",
@@ -416,10 +416,10 @@ export const DISCOVERED_FRAMES: ImageFrame[] = [
     "concept": "Taman",
     "src": "/assets/photobooth/frames/pita-peach--taman--fade-FCF8EC.webp",
     "layouts": [
-      "strip",
-      "grid",
-      "portrait",
-      "duet"
+      "duo",
+      "trio",
+      "classic",
+      "portrait"
     ],
     "footer": "drawn",
     "layer": "background",
@@ -431,10 +431,10 @@ export const DISCOVERED_FRAMES: ImageFrame[] = [
     "concept": "Modern",
     "src": "/assets/photobooth/frames/retro--modern--fade-F0E5D3.webp",
     "layouts": [
-      "strip",
-      "grid",
-      "portrait",
-      "duet"
+      "duo",
+      "trio",
+      "classic",
+      "portrait"
     ],
     "footer": "drawn",
     "layer": "background",
@@ -446,10 +446,10 @@ export const DISCOVERED_FRAMES: ImageFrame[] = [
     "concept": "Modern",
     "src": "/assets/photobooth/frames/sampanye--modern--fade-EDE3D0.webp",
     "layouts": [
-      "strip",
-      "grid",
-      "portrait",
-      "duet"
+      "duo",
+      "trio",
+      "classic",
+      "portrait"
     ],
     "footer": "drawn",
     "layer": "background",
@@ -461,10 +461,10 @@ export const DISCOVERED_FRAMES: ImageFrame[] = [
     "concept": "Klasik",
     "src": "/assets/photobooth/frames/senja--klasik--fade-F9F4E8.webp",
     "layouts": [
-      "strip",
-      "grid",
-      "portrait",
-      "duet"
+      "duo",
+      "trio",
+      "classic",
+      "portrait"
     ],
     "footer": "drawn",
     "layer": "background",
@@ -476,10 +476,10 @@ export const DISCOVERED_FRAMES: ImageFrame[] = [
     "concept": "Taman",
     "src": "/assets/photobooth/frames/stroberi--taman--fade-FCFAEA.webp",
     "layouts": [
-      "strip",
-      "grid",
-      "portrait",
-      "duet"
+      "duo",
+      "trio",
+      "classic",
+      "portrait"
     ],
     "footer": "drawn",
     "layer": "background",
@@ -491,10 +491,10 @@ export const DISCOVERED_FRAMES: ImageFrame[] = [
     "concept": "Taman",
     "src": "/assets/photobooth/frames/terakota--taman--fade-C28669.webp",
     "layouts": [
-      "strip",
-      "grid",
-      "portrait",
-      "duet"
+      "duo",
+      "trio",
+      "classic",
+      "portrait"
     ],
     "footer": "drawn",
     "layer": "background",
@@ -506,10 +506,10 @@ export const DISCOVERED_FRAMES: ImageFrame[] = [
     "concept": "Modern",
     "src": "/assets/photobooth/frames/topeng--modern--fade-F7ECD0.webp",
     "layouts": [
-      "strip",
-      "grid",
-      "portrait",
-      "duet"
+      "duo",
+      "trio",
+      "classic",
+      "portrait"
     ],
     "footer": "drawn",
     "layer": "background",
@@ -521,10 +521,10 @@ export const DISCOVERED_FRAMES: ImageFrame[] = [
     "concept": "Taman",
     "src": "/assets/photobooth/frames/tropis--taman--fade-07BBD2.webp",
     "layouts": [
-      "strip",
-      "grid",
-      "portrait",
-      "duet"
+      "duo",
+      "trio",
+      "classic",
+      "portrait"
     ],
     "footer": "drawn",
     "layer": "background",
@@ -536,10 +536,10 @@ export const DISCOVERED_FRAMES: ImageFrame[] = [
     "concept": "Taman",
     "src": "/assets/photobooth/frames/wisteria--taman--fade-EAEDE3.webp",
     "layouts": [
-      "strip",
-      "grid",
-      "portrait",
-      "duet"
+      "duo",
+      "trio",
+      "classic",
+      "portrait"
     ],
     "footer": "drawn",
     "layer": "background",
