@@ -137,13 +137,13 @@ export interface PhotoboothFrame {
 /** Bingkai warna bawaan (tema Pesta Teh). Tambah entri baru = frame baru. */
 export const FRAMES: PhotoboothFrame[] = [
   { id: "teh-melati", name: "Teh Melati", concept: "Klasik", bg: "#FFFDF8", ink: "#3F4A2C", accent: "#EBA7B1", border: "#6F9440" },
-  { id: "kebun-teh", name: "Kebun Teh", concept: "Taman", bg: "#6F9440", ink: "#FDEEF2", accent: "#F9CBD3", border: "#FDEEF2" },
-  { id: "jambu", name: "Jambu", concept: "Taman", bg: "#FDEEF2", ink: "#6F9440", accent: "#EBA7B1", border: "#EBA7B1" },
+  { id: "kebun-teh", name: "Kebun Teh", concept: "Klasik", bg: "#6F9440", ink: "#FDEEF2", accent: "#F9CBD3", border: "#FDEEF2" },
+  { id: "jambu", name: "Jambu", concept: "Klasik", bg: "#FDEEF2", ink: "#6F9440", accent: "#EBA7B1", border: "#EBA7B1" },
   { id: "sogan", name: "Sogan", concept: "Klasik", bg: "#7A5A3A", ink: "#FFF6E8", accent: "#E8C97A", border: "#E8C97A" },
   { id: "porselen", name: "Porselen", concept: "Klasik", bg: "#FFFFFF", ink: "#2E4A6B", accent: "#7FA8C9", border: "#2E4A6B" },
-  { id: "daun", name: "Daun", concept: "Taman", bg: "#2F4A2C", ink: "#E1F1C3", accent: "#A8BD84", border: "#A8BD84" },
-  { id: "kertas", name: "Kertas", concept: "Modern", bg: "#F3EDE2", ink: "#3F4A2C", accent: "#6F9440", border: "#6F9440" },
-  { id: "malam", name: "Malam", concept: "Modern", bg: "#232323", ink: "#FDEEF2", accent: "#EBA7B1", border: "#EBA7B1" },
+  { id: "daun", name: "Daun", concept: "Klasik", bg: "#2F4A2C", ink: "#E1F1C3", accent: "#A8BD84", border: "#A8BD84" },
+  { id: "kertas", name: "Kertas", concept: "Klasik", bg: "#F3EDE2", ink: "#3F4A2C", accent: "#6F9440", border: "#6F9440" },
+  { id: "malam", name: "Malam", concept: "Klasik", bg: "#232323", ink: "#FDEEF2", accent: "#EBA7B1", border: "#EBA7B1" },
 ];
 
 export const FRAME_CONCEPTS: ("Semua" | FrameConcept)[] = ["Semua", "Klasik", "Taman", "Modern"];
