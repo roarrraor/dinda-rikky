@@ -6,6 +6,201 @@ import type { StickerOption } from "./stickers";
 
 export const DISCOVERED_FRAMES: ImageFrame[] = [
   {
+    "id": "anggrek-ungu",
+    "name": "Anggrek Ungu",
+    "concept": "Taman",
+    "src": "/assets/photobooth/frames/anggrek-ungu--taman--fade-F3E7F7.webp",
+    "layouts": [
+      "strip",
+      "grid",
+      "portrait",
+      "duet"
+    ],
+    "footer": "drawn",
+    "layer": "background",
+    "footerFade": "#F3E7F7"
+  },
+  {
+    "id": "angsa",
+    "name": "Angsa",
+    "concept": "Taman",
+    "src": "/assets/photobooth/frames/angsa--taman--fade-F4F0E5.webp",
+    "layouts": [
+      "strip",
+      "grid",
+      "portrait",
+      "duet"
+    ],
+    "footer": "drawn",
+    "layer": "background",
+    "footerFade": "#F4F0E5"
+  },
+  {
+    "id": "arka",
+    "name": "Arka",
+    "concept": "Modern",
+    "src": "/assets/photobooth/frames/arka--modern--fade-F7F2EC.webp",
+    "layouts": [
+      "strip",
+      "grid",
+      "portrait",
+      "duet"
+    ],
+    "footer": "drawn",
+    "layer": "background",
+    "footerFade": "#F7F2EC"
+  },
+  {
+    "id": "art-deco",
+    "name": "Art Deco",
+    "concept": "Modern",
+    "src": "/assets/photobooth/frames/art-deco--modern--fade-F9F9F3.webp",
+    "layouts": [
+      "strip",
+      "grid",
+      "portrait",
+      "duet"
+    ],
+    "footer": "drawn",
+    "layer": "background",
+    "footerFade": "#F9F9F3"
+  },
+  {
+    "id": "beludru-hijau",
+    "name": "Beludru Hijau",
+    "concept": "Modern",
+    "src": "/assets/photobooth/frames/beludru-hijau--modern--fade-042618.webp",
+    "layouts": [
+      "strip",
+      "grid",
+      "portrait",
+      "duet"
+    ],
+    "footer": "drawn",
+    "layer": "background",
+    "footerFade": "#042618"
+  },
+  {
+    "id": "biru-jingga",
+    "name": "Biru Jingga",
+    "concept": "Taman",
+    "src": "/assets/photobooth/frames/biru-jingga--taman--fade-F9F3E2.webp",
+    "layouts": [
+      "strip",
+      "grid",
+      "portrait",
+      "duet"
+    ],
+    "footer": "drawn",
+    "layer": "background",
+    "footerFade": "#F9F3E2"
+  },
+  {
+    "id": "bunga-matahari",
+    "name": "Bunga Matahari",
+    "concept": "Taman",
+    "src": "/assets/photobooth/frames/bunga-matahari--taman--fade-FFF9DF.webp",
+    "layouts": [
+      "strip",
+      "grid",
+      "portrait",
+      "duet"
+    ],
+    "footer": "drawn",
+    "layer": "background",
+    "footerFade": "#FFF9DF"
+  },
+  {
+    "id": "celestial",
+    "name": "Celestial",
+    "concept": "Modern",
+    "src": "/assets/photobooth/frames/celestial--modern--fade-0F2847.webp",
+    "layouts": [
+      "strip",
+      "grid",
+      "portrait",
+      "duet"
+    ],
+    "footer": "drawn",
+    "layer": "background",
+    "footerFade": "#0F2847"
+  },
+  {
+    "id": "duyung",
+    "name": "Duyung",
+    "concept": "Taman",
+    "src": "/assets/photobooth/frames/duyung--taman--fade-163C4F.webp",
+    "layouts": [
+      "strip",
+      "grid",
+      "portrait",
+      "duet"
+    ],
+    "footer": "drawn",
+    "layer": "background",
+    "footerFade": "#163C4F"
+  },
+  {
+    "id": "galaksi",
+    "name": "Galaksi",
+    "concept": "Modern",
+    "src": "/assets/photobooth/frames/galaksi--modern--fade-070613.webp",
+    "layouts": [
+      "strip",
+      "grid",
+      "portrait",
+      "duet"
+    ],
+    "footer": "drawn",
+    "layer": "background",
+    "footerFade": "#070613"
+  },
+  {
+    "id": "hibiskus",
+    "name": "Hibiskus",
+    "concept": "Taman",
+    "src": "/assets/photobooth/frames/hibiskus--taman--fade-EBFCFC.webp",
+    "layouts": [
+      "strip",
+      "grid",
+      "portrait",
+      "duet"
+    ],
+    "footer": "drawn",
+    "layer": "background",
+    "footerFade": "#EBFCFC"
+  },
+  {
+    "id": "hortensia",
+    "name": "Hortensia",
+    "concept": "Taman",
+    "src": "/assets/photobooth/frames/hortensia--taman--fade-EEF7FC.webp",
+    "layouts": [
+      "strip",
+      "grid",
+      "portrait",
+      "duet"
+    ],
+    "footer": "drawn",
+    "layer": "background",
+    "footerFade": "#EEF7FC"
+  },
+  {
+    "id": "jeruk",
+    "name": "Jeruk",
+    "concept": "Taman",
+    "src": "/assets/photobooth/frames/jeruk--taman--fade-FBBF8B.webp",
+    "layouts": [
+      "strip",
+      "grid",
+      "portrait",
+      "duet"
+    ],
+    "footer": "drawn",
+    "layer": "background",
+    "footerFade": "#FBBF8B"
+  },
+  {
     "id": "langit-malam",
     "name": "Langit Malam",
     "concept": "Klasik",
@@ -21,6 +216,246 @@ export const DISCOVERED_FRAMES: ImageFrame[] = [
     "footerFade": "#F5EEDC"
   },
   {
+    "id": "laut",
+    "name": "Laut",
+    "concept": "Taman",
+    "src": "/assets/photobooth/frames/laut--taman--fade-FAF9F4.webp",
+    "layouts": [
+      "strip",
+      "grid",
+      "portrait",
+      "duet"
+    ],
+    "footer": "drawn",
+    "layer": "background",
+    "footerFade": "#FAF9F4"
+  },
+  {
+    "id": "lavender",
+    "name": "Lavender",
+    "concept": "Taman",
+    "src": "/assets/photobooth/frames/lavender--taman--fade-EDECF4.webp",
+    "layouts": [
+      "strip",
+      "grid",
+      "portrait",
+      "duet"
+    ],
+    "footer": "drawn",
+    "layer": "background",
+    "footerFade": "#EDECF4"
+  },
+  {
+    "id": "lemon",
+    "name": "Lemon",
+    "concept": "Taman",
+    "src": "/assets/photobooth/frames/lemon--taman--fade-FBF8ED.webp",
+    "layouts": [
+      "strip",
+      "grid",
+      "portrait",
+      "duet"
+    ],
+    "footer": "drawn",
+    "layer": "background",
+    "footerFade": "#FBF8ED"
+  },
+  {
+    "id": "mahkota",
+    "name": "Mahkota",
+    "concept": "Modern",
+    "src": "/assets/photobooth/frames/mahkota--modern--fade-380411.webp",
+    "layouts": [
+      "strip",
+      "grid",
+      "portrait",
+      "duet"
+    ],
+    "footer": "drawn",
+    "layer": "background",
+    "footerFade": "#380411"
+  },
+  {
+    "id": "marmer-hijau",
+    "name": "Marmer Hijau",
+    "concept": "Taman",
+    "src": "/assets/photobooth/frames/marmer-hijau--taman--fade-0E241C.webp",
+    "layouts": [
+      "strip",
+      "grid",
+      "portrait",
+      "duet"
+    ],
+    "footer": "drawn",
+    "layer": "background",
+    "footerFade": "#0E241C"
+  },
+  {
+    "id": "matcha",
+    "name": "Matcha",
+    "concept": "Taman",
+    "src": "/assets/photobooth/frames/matcha--taman--fade-D6DBC0.webp",
+    "layouts": [
+      "strip",
+      "grid",
+      "portrait",
+      "duet"
+    ],
+    "footer": "drawn",
+    "layer": "background",
+    "footerFade": "#D6DBC0"
+  },
+  {
+    "id": "mawar-hitam",
+    "name": "Mawar Hitam",
+    "concept": "Modern",
+    "src": "/assets/photobooth/frames/mawar-hitam--modern--fade-1A1A1A.webp",
+    "layouts": [
+      "strip",
+      "grid",
+      "portrait",
+      "duet"
+    ],
+    "footer": "drawn",
+    "layer": "background",
+    "footerFade": "#1A1A1A"
+  },
+  {
+    "id": "mawar-merah",
+    "name": "Mawar Merah",
+    "concept": "Taman",
+    "src": "/assets/photobooth/frames/mawar-merah--taman--fade-430F1B.webp",
+    "layouts": [
+      "strip",
+      "grid",
+      "portrait",
+      "duet"
+    ],
+    "footer": "drawn",
+    "layer": "background",
+    "footerFade": "#430F1B"
+  },
+  {
+    "id": "mawar-pink",
+    "name": "Mawar Pink",
+    "concept": "Taman",
+    "src": "/assets/photobooth/frames/mawar-pink--taman--fade-F8EFE5.webp",
+    "layouts": [
+      "strip",
+      "grid",
+      "portrait",
+      "duet"
+    ],
+    "footer": "drawn",
+    "layer": "background",
+    "footerFade": "#F8EFE5"
+  },
+  {
+    "id": "mawar-putih",
+    "name": "Mawar Putih",
+    "concept": "Taman",
+    "src": "/assets/photobooth/frames/mawar-putih--taman--fade-F1F1F0.webp",
+    "layouts": [
+      "strip",
+      "grid",
+      "portrait",
+      "duet"
+    ],
+    "footer": "drawn",
+    "layer": "background",
+    "footerFade": "#F1F1F0"
+  },
+  {
+    "id": "mediterania",
+    "name": "Mediterania",
+    "concept": "Taman",
+    "src": "/assets/photobooth/frames/mediterania--taman--fade-F2E9DA.webp",
+    "layouts": [
+      "strip",
+      "grid",
+      "portrait",
+      "duet"
+    ],
+    "footer": "drawn",
+    "layer": "background",
+    "footerFade": "#F2E9DA"
+  },
+  {
+    "id": "neon",
+    "name": "Neon",
+    "concept": "Modern",
+    "src": "/assets/photobooth/frames/neon--modern--fade-1F1F21.webp",
+    "layouts": [
+      "strip",
+      "grid",
+      "portrait",
+      "duet"
+    ],
+    "footer": "drawn",
+    "layer": "background",
+    "footerFade": "#1F1F21"
+  },
+  {
+    "id": "pelangi",
+    "name": "Pelangi",
+    "concept": "Taman",
+    "src": "/assets/photobooth/frames/pelangi--taman--fade-FAFAF5.webp",
+    "layouts": [
+      "strip",
+      "grid",
+      "portrait",
+      "duet"
+    ],
+    "footer": "drawn",
+    "layer": "background",
+    "footerFade": "#FAFAF5"
+  },
+  {
+    "id": "pita-peach",
+    "name": "Pita Peach",
+    "concept": "Taman",
+    "src": "/assets/photobooth/frames/pita-peach--taman--fade-FCF8EC.webp",
+    "layouts": [
+      "strip",
+      "grid",
+      "portrait",
+      "duet"
+    ],
+    "footer": "drawn",
+    "layer": "background",
+    "footerFade": "#FCF8EC"
+  },
+  {
+    "id": "retro",
+    "name": "Retro",
+    "concept": "Modern",
+    "src": "/assets/photobooth/frames/retro--modern--fade-F0E5D3.webp",
+    "layouts": [
+      "strip",
+      "grid",
+      "portrait",
+      "duet"
+    ],
+    "footer": "drawn",
+    "layer": "background",
+    "footerFade": "#F0E5D3"
+  },
+  {
+    "id": "sampanye",
+    "name": "Sampanye",
+    "concept": "Modern",
+    "src": "/assets/photobooth/frames/sampanye--modern--fade-EDE3D0.webp",
+    "layouts": [
+      "strip",
+      "grid",
+      "portrait",
+      "duet"
+    ],
+    "footer": "drawn",
+    "layer": "background",
+    "footerFade": "#EDE3D0"
+  },
+  {
     "id": "senja",
     "name": "Senja",
     "concept": "Klasik",
@@ -34,6 +469,81 @@ export const DISCOVERED_FRAMES: ImageFrame[] = [
     "footer": "drawn",
     "layer": "background",
     "footerFade": "#F9F4E8"
+  },
+  {
+    "id": "stroberi",
+    "name": "Stroberi",
+    "concept": "Taman",
+    "src": "/assets/photobooth/frames/stroberi--taman--fade-FCFAEA.webp",
+    "layouts": [
+      "strip",
+      "grid",
+      "portrait",
+      "duet"
+    ],
+    "footer": "drawn",
+    "layer": "background",
+    "footerFade": "#FCFAEA"
+  },
+  {
+    "id": "terakota",
+    "name": "Terakota",
+    "concept": "Taman",
+    "src": "/assets/photobooth/frames/terakota--taman--fade-C28669.webp",
+    "layouts": [
+      "strip",
+      "grid",
+      "portrait",
+      "duet"
+    ],
+    "footer": "drawn",
+    "layer": "background",
+    "footerFade": "#C28669"
+  },
+  {
+    "id": "topeng",
+    "name": "Topeng",
+    "concept": "Modern",
+    "src": "/assets/photobooth/frames/topeng--modern--fade-F7ECD0.webp",
+    "layouts": [
+      "strip",
+      "grid",
+      "portrait",
+      "duet"
+    ],
+    "footer": "drawn",
+    "layer": "background",
+    "footerFade": "#F7ECD0"
+  },
+  {
+    "id": "tropis",
+    "name": "Tropis",
+    "concept": "Taman",
+    "src": "/assets/photobooth/frames/tropis--taman--fade-07BBD2.webp",
+    "layouts": [
+      "strip",
+      "grid",
+      "portrait",
+      "duet"
+    ],
+    "footer": "drawn",
+    "layer": "background",
+    "footerFade": "#07BBD2"
+  },
+  {
+    "id": "wisteria",
+    "name": "Wisteria",
+    "concept": "Taman",
+    "src": "/assets/photobooth/frames/wisteria--taman--fade-EAEDE3.webp",
+    "layouts": [
+      "strip",
+      "grid",
+      "portrait",
+      "duet"
+    ],
+    "footer": "drawn",
+    "layer": "background",
+    "footerFade": "#EAEDE3"
   }
 ];
 

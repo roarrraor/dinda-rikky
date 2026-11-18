@@ -178,7 +178,7 @@ export const IMAGE_FRAMES: ImageFrame[] = [
   {
     id: "botanical",
     name: "Botanical",
-    concept: "Taman",
+    concept: "Klasik",
     src: "/assets/photobooth/frames/botanical.webp",
     layouts: ["strip", "grid", "portrait", "duet"],
     footer: "drawn",
