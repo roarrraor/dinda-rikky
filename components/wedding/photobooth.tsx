@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import NextImage from "next/image";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import {
@@ -9,13 +8,15 @@ import {
   Camera,
   Check,
   ChevronLeft,
+  Columns2,
   Download,
   ImagePlus,
-  Images,
   LayoutGrid,
   Lightbulb,
   Lock,
+  RectangleVertical,
   RotateCcw,
+  Rows3,
   Share2,
   SwitchCamera,
   Trash2,
@@ -51,7 +52,6 @@ import {
   type ShapeId,
 } from "@/lib/wedding/photobooth";
 import { PtButton } from "./primitives";
-import { ASSETS } from "@/lib/wedding/data";
 import { DISCOVERED_FRAMES } from "@/lib/wedding/photobooth-assets.generated";
 
 /** Semua frame gambar: hardcode + yang ketemu otomatis dari folder
@@ -577,12 +577,12 @@ const PB_KICKER = "font-montserrat text-[12px] font-semibold uppercase tracking-
 const PB_TITLE = "font-playfair text-[32px] font-bold leading-tight text-(--theme-text)";
 /** Latar krem desain baru (bukan putih). */
 const PB_CREAM = "bg-[#FAF6EE]";
-/** Foto contoh per layout buat pratinjau langkah 1 (ilustrasi pose). */
-const SAMPLE_PHOTOS: Record<string, readonly { src: string }[]> = {
-  strip: [ASSETS.poses[0], ASSETS.poses[1], ASSETS.poses[2]],
-  grid: [ASSETS.poses[0], ASSETS.poses[1], ASSETS.poses[2], ASSETS.poses[3]],
-  portrait: [ASSETS.poses[0]],
-  duet: [ASSETS.poses[0], ASSETS.poses[1]],
+/** Ikon tata letak per id (dipakai kartu langkah 1). */
+const LAYOUT_ICONS: Record<PhotoboothLayout["id"], typeof Rows3> = {
+  strip: Rows3,
+  grid: LayoutGrid,
+  portrait: RectangleVertical,
+  duet: Columns2,
 };
 
 export function PhotoboothStudio({ caption }: { caption: PhotoboothCaption }) {
@@ -594,7 +594,6 @@ export function PhotoboothStudio({ caption }: { caption: PhotoboothCaption }) {
   const [shapeId, setShapeId] = useState<ShapeId>(DEFAULT_SHAPE_ID);
   const [filterId, setFilterId] = useState(DEFAULT_FILTER_ID);
   const [shots, setShots] = useState<(string | null)[]>([null, null, null]);
-  const [showWall, setShowWall] = useState(false);
   const [tab, setTab] = useState<Tab>("frame");
   const [concept, setConcept] = useState<"Semua" | FrameConcept>("Semua");
   const [notice, setNotice] = useState<string | null>(null);
@@ -657,15 +656,10 @@ export function PhotoboothStudio({ caption }: { caption: PhotoboothCaption }) {
     [],
   );
 
-  /** Pilih tata letak di langkah 1 (baru menandai, belum jalan ke kamera). */
   const pickLayout = (l: PhotoboothLayout) => {
     setLayout(l);
     setShots(Array.from({ length: l.shots }, () => null));
     setTarget(0);
-  };
-
-  /** Tombol "Ambil foto": lanjut ke akses kamera dengan layout terpilih. */
-  const startPhotos = () => {
     setStep("access");
   };
 
@@ -941,42 +935,23 @@ export function PhotoboothStudio({ caption }: { caption: PhotoboothCaption }) {
           <h1 className={`mt-1 ${PB_TITLE}`}>Abadikan momen ini</h1>
           <p className={`mx-auto mt-2 max-w-80 ${PB_BODY}`}>{T.step1Desc}</p>
 
-          {/* pratinjau tiap layout sebagai strip hasil jadi (contoh foto) */}
           <div className="mt-8 grid grid-cols-2 gap-3 text-left">
             {LAYOUTS.map((l) => {
-              const selected = l.id === layout.id;
-              const photos = SAMPLE_PHOTOS[l.id] ?? [];
-              const twoCol = l.id === "grid" || l.id === "duet";
+              const Icon = LAYOUT_ICONS[l.id];
               return (
                 <button
                   key={l.id}
                   type="button"
                   onClick={() => pickLayout(l)}
-                  aria-pressed={selected}
-                  className={`relative rounded-3xl bg-white p-3 text-left shadow-[0_6px_20px_-8px_rgba(63,74,44,0.25)] transition-transform active:scale-[0.98] cursor-pointer ${
-                    selected ? "ring-2 ring-(--theme-primary)" : ""
-                  }`}
+                  className="relative rounded-3xl bg-white p-5 text-left shadow-[0_6px_20px_-8px_rgba(63,74,44,0.25)] transition-transform active:scale-[0.98] cursor-pointer"
                 >
                   {l.badge && (
-                    <span className="absolute -top-3 left-1/2 z-10 -translate-x-1/2 rounded-full bg-[#E8A33D] px-2.5 py-0.5 font-montserrat font-semibold text-[10px] uppercase tracking-[0.08em] whitespace-nowrap text-white">
+                    <span className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-[#E8A33D] px-2.5 py-0.5 font-montserrat font-semibold text-[10px] uppercase tracking-[0.08em] whitespace-nowrap text-white">
                       Populer
                     </span>
                   )}
-                  {selected && (
-                    <span className="absolute -top-2.5 -right-2.5 z-10 grid size-7 place-items-center rounded-full bg-(--theme-primary) text-white shadow-[0_2px_8px_rgba(63,74,44,0.35)]">
-                      <Check size={15} />
-                    </span>
-                  )}
-                  <span className={`flex h-44 gap-1 ${twoCol ? "grid grid-cols-2" : "flex-col"}`}>
-                    {photos.map((p) => (
-                      <span key={p.src} className="relative min-h-0 flex-1 overflow-hidden rounded-lg">
-                        <NextImage src={p.src} alt="" fill sizes="200px" className="object-cover object-bottom" />
-                      </span>
-                    ))}
-                  </span>
-                  <span className="mt-2 block text-center font-sans text-(--theme-text)">
-                    <span className="block text-[8px] font-semibold tracking-[0.3em] uppercase">Dinda &amp; Rikky</span>
-                    <span className="mt-0.5 block text-[7px] tracking-[0.3em]">20.12.26</span>
+                  <span className="grid size-14 place-items-center rounded-2xl bg-(--theme-surface) text-(--theme-primary)">
+                    <Icon size={28} />
                   </span>
                   <span className="mt-3 block font-montserrat text-[17px] font-semibold text-(--theme-text)">{l.name}</span>
                   <span className="mt-1 block font-montserrat text-[14px] leading-relaxed text-(--theme-muted)">{l.desc}</span>
@@ -986,17 +961,6 @@ export function PhotoboothStudio({ caption }: { caption: PhotoboothCaption }) {
                 </button>
               );
             })}
-          </div>
-
-          <div className="mx-auto mt-8 flex w-full max-w-80 flex-col gap-3">
-            <PtButton friendly className="w-full" onClick={startPhotos}>
-              <Camera size={16} />
-              {T.step2}
-            </PtButton>
-            <PtButton friendly outline className="w-full" onClick={() => setShowWall(true)}>
-              <Images size={16} />
-              {T.viewGuestPhotos}
-            </PtButton>
           </div>
 
           <div className="mx-auto mt-8 max-w-80 space-y-3 text-left">
@@ -1559,9 +1523,6 @@ export function PhotoboothStudio({ caption }: { caption: PhotoboothCaption }) {
           </div>
         </main>
       )}
-
-      {/* galeri strip tersimpan di perangkat ini (tombol "Lihat foto tamu") */}
-      {showWall && <PhotoboothWall onClose={() => setShowWall(false)} />}
     </div>
   );
 }

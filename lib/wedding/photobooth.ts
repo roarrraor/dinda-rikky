@@ -288,8 +288,6 @@ export const PHOTOBOOTH_COPY = {
     "Bagikan tidak didukung di browser ini — strip sudah diunduh, teks caption sudah disalin, tinggal tempel.",
   privacy: "Foto diproses di perangkatmu dan tidak dikirim ke server.",
   privacyShort: "Foto diproses di perangkatmu",
-  /** tombol langkah 1: buka galeri strip tersimpan di perangkat ini */
-  viewGuestPhotos: "Lihat foto tamu",
   auto: "Otomatis",
   autoOn: "Mode otomatis aktif — semua pose diambil berurutan.",
   grid: "Garis bantu",
