@@ -36,7 +36,7 @@ const STICKER_EXTS = new Set([".gif", ".png", ".webp"]);
 // File yang sengaja tidak dimunculkan (PNG Renda Teh yang ditolak Roar).
 const SKIP_FRAMES = new Set(["renda-teh-strip.png"]);
 
-const ALL_LAYOUTS = ["strip", "grid", "portrait", "duet"];
+const ALL_LAYOUTS = ["duo", "trio", "classic"];
 const CONCEPTS = ["klasik", "taman", "modern"];
 
 function listFiles(dir, exts) {
@@ -96,7 +96,7 @@ function frameFromFile(file) {
   let layouts = ALL_LAYOUTS;
   if (layer === "overlay") {
     const picked = ALL_LAYOUTS.filter((l) => mods.includes(l));
-    layouts = picked.length > 0 ? picked : ["strip"];
+    layouts = picked.length > 0 ? picked : ["trio"];
   }
   return {
     id: slug,
