@@ -447,9 +447,10 @@ export function GallerySection({ photos }: { photos: string[] }) {
  * Photobooth versi kita (bukan mirror inveet): studio kamera di rute
  * `/photobooth` — pilih tata letak, ambil foto (kamera / galeri), atur
  * bingkai, simpan / bagikan. Foto diproses di perangkat tamu.
- * Di halaman depan, keempat pilihan tata letak ditampilkan sebagai strip
- * hasil jadi (contoh, pakai ilustrasi pose Dinda & Rikky) ala mockup Roar.
- * Ketuk salah satu strip untuk membuka photobooth.
+ * Di halaman depan, section ini tampil sebagai PROMO yang ngajakin tamu
+ * coba fiturnya: satu strip Classic hasil jadi sebagai hero (miring ala
+ * polaroid, lakban di atas), pilihan tata letak sebagai pil, CTA besar.
+ * Ketuk hero / pil / CTA untuk membuka photobooth.
  */
 export function PhotoboothSection({
   caption,
@@ -460,13 +461,8 @@ export function PhotoboothSection({
   const [wallOpen, setWallOpen] = useState(false);
   const { poses } = ASSETS;
 
-  /** Foto contoh per layout (ilustrasi pose, urutan sama tiap strip). */
-  const samplePhotos: Record<string, readonly { src: string }[]> = {
-    duo: [poses[0], poses[1]],
-    classic: [poses[0], poses[1], poses[2], poses[3]],
-    trio: [poses[0], poses[1], poses[2]],
-    portrait: [poses[0]],
-  };
+  /** Foto contoh strip Classic (4 pose) buat hero. */
+  const heroPhotos = [poses[0], poses[1], poses[2], poses[3]];
 
   return (
     <section id="pt-photobooth" className="@container relative bg-(--pt-leaf) px-6 pt-10 pb-12 text-center">
@@ -475,48 +471,60 @@ export function PhotoboothSection({
         <p className={`mx-auto mt-3 max-w-76 ${BODY}`}>{COPY.photoboothNote}</p>
       </Reveal>
 
-      {/* 4 pilihan tata letak sebagai strip hasil jadi (contoh, semua strip vertikal) */}
-      <div className="mx-auto mt-8 grid max-w-md grid-cols-2 gap-4">
-        {LAYOUTS.map((l) => {
-          const photos = samplePhotos[l.id] ?? [];
-          return (
-            <div key={l.id} className="flex flex-col items-center">
-              <button
-                type="button"
-                onClick={() => router.push("/photobooth")}
-                aria-label={`Coba photobooth ${l.name}`}
-                className="w-full cursor-pointer bg-white px-2 pt-2 shadow-[0_16px_24px_-12px_rgb(63_74_44/0.55)] transition-transform active:scale-[0.98]"
-              >
-                <div className="space-y-1.5">
-                  {photos.map((p) => (
-                    <div key={p.src} className="relative aspect-[4/3] overflow-hidden">
-                      <Image src={p.src} alt="" fill sizes="200px" className="object-cover object-bottom" />
-                    </div>
-                  ))}
-                </div>
-                <div className="py-2.5 font-sans text-(--theme-text)">
-                  <p className="text-[8px] font-semibold tracking-[0.3em] uppercase">{caption.names}</p>
-                  <p className="mt-0.5 text-[7px] tracking-[0.3em]">{caption.date}</p>
-                </div>
-              </button>
-              <span className="mt-2.5 font-montserrat text-[13px] font-semibold text-(--theme-text)">
-                {l.name} ({l.shots} Pose)
-              </span>
-            </div>
-          );
-        })}
+      {/* Hero: satu strip Classic hasil jadi, miring dikit ala polaroid
+          dengan lakban di atas — ajakan buat tamu coba photobooth. */}
+      <Reveal className="mt-8 flex justify-center">
+        <button
+          type="button"
+          onClick={() => router.push("/photobooth")}
+          aria-label="Coba photobooth"
+          className="relative w-[248px] -rotate-2 cursor-pointer bg-white px-2 pt-2 shadow-[0_24px_36px_-14px_rgb(63_74_44/0.55)] transition-transform active:scale-[0.98]"
+        >
+          <span className="absolute -top-3 left-1/2 z-10 h-6 w-20 -translate-x-1/2 -rotate-2 bg-[#F3EADB]/85 shadow-sm" />
+          <div className="space-y-1.5">
+            {heroPhotos.map((p) => (
+              <div key={p.src} className="relative aspect-[4/3] overflow-hidden">
+                <Image src={p.src} alt="" fill sizes="250px" className="object-cover object-bottom" />
+              </div>
+            ))}
+          </div>
+          <div className="py-2.5 font-sans text-(--theme-text)">
+            <p className="text-[8px] font-semibold tracking-[0.3em] uppercase">{caption.names}</p>
+            <p className="mt-0.5 text-[7px] tracking-[0.3em]">{caption.date}</p>
+          </div>
+        </button>
+      </Reveal>
+
+      {/* Pilihan tata letak sebagai pil — ketuk untuk buka photobooth */}
+      <p className="mt-8 font-montserrat text-[12px] font-semibold tracking-[0.06em] text-(--theme-text)">
+        {COPY.photoboothLayoutsLabel}
+      </p>
+      <div className="mt-3 flex flex-wrap justify-center gap-2">
+        {LAYOUTS.map((l) => (
+          <button
+            key={l.id}
+            type="button"
+            onClick={() => router.push("/photobooth")}
+            aria-label={`Photobooth ${l.name}`}
+            className="cursor-pointer rounded-full border border-(--theme-text)/25 bg-white/70 px-3.5 py-1.5 font-montserrat text-[12px] font-semibold text-(--theme-text) transition active:scale-95"
+          >
+            {l.name} · {l.shots} Pose
+          </button>
+        ))}
       </div>
 
-      <Reveal className="mt-9 flex flex-col items-center gap-3">
+      <Reveal className="mt-8 flex flex-col items-center gap-3">
         <PtButton onClick={() => router.push("/photobooth")}>
           <Camera size={14} />
-          {COPY.photoboothTake}
+          {COPY.photoboothCta}
         </PtButton>
         <PtButton outline onClick={() => setWallOpen(true)}>
           <Images size={14} />
           {COPY.photoboothGallery}
         </PtButton>
       </Reveal>
+
+      <p className="mt-6 font-montserrat text-[11px] text-(--theme-muted)">{COPY.photoboothPrivacy}</p>
 
       {wallOpen && <PhotoboothWall onClose={() => setWallOpen(false)} />}
     </section>

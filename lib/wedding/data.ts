@@ -95,8 +95,10 @@ export const COPY = {
   photoboothTitle: "Photobooth",
   photoboothTake: "Ambil Foto",
   photoboothGallery: "Lihat Foto Tamu",
-  photoboothNote:
-    "Berpose sebentar, bawa pulang ceritanya. Foto diproses di perangkatmu dan tidak dikirim ke server.",
+  photoboothCta: "Coba Photobooth",
+  photoboothLayoutsLabel: "4 pilihan tata letak, gratis buat semua tamu",
+  photoboothPrivacy: "Foto diproses di perangkatmu dan tidak dikirim ke server.",
+  photoboothNote: "Berpose sebentar, bawa pulang ceritanya.",
   rsvp: "Mohon konfirmasi kehadiran serta titipkan doa terbaik untuk kami.",
   wishes: "Tuliskan doa dan ucapan terbaik untuk kami.",
   giftTitle: "Tanda Kasih",
