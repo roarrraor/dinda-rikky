@@ -1252,6 +1252,47 @@ export function RsvpSection({
 
 /* ---------- Tanda Kasih ---------- */
 
+/** Chip emas ala kartu bank. */
+function ChipIcon({ className = "" }: { className?: string }) {
+  return (
+    <svg aria-hidden viewBox="0 0 48 36" className={className}>
+      <defs>
+        <linearGradient id="giftChipGold" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stopColor="#EFD688" />
+          <stop offset="55%" stopColor="#C9A227" />
+          <stop offset="100%" stopColor="#F2DA8A" />
+        </linearGradient>
+      </defs>
+      <rect x="1" y="1" width="46" height="34" rx="7" fill="url(#giftChipGold)" stroke="#A8842A" />
+      <path d="M1 12H47M1 24H47M16 1V35M32 1V35" stroke="#A8842A" strokeWidth="1" fill="none" />
+      <rect x="16" y="12" width="16" height="12" rx="2.5" fill="none" stroke="#A8842A" />
+    </svg>
+  );
+}
+
+/** Gelombang contactless ))) */
+function ContactlessIcon({ className = "" }: { className?: string }) {
+  return (
+    <svg aria-hidden viewBox="0 0 24 28" className={className} fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round">
+      <path d="M4 8Q9 14 4 20" />
+      <path d="M9 4Q16 14 9 24" />
+      <path d="M14 1Q21 14 14 27" />
+    </svg>
+  );
+}
+
+/** Pita kado pink bergaris emas. */
+function BowIcon({ className = "" }: { className?: string }) {
+  return (
+    <svg aria-hidden viewBox="0 0 44 32" className={className}>
+      <path d="M20 18l-5 11 6-2 1 3 1-3 6 2-5-11z" fill="#F6C6D8" stroke="#C9A227" strokeWidth="1" strokeLinejoin="round" />
+      <path d="M22 15C15 5 6 3 6 11c0 8 8 10 16 4Z" fill="#F6C6D8" stroke="#C9A227" strokeWidth="1.2" strokeLinejoin="round" />
+      <path d="M22 15c7-10 16-12 16-4 0 8-8 10-16 4Z" fill="#F6C6D8" stroke="#C9A227" strokeWidth="1.2" strokeLinejoin="round" />
+      <rect x="19" y="12" width="6" height="6" rx="2" fill="#F6C6D8" stroke="#C9A227" strokeWidth="1.2" />
+    </svg>
+  );
+}
+
 function GiftCard({
   label,
   name,
@@ -1268,32 +1309,77 @@ function GiftCard({
   className?: string;
 }) {
   const [copied, setCopied] = useState(false);
+  const copyBtn = (
+    <button
+      type="button"
+      onClick={() =>
+        navigator.clipboard.writeText(copy).then(() => {
+          setCopied(true);
+          setTimeout(() => setCopied(false), 2000);
+        })
+      }
+      className="inline-flex shrink-0 cursor-pointer items-center gap-1.5 rounded-full bg-(--theme-surface) px-4 py-2 font-cormorant text-[16px] leading-none font-bold text-(--theme-text) ring-1 ring-(--theme-accent)"
+    >
+      {copied ? <CheckCircle2 size={15} fill="currentColor" stroke="white" /> : <Copy size={15} />}
+      {copied ? ID.gift.copied : ID.gift.copy}
+    </button>
+  );
+
+  if (small) {
+    // Kartu kirim kado: pita + nama penerima + alamat, semburat pink di sudut.
+    return (
+      <div
+        className={`relative overflow-hidden rounded-[20px] text-left shadow-[0_10px_22px_-12px_rgb(63_74_44/0.55)] ring-1 ring-(--pt-sage)/40 ${className}`}
+        style={{
+          background:
+            "radial-gradient(130% 110% at 100% 100%, rgb(246 198 216 / 0.55), transparent 55%), #FBF7EC",
+        }}
+      >
+        <div aria-hidden className="h-7" style={GINGHAM} />
+        <div className="flex h-[calc(100%-28px)] flex-col justify-between px-5 pt-3.5 pb-5">
+          <div className="flex items-start justify-between gap-3">
+            <p className="pt-1 font-cormorant text-[15px] font-semibold uppercase tracking-[0.16em] text-(--theme-primary)">
+              {label}
+            </p>
+            <BowIcon className="h-7 w-10 shrink-0 -rotate-3" />
+          </div>
+          <div>
+            {name && <p className="font-cormorant text-[26px] leading-tight font-semibold">{name}</p>}
+            <p className="mt-1 font-cormorant text-[19px] leading-snug whitespace-pre-line wrap-break-word">
+              {value}
+            </p>
+          </div>
+          <div className="flex items-end justify-between gap-3">
+            <p className="pb-1 text-[10px] uppercase tracking-[0.18em] text-(--theme-text)">Alamat Pengiriman</p>
+            {copyBtn}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Kartu rekening ala kartu bank: chip emas + nomor + pemegang kartu.
   return (
-    <div className={`overflow-hidden bg-white text-center shadow-[0_8px_18px_-10px_rgb(63_74_44/0.5)] ring-1 ring-(--pt-sage)/60 ${className}`}>
-      <div aria-hidden className="h-3" style={GINGHAM} />
-      <div className="flex h-[calc(100%-12px)] flex-col items-center justify-center px-5 py-4">
-        <p className={`text-[12px] text-(--theme-primary) ${LABEL}`}>{label}</p>
-        {name && <p className="mt-1 font-cormorant text-[17px] leading-tight">{name}</p>}
-        <p
-          className={`mt-1 font-cormorant leading-tight whitespace-pre-line wrap-break-word ${
-            small ? "text-[16px] font-semibold" : "text-[22px] font-bold tracking-[0.04em] tabular-nums"
-          }`}
-        >
+    <div className={`relative overflow-hidden rounded-[20px] bg-[#FBF7EC] text-left shadow-[0_10px_22px_-12px_rgb(63_74_44/0.55)] ring-1 ring-(--pt-sage)/40 ${className}`}>
+      <div aria-hidden className="h-7" style={GINGHAM} />
+      <div className="flex h-[calc(100%-28px)] flex-col justify-between px-5 pt-3.5 pb-5">
+        <div className="flex items-center justify-between gap-3">
+          <div className="flex items-center gap-2.5">
+            <ChipIcon className="h-9 w-12 shrink-0" />
+            <ContactlessIcon className="h-6 w-5 shrink-0 text-(--theme-text)" />
+          </div>
+          <p className="font-cormorant text-[26px] leading-none font-semibold text-(--theme-text)">{label}</p>
+        </div>
+        <p className="font-cormorant text-[28px] leading-none font-semibold tracking-[0.03em] text-(--theme-text) tabular-nums wrap-break-word">
           {value}
         </p>
-        <button
-          type="button"
-          onClick={() =>
-            navigator.clipboard.writeText(copy).then(() => {
-              setCopied(true);
-              setTimeout(() => setCopied(false), 2000);
-            })
-          }
-          className="mt-2.5 inline-flex items-center gap-1.5 rounded-full bg-(--theme-surface) px-3.5 py-1.5 font-cormorant text-[15px] leading-none font-bold text-(--theme-primary) ring-1 ring-(--theme-accent) cursor-pointer"
-        >
-          {copied ? <CheckCircle2 size={14} fill="currentColor" stroke="white" /> : <Copy size={14} />}
-          {copied ? ID.gift.copied : ID.gift.copy}
-        </button>
+        <div className="flex items-end justify-between gap-3">
+          <div className="min-w-0">
+            <p className="text-[10px] uppercase tracking-[0.18em] text-(--theme-text)">Card Holder</p>
+            {name && <p className="mt-0.5 truncate font-cormorant text-[20px] leading-tight">{name}</p>}
+          </div>
+          {copyBtn}
+        </div>
       </div>
     </div>
   );
@@ -1311,8 +1397,8 @@ function GiftStack({
   const [dragY, setDragY] = useState(0);
   const [dragging, setDragging] = useState(false);
   const startY = useRef(0);
-  const PEEK = 88;
-  const CARD_H = 190;
+  const PEEK = 80;
+  const CARD_H = 250;
 
   const go = (d: number) => setIndex((i) => (i + d + n) % n);
   const rel = (i: number) => {
