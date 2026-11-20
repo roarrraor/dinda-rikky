@@ -161,9 +161,9 @@ export function Art({
   );
 }
 
-/** Segel lilin dengan inisial */
-export function Seal({ initials, className = "" }: { initials: string; className?: string }) {
-  const { seal } = ASSETS;
+/** Segel lilin dengan monogram D/R */
+export function Seal({ className = "" }: { className?: string }) {
+  const { seal, sealMonogram } = ASSETS;
   return (
     <div aria-hidden className={`relative ${className}`}>
       <Image
@@ -174,8 +174,15 @@ export function Seal({ initials, className = "" }: { initials: string; className
         sizes="100px"
         className="h-auto w-full drop-shadow-[0_3px_4px_rgb(0_0_0/0.2)]"
       />
-      <span className="absolute inset-0 grid place-items-center font-great-vibes text-[1.5em] leading-none text-(--theme-surface)/90 [text-shadow:0_-1px_0_rgb(0_0_0/0.25)]">
-        {initials}
+      <span className="absolute inset-0 grid place-items-center">
+        <Image
+          src={sealMonogram.src}
+          alt=""
+          width={sealMonogram.width}
+          height={sealMonogram.height}
+          sizes="60px"
+          className="h-auto w-[48%] drop-shadow-[0_-1px_0_rgb(0_0_0/0.25)]"
+        />
       </span>
     </div>
   );

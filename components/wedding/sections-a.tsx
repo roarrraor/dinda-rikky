@@ -24,7 +24,6 @@ export function TableSection({
 }) {
   const music = useMusic();
   const { envelopeClosed, envelopeOpen, envelopePocket, plate, swan, venue: venueArt, poses } = ASSETS;
-  const initials = `${first.charAt(0)}${second.charAt(0)}`;
   const tag = hashtag?.trim().replace(/^#/, "");
   const flowers = (cls: string, delay: number) => <Art art="flowers" className={`z-30 ${cls}`} delay={delay} />;
 
@@ -49,7 +48,7 @@ export function TableSection({
                 top: `${100 * envelopeClosed.seal.y}%`,
               }}
             >
-              <Seal initials={initials} className="w-full" />
+              <Seal className="w-full" />
             </span>
           </div>
         </Drop>
@@ -80,7 +79,7 @@ export function TableSection({
             </div>
             <Image src={envelopePocket.src} alt="" fill sizes="220px" className="object-contain" />
             <span className="absolute top-[69%] left-1/2 w-[19%] -translate-x-1/2 -translate-y-1/2 text-[11px]">
-              <Seal initials={initials} className="w-full" />
+              <Seal className="w-full" />
             </span>
           </div>
         </Drop>

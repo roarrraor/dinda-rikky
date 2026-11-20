@@ -49,7 +49,6 @@ export function Cover({
   const [opening, setOpening] = useState(false);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const { envelopeClosed, envelopeOpen, envelopePocket, flowers } = ASSETS;
-  const initials = `${first.charAt(0)}${second.charAt(0)}`;
   const tag = hashtag?.trim().replace(/^#/, "");
 
   useEffect(
@@ -210,7 +209,7 @@ export function Cover({
                           top: `${100 * envelopeClosed.seal.y}%`,
                         }}
                       >
-                        <Seal initials={initials} className="w-full" />
+                        <Seal className="w-full" />
                       </span>
                     </motion.button>
                   )}

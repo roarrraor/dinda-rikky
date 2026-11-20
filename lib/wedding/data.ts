@@ -13,6 +13,7 @@ export const ASSETS = {
   envelopeOpen: asset("envelope-open.webp", 657, 871),
   envelopePocket: asset("envelope-pocket.webp", 657, 871),
   seal: asset("seal.webp", 267, 263),
+  sealMonogram: asset("seal-monogram.webp", 400, 614),
   flowers: asset("flowers.webp", 386, 669),
   plate: asset("plate.webp", 596, 595),
   swan: asset("swan.webp", 400, 279),
