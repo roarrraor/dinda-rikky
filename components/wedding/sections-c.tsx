@@ -460,8 +460,9 @@ export function PhotoboothSection({
   const [wallOpen, setWallOpen] = useState(false);
   const { poses } = ASSETS;
 
-  /** Foto contoh strip Classic (4 pose) buat hero. */
-  const heroPhotos = [poses[0], poses[1], poses[2], poses[3]];
+  /** Foto contoh strip Classic (4 pose) buat hero — 9 pose beda-beda di
+      ketiga strip, tanpa ada yang dobel. */
+  const heroPhotos = [poses[0], poses[1], poses[3], poses[7]];
 
   return (
     <section id="pt-photobooth" className="@container relative bg-(--pt-leaf) px-6 pt-8 pb-8 text-center">
@@ -482,9 +483,9 @@ export function PhotoboothSection({
           className="relative mt-9 w-[98px] -rotate-6 cursor-pointer bg-white px-1.5 pt-1.5 pb-2 shadow-[0_16px_24px_-12px_rgb(63_74_44/0.5)] transition-transform active:scale-[0.98]"
         >
           <div className="space-y-1">
-            {[poses[2], poses[3]].map((p) => (
+            {[poses[6], poses[9]].map((p) => (
               <div key={p.src} className="relative aspect-[4/3] overflow-hidden">
-                <Image src={p.src} alt="" fill sizes="98px" className="object-cover object-[50%_12%]" />
+                <Image src={p.src} alt="" fill sizes="98px" className="object-cover object-top" />
               </div>
             ))}
           </div>
@@ -501,7 +502,7 @@ export function PhotoboothSection({
           <div className="space-y-1.5">
             {heroPhotos.map((p) => (
               <div key={p.src} className="relative aspect-[4/3] overflow-hidden">
-                <Image src={p.src} alt="" fill sizes="136px" className="object-cover object-[50%_12%]" />
+                <Image src={p.src} alt="" fill sizes="136px" className="object-cover object-top" />
               </div>
             ))}
           </div>
@@ -519,9 +520,9 @@ export function PhotoboothSection({
           className="relative mt-9 w-[98px] rotate-6 cursor-pointer bg-white px-1.5 pt-1.5 pb-2 shadow-[0_16px_24px_-12px_rgb(63_74_44/0.5)] transition-transform active:scale-[0.98]"
         >
           <div className="space-y-1">
-            {[poses[0], poses[1], poses[2]].map((p) => (
+            {[poses[2], poses[4], poses[5]].map((p) => (
               <div key={p.src} className="relative aspect-[4/3] overflow-hidden">
-                <Image src={p.src} alt="" fill sizes="98px" className="object-cover object-[50%_12%]" />
+                <Image src={p.src} alt="" fill sizes="98px" className="object-cover object-top" />
               </div>
             ))}
           </div>
