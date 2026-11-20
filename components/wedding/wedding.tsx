@@ -137,16 +137,16 @@ export function Wedding({ data, guestName }: { data: WeddingData; guestName?: st
               <DressCodeSection note={data.dresscode} wear={data.dresscodeColors?.wear ?? []} />
             )}
             <GallerySection photos={(data.photos ?? []).filter(Boolean)} />
-            <PhotoboothSection caption={caption} />
-            {(showRsvp || showWishes) && (
-              <RsvpSection form={form} slug={data.slug} showRsvp={showRsvp} showWishes={showWishes} />
-            )}
             <GiftSection
               gifts={data.gifts}
               qrisPhoto={data.qrisPhoto}
               giftAddress={data.giftAddress}
               giftReceiver={data.giftReceiver}
             />
+            {(showRsvp || showWishes) && (
+              <RsvpSection form={form} slug={data.slug} showRsvp={showRsvp} showWishes={showWishes} />
+            )}
+            <PhotoboothSection caption={caption} />
             <ClosingSection
               first={first}
               second={second}
