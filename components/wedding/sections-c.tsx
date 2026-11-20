@@ -7,7 +7,6 @@ import dayjs from "dayjs";
 import { AnimatePresence, motion } from "motion/react";
 import { Camera, Check, CheckCircle2, ChevronDown, ChevronRight, ChevronUp, Copy, Images, MessageCircle, Minus, Plus, Send, Smile, X } from "lucide-react";
 import { ASSETS, COPY, ID, paletteVars } from "@/lib/wedding/data";
-import { LAYOUTS } from "@/lib/wedding/photobooth";
 import { allStickers, stickerSrc } from "@/lib/wedding/stickers";
 import { formatDate } from "@/lib/wedding/format";
 import { sanitizeRichText } from "@/lib/wedding/sanitize";
@@ -528,24 +527,6 @@ export function PhotoboothSection({
           </div>
         </button>
       </Reveal>
-
-      {/* Pilihan tata letak sebagai pil — ketuk untuk buka photobooth */}
-      <p className="mt-5 font-montserrat text-[12px] font-semibold tracking-[0.06em] text-(--theme-text)">
-        {COPY.photoboothLayoutsLabel}
-      </p>
-      <div className="mt-3 flex flex-wrap justify-center gap-2">
-        {LAYOUTS.map((l) => (
-          <button
-            key={l.id}
-            type="button"
-            onClick={() => router.push("/photobooth")}
-            aria-label={`Photobooth ${l.name}`}
-            className="cursor-pointer rounded-full border border-(--theme-text)/25 bg-white/70 px-3.5 py-1.5 font-montserrat text-[12px] font-semibold text-(--theme-text) transition active:scale-95"
-          >
-            {l.name} · {l.shots} Pose
-          </button>
-        ))}
-      </div>
 
       <Reveal className="mt-5 flex flex-col items-center gap-3">
         <PtButton onClick={() => router.push("/photobooth")}>
