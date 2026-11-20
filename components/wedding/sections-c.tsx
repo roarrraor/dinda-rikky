@@ -465,7 +465,7 @@ export function PhotoboothSection({
   const heroPhotos = [poses[0], poses[1], poses[3], poses[7]];
 
   return (
-    <section id="pt-photobooth" className="@container relative bg-(--pt-leaf) px-6 pt-8 pb-8 text-center">
+    <section id="pt-photobooth" className="@container relative bg-(--pt-leaf) px-6 pt-6 pb-6 text-center">
       <Reveal>
         <SectionTitle>{COPY.photoboothTitle}</SectionTitle>
         <p className={`mx-auto mt-3 max-w-76 ${BODY}`}>{COPY.photoboothNote}</p>
@@ -474,18 +474,18 @@ export function PhotoboothSection({
       {/* Tiga strip berdampingan ala kipas (referensi Roar): Duo kiri,
           Classic tengah jadi hero, Trio kanan. Skala kecil supaya satu
           section muat satu layar HP. */}
-      <Reveal className="mt-5 flex items-start justify-center gap-3">
+      <Reveal className="mt-4 flex items-start justify-center gap-2">
         {/* Kiri: Duo (2 pose), miring ke kiri, turun dikit */}
         <button
           type="button"
           onClick={() => router.push("/photobooth")}
           aria-label="Photobooth Duo"
-          className="relative mt-9 w-[98px] -rotate-6 cursor-pointer bg-white px-1.5 pt-1.5 pb-2 shadow-[0_16px_24px_-12px_rgb(63_74_44/0.5)] transition-transform active:scale-[0.98]"
+          className="relative mt-7 w-[68px] -rotate-6 cursor-pointer bg-white px-1.5 pt-1.5 pb-2 shadow-[0_16px_24px_-12px_rgb(63_74_44/0.5)] transition-transform active:scale-[0.98]"
         >
           <div className="space-y-1">
             {[poses[6], poses[9]].map((p) => (
               <div key={p.src} className="relative aspect-[3/4] overflow-hidden">
-                <Image src={p.src} alt="" fill sizes="98px" className="object-cover" />
+                <Image src={p.src} alt="" fill sizes="68px" className="object-cover" />
               </div>
             ))}
           </div>
@@ -496,17 +496,17 @@ export function PhotoboothSection({
           type="button"
           onClick={() => router.push("/photobooth")}
           aria-label="Coba photobooth"
-          className="relative w-[136px] -rotate-2 cursor-pointer bg-white px-2 pt-2 shadow-[0_24px_36px_-14px_rgb(63_74_44/0.55)] transition-transform active:scale-[0.98]"
+          className="relative w-[88px] -rotate-2 cursor-pointer bg-white px-2 pt-2 shadow-[0_24px_36px_-14px_rgb(63_74_44/0.55)] transition-transform active:scale-[0.98]"
         >
           <span className="absolute -top-3 left-1/2 z-10 h-6 w-20 -translate-x-1/2 -rotate-2 bg-[#F3EADB]/85 shadow-sm" />
           <div className="space-y-1.5">
             {heroPhotos.map((p) => (
               <div key={p.src} className="relative aspect-[3/4] overflow-hidden">
-                <Image src={p.src} alt="" fill sizes="136px" className="object-cover" />
+                <Image src={p.src} alt="" fill sizes="88px" className="object-cover" />
               </div>
             ))}
           </div>
-          <div className="py-2.5 font-sans text-(--theme-text)">
+          <div className="py-2 font-sans text-(--theme-text)">
             <p className="text-[8px] font-semibold tracking-[0.3em] uppercase">{caption.names}</p>
             <p className="mt-0.5 text-[7px] tracking-[0.3em]">{caption.date}</p>
           </div>
@@ -517,19 +517,19 @@ export function PhotoboothSection({
           type="button"
           onClick={() => router.push("/photobooth")}
           aria-label="Photobooth Trio"
-          className="relative mt-9 w-[98px] rotate-6 cursor-pointer bg-white px-1.5 pt-1.5 pb-2 shadow-[0_16px_24px_-12px_rgb(63_74_44/0.5)] transition-transform active:scale-[0.98]"
+          className="relative mt-7 w-[68px] rotate-6 cursor-pointer bg-white px-1.5 pt-1.5 pb-2 shadow-[0_16px_24px_-12px_rgb(63_74_44/0.5)] transition-transform active:scale-[0.98]"
         >
           <div className="space-y-1">
             {[poses[2], poses[4], poses[5]].map((p) => (
               <div key={p.src} className="relative aspect-[3/4] overflow-hidden">
-                <Image src={p.src} alt="" fill sizes="98px" className="object-cover" />
+                <Image src={p.src} alt="" fill sizes="68px" className="object-cover" />
               </div>
             ))}
           </div>
         </button>
       </Reveal>
 
-      <Reveal className="mt-5 flex flex-col items-center gap-3">
+      <Reveal className="mt-4 flex flex-col items-center gap-3">
         <PtButton onClick={() => router.push("/photobooth")}>
           <Camera size={14} />
           {COPY.photoboothCta}
@@ -540,7 +540,7 @@ export function PhotoboothSection({
         </PtButton>
       </Reveal>
 
-      <p className="mt-5 font-montserrat text-[11px] text-(--theme-muted)">{COPY.photoboothPrivacy}</p>
+      <p className="mt-4 font-montserrat text-[11px] text-(--theme-muted)">{COPY.photoboothPrivacy}</p>
 
       {wallOpen && <PhotoboothWall onClose={() => setWallOpen(false)} />}
     </section>
