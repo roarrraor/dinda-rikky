@@ -24,12 +24,18 @@ export const ASSETS = {
   cosmos: asset("cosmos.webp", 196, 360),
   teacup: asset("teacup.webp", 365, 323),
   grass: asset("grass.webp", 1000, 982),
-  // Pose ilustrasi couple (versi Ghibli Rikky & Dinda).
+  // Pose ilustrasi couple (10 kartun chibi Rikky & Dinda).
   poses: [
-    asset("pose-1.webp", 900, 1095),
-    asset("pose-2.webp", 900, 1095),
-    asset("pose-3.webp", 900, 1095),
-    asset("pose-4.webp", 900, 1095),
+    asset("pose-1.webp", 896, 1200),
+    asset("pose-2.webp", 896, 1200),
+    asset("pose-3.webp", 896, 1200),
+    asset("pose-4.webp", 896, 1200),
+    asset("pose-5.webp", 896, 1200),
+    asset("pose-6.webp", 896, 1200),
+    asset("pose-7.webp", 896, 1200),
+    asset("pose-8.webp", 896, 1200),
+    asset("pose-9.webp", 896, 1200),
+    asset("pose-10.webp", 896, 1200),
   ],
 } as const;
 
@@ -263,11 +269,6 @@ const galleryPhotos = [
   "/assets/illustrations/gallery-3.webp",
   "/assets/illustrations/gallery-4.webp",
   "/assets/illustrations/gallery-5.webp",
-  "/assets/illustrations/gallery-6.webp",
-  "/assets/illustrations/gallery-7.webp",
-  "/assets/illustrations/gallery-8.webp",
-  "/assets/illustrations/gallery-9.webp",
-  "/assets/illustrations/gallery-10.webp",
 ];
 
 export const WEDDING: WeddingData = {
