@@ -484,8 +484,8 @@ export function PhotoboothSection({
         >
           <div className="space-y-1">
             {[poses[6], poses[9]].map((p) => (
-              <div key={p.src} className="relative aspect-[4/3] overflow-hidden">
-                <Image src={p.src} alt="" fill sizes="98px" className="object-cover object-top" />
+              <div key={p.src} className="relative aspect-[3/4] overflow-hidden">
+                <Image src={p.src} alt="" fill sizes="98px" className="object-cover" />
               </div>
             ))}
           </div>
@@ -501,8 +501,8 @@ export function PhotoboothSection({
           <span className="absolute -top-3 left-1/2 z-10 h-6 w-20 -translate-x-1/2 -rotate-2 bg-[#F3EADB]/85 shadow-sm" />
           <div className="space-y-1.5">
             {heroPhotos.map((p) => (
-              <div key={p.src} className="relative aspect-[4/3] overflow-hidden">
-                <Image src={p.src} alt="" fill sizes="136px" className="object-cover object-top" />
+              <div key={p.src} className="relative aspect-[3/4] overflow-hidden">
+                <Image src={p.src} alt="" fill sizes="136px" className="object-cover" />
               </div>
             ))}
           </div>
@@ -521,8 +521,8 @@ export function PhotoboothSection({
         >
           <div className="space-y-1">
             {[poses[2], poses[4], poses[5]].map((p) => (
-              <div key={p.src} className="relative aspect-[4/3] overflow-hidden">
-                <Image src={p.src} alt="" fill sizes="98px" className="object-cover object-top" />
+              <div key={p.src} className="relative aspect-[3/4] overflow-hidden">
+                <Image src={p.src} alt="" fill sizes="98px" className="object-cover" />
               </div>
             ))}
           </div>
