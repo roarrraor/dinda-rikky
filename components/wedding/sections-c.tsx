@@ -473,18 +473,18 @@ export function PhotoboothSection({
 
       {/* Hero: satu strip Classic hasil jadi, miring dikit ala polaroid
           dengan lakban di atas — ajakan buat tamu coba photobooth. */}
-      <Reveal className="mt-8 flex justify-center">
+      <Reveal className="mt-6 flex justify-center">
         <button
           type="button"
           onClick={() => router.push("/photobooth")}
           aria-label="Coba photobooth"
-          className="relative w-[248px] -rotate-2 cursor-pointer bg-white px-2 pt-2 shadow-[0_24px_36px_-14px_rgb(63_74_44/0.55)] transition-transform active:scale-[0.98]"
+          className="relative w-[180px] -rotate-2 cursor-pointer bg-white px-2 pt-2 shadow-[0_24px_36px_-14px_rgb(63_74_44/0.55)] transition-transform active:scale-[0.98]"
         >
           <span className="absolute -top-3 left-1/2 z-10 h-6 w-20 -translate-x-1/2 -rotate-2 bg-[#F3EADB]/85 shadow-sm" />
           <div className="space-y-1.5">
             {heroPhotos.map((p) => (
               <div key={p.src} className="relative aspect-[4/3] overflow-hidden">
-                <Image src={p.src} alt="" fill sizes="250px" className="object-cover object-bottom" />
+                <Image src={p.src} alt="" fill sizes="180px" className="object-cover object-bottom" />
               </div>
             ))}
           </div>
@@ -496,7 +496,7 @@ export function PhotoboothSection({
       </Reveal>
 
       {/* Pilihan tata letak sebagai pil — ketuk untuk buka photobooth */}
-      <p className="mt-8 font-montserrat text-[12px] font-semibold tracking-[0.06em] text-(--theme-text)">
+      <p className="mt-6 font-montserrat text-[12px] font-semibold tracking-[0.06em] text-(--theme-text)">
         {COPY.photoboothLayoutsLabel}
       </p>
       <div className="mt-3 flex flex-wrap justify-center gap-2">
@@ -513,7 +513,7 @@ export function PhotoboothSection({
         ))}
       </div>
 
-      <Reveal className="mt-8 flex flex-col items-center gap-3">
+      <Reveal className="mt-6 flex flex-col items-center gap-3">
         <PtButton onClick={() => router.push("/photobooth")}>
           <Camera size={14} />
           {COPY.photoboothCta}
