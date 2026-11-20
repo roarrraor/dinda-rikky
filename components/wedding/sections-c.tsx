@@ -484,7 +484,7 @@ export function PhotoboothSection({
           <div className="space-y-1">
             {[poses[2], poses[3]].map((p) => (
               <div key={p.src} className="relative aspect-[4/3] overflow-hidden">
-                <Image src={p.src} alt="" fill sizes="98px" className="object-cover object-bottom" />
+                <Image src={p.src} alt="" fill sizes="98px" className="object-cover object-[50%_12%]" />
               </div>
             ))}
           </div>
@@ -501,7 +501,7 @@ export function PhotoboothSection({
           <div className="space-y-1.5">
             {heroPhotos.map((p) => (
               <div key={p.src} className="relative aspect-[4/3] overflow-hidden">
-                <Image src={p.src} alt="" fill sizes="136px" className="object-cover object-bottom" />
+                <Image src={p.src} alt="" fill sizes="136px" className="object-cover object-[50%_12%]" />
               </div>
             ))}
           </div>
@@ -521,7 +521,7 @@ export function PhotoboothSection({
           <div className="space-y-1">
             {[poses[0], poses[1], poses[2]].map((p) => (
               <div key={p.src} className="relative aspect-[4/3] overflow-hidden">
-                <Image src={p.src} alt="" fill sizes="98px" className="object-cover object-bottom" />
+                <Image src={p.src} alt="" fill sizes="98px" className="object-cover object-[50%_12%]" />
               </div>
             ))}
           </div>
