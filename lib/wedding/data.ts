@@ -263,6 +263,11 @@ const galleryPhotos = [
   "/assets/illustrations/gallery-3.webp",
   "/assets/illustrations/gallery-4.webp",
   "/assets/illustrations/gallery-5.webp",
+  "/assets/illustrations/gallery-6.webp",
+  "/assets/illustrations/gallery-7.webp",
+  "/assets/illustrations/gallery-8.webp",
+  "/assets/illustrations/gallery-9.webp",
+  "/assets/illustrations/gallery-10.webp",
 ];
 
 export const WEDDING: WeddingData = {
