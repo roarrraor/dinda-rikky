@@ -97,3 +97,11 @@ body {
   background: #6f9440;
   border-radius: 999px;
 }
+
+/* Latar chat ucapan ala WhatsApp: pola doodle di atas krem. */
+.wa-doodle-bg {
+  background-color: #efeae3;
+  background-image: url("/assets/wedding/wa-doodle-bg.png");
+  background-repeat: repeat;
+  background-size: 480px auto;
+}

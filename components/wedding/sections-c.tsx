@@ -931,7 +931,7 @@ export function RsvpSection({
                     followRef.current =
                       el.scrollTop + el.clientHeight >= el.scrollHeight - 120;
                   }}
-                  className="chat-scroll flex-1 overflow-y-auto overscroll-contain bg-[#E7DFD3] px-3 pt-4 pb-4"
+                  className="chat-scroll wa-doodle-bg flex-1 overflow-y-auto overscroll-contain px-3 pt-4 pb-4"
                 >
                   {orderedWishes.slice(0, visibleCount).map((w, i) => {
                     const mine = !!justSent && w.name === justSent.name && w.message === justSent.message;
