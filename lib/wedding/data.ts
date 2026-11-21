@@ -243,22 +243,22 @@ const bride = "Dinda Intan Pratiwi";
 
 const story = [
   {
-    title: "Pertemuan Tak Terduga",
+    title: "Cerita Awal",
     description:
-      "Kami pertama bertemu dalam sebuah pertemuan sederhana yang tak pernah terbayangkan sebelumnya. Satu percakapan menjadi awal dari segalanya.",
-    date: "2021",
+      "Berawal dari sebuah percakapan sederhana di Telegram pada 19 Oktober 2020. Dua orang asing dipertemukan tanpa pernah menyangka bahwa percakapan itu akan menjadi awal dari sebuah perjalanan panjang.",
+    date: "2020",
   },
   {
-    title: "Bertumbuh Bersama",
+    title: "Pertemuan Pertama",
     description:
-      "Dari perkenalan yang sederhana, tumbuh kebersamaan yang hangat. Kami belajar saling memahami, mempercayai, dan mendukung satu sama lain.",
+      "Pada 28 Desember 2022, akhirnya kami bertemu untuk pertama kalinya di kota Malang, Jawa Timur. Dari yang sebelumnya hanya saling mengenal melalui layar, kini kami mulai menciptakan cerita bersama.",
     date: "2022",
   },
   {
-    title: "Ikrar Suci",
+    title: "Menuju Masa Depan",
     description:
-      "Kini dengan penuh rasa syukur dan doa dari kedua keluarga, kami mantap melangkah bersama menuju bahtera rumah tangga yang sakinah, mawaddah, warahmah.",
-    date: "2024",
+      "Perjalanan membawa kami pada langkah yang lebih serius. Dengan bertemunya kedua keluarga dan doa serta restu orang tua, kami memantapkan hati untuk melangkah bersama menuju kehidupan baru.",
+    date: "2025",
   },
 ];
 
