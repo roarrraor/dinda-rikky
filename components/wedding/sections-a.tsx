@@ -5,10 +5,9 @@ import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { useEffect, useState } from "react";
 import { ASSETS, COPY } from "@/lib/wedding/data";
 import { formatDate } from "@/lib/wedding/format";
-import { useMusic } from "./music";
 import { Art, Drop, GRASS, HAND, LABEL, Polaroid, Reveal, SCRIPT, Seal, Stagger, BODY, ScallopCard, KICKER } from "./primitives";
 
-/** Meja teh: kolase amplop, piring tanggal, kartu lokasi, polaroid, angsa (tombol musik) */
+/** Meja teh: kolase amplop, piring tanggal, kartu lokasi, polaroid */
 export function TableSection({
   first,
   second,
@@ -22,8 +21,7 @@ export function TableSection({
   venue?: string;
   hashtag?: string | null;
 }) {
-  const music = useMusic();
-  const { envelopeClosed, envelopeOpen, envelopePocket, plate, swan, venue: venueArt, poses } = ASSETS;
+  const { envelopeClosed, envelopeOpen, envelopePocket, plate, venue: venueArt, poses } = ASSETS;
   const tag = hashtag?.trim().replace(/^#/, "");
   const flowers = (cls: string, delay: number) => <Art art="flowers" className={`z-30 ${cls}`} delay={delay} />;
 
@@ -129,36 +127,6 @@ export function TableSection({
           <Polaroid src={poses[0].src} alt={`${first} & ${second}`} />
         </Drop>
 
-        {/* angsa = tombol musik */}
-        <Drop className="absolute top-[79%] left-[6%] z-20 w-[48%]" tilt={0} delay={2}>
-          <button
-            type="button"
-            onClick={() => music?.toggle()}
-            aria-label={COPY.music}
-            aria-pressed={!!music?.playing}
-            className="relative block w-full cursor-pointer"
-          >
-            <motion.span
-              className="block"
-              animate={music?.playing ? { rotate: [-2, 2, -2] } : { rotate: 0 }}
-              transition={{ duration: 2.4, repeat: Infinity, ease: "easeInOut" }}
-            >
-              <Image
-                src={swan.src}
-                alt=""
-                width={swan.width}
-                height={swan.height}
-                sizes="180px"
-                className="h-auto w-full drop-shadow-[0_8px_10px_rgb(0_0_0/0.25)]"
-              />
-            </motion.span>
-            <span
-              className={`absolute top-[64%] left-[13%] -rotate-3 text-[min(5.2cqw,22px)] whitespace-nowrap text-white [text-shadow:0_1px_2px_rgb(190_100_120/0.7)] ${SCRIPT}`}
-            >
-              {COPY.tapMusic}
-            </span>
-          </button>
-        </Drop>
         {flowers("top-[80%] -left-[3%] w-[15%]", 2.2)}
         <Art art="orchid" className="top-[78%] -right-[1%] z-30 w-[12%]" delay={2.3} />
       </div>
@@ -167,7 +135,7 @@ export function TableSection({
 }
 
 /** "Burst": 4 pose foto bergantian seperti photobooth */
-export function BurstSection({ date }: { date: string }) {
+export function BurstSection({ date, first, second }: { date: string; first: string; second: string }) {
   const reduced = useReducedMotion();
   const { poses } = ASSETS;
   const last = poses.length - 1;
@@ -213,6 +181,9 @@ export function BurstSection({ date }: { date: string }) {
           </div>
           <p className={`mt-[5%] text-center text-[10px] text-(--theme-muted) ${LABEL}`}>
             {formatDate(date, "DD . MM . YYYY")}
+          </p>
+          <p className={`mt-1 text-center text-[22px] leading-none text-(--theme-primary) ${SCRIPT}`}>
+            {first} & {second}
           </p>
         </div>
       </Reveal>

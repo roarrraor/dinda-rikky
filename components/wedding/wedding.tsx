@@ -122,7 +122,7 @@ export function Wedding({ data, guestName }: { data: WeddingData; guestName?: st
             transition={{ duration: 0.9, ease: "easeOut" }}
           >
             <TableSection first={first} second={second} date={data.date} venue={events[0]?.venue || data.venue} hashtag={data.hashtag} />
-            <BurstSection date={data.date} />
+            <BurstSection date={data.date} first={first} second={second} />
             <SalamSection
               muslim={muslim}
               greeting={data.openingGreeting?.trim() || (muslim ? COPY.greeting : FALLBACK_GREETING)}
@@ -139,7 +139,6 @@ export function Wedding({ data, guestName }: { data: WeddingData; guestName?: st
             <GallerySection photos={(data.photos ?? []).filter(Boolean)} />
             <GiftSection
               gifts={data.gifts}
-              qrisPhoto={data.qrisPhoto}
               giftAddress={data.giftAddress}
               giftReceiver={data.giftReceiver}
             />

@@ -1504,16 +1504,13 @@ function GiftStack({
 
 export function GiftSection({
   gifts,
-  qrisPhoto,
   giftAddress,
   giftReceiver,
 }: {
   gifts?: { bank: string; accountNumber: string; accountName?: string }[];
-  qrisPhoto?: string;
   giftAddress?: string;
   giftReceiver?: string;
 }) {
-  const [zoom, setZoom] = useState(false);
   const accounts = (gifts ?? []).filter((g) => g.accountNumber?.trim());
   const address = giftAddress?.trim();
   const cards = [
@@ -1536,7 +1533,7 @@ export function GiftSection({
         ]
       : []),
   ];
-  if (accounts.length === 0 && !address && !qrisPhoto) return null;
+  if (accounts.length === 0 && !address) return null;
 
   return (
     <section id="pt-gift" className="@container relative bg-(--pt-leaf) px-6 pt-10 pb-12 text-center">
@@ -1551,17 +1548,6 @@ export function GiftSection({
       ) : (
         <GiftStack cards={cards} />
       )}
-      {qrisPhoto && (
-        <button
-          type="button"
-          onClick={() => setZoom(true)}
-          aria-label={ID.gift.zoomQris}
-          className="relative mx-auto mt-5 block size-48 cursor-zoom-in bg-white ring-1 ring-(--pt-sage)"
-        >
-          <Image src={qrisPhoto} alt="QRIS" fill sizes="192px" className="object-contain p-3" />
-        </button>
-      )}
-      {zoom && qrisPhoto && <Lightbox src={qrisPhoto} alt="QRIS" onClose={() => setZoom(false)} />}
     </section>
   );
 }
