@@ -106,8 +106,8 @@ function PersonCard({ p, showPhoto, mirror }: { p: Person; showPhoto: boolean; m
       )}
       <Reveal className={`relative ${showPhoto ? "-mt-[34cqw]" : ""}`}>
         <div
-          className={`relative rounded-t-full bg-(--pt-pink)/70 px-[12%] pb-[26cqw] text-center ${
-            showPhoto ? "pt-[44cqw]" : "pt-[22cqw]"
+          className={`relative rounded-t-full bg-(--pt-pink)/70 px-[12%] pb-[18cqw] text-center ${
+            showPhoto ? "pt-[38cqw]" : "pt-[18cqw]"
           }`}
         >
           <Stagger delay={0.2}>
