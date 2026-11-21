@@ -7,7 +7,6 @@ import { ASSETS, COPY, ID } from "@/lib/wedding/data";
 import { displayName, formatDate } from "@/lib/wedding/format";
 import { googleCalendarUrl } from "@/lib/wedding/calendar";
 import type { WeddingEvent } from "@/lib/wedding/events";
-import { useCountdown } from "@/lib/wedding/use-countdown";
 import {
   Art,
   BODY,
@@ -269,7 +268,6 @@ export function SaveDateSection({
   title: string;
   events: WeddingEvent[];
 }) {
-  const { arrived, units } = useCountdown(date);
   const last = events.at(-1);
   const calendarUrl = googleCalendarUrl({
     title: ID.saveDate.calendarTitle(title),
@@ -361,20 +359,6 @@ export function SaveDateSection({
           ))}
         </div>
       </Reveal>
-
-      {/* hitung mundur */}
-      {!arrived && (
-        <Reveal className="mt-8 flex justify-center gap-5 px-5">
-          {units.map((u) => (
-            <div key={u.label} className="text-center">
-              <p className={`text-[30px] leading-none text-(--theme-text)/85 tabular-nums ${HAND}`}>
-                {String(u.value).padStart(2, "0")}
-              </p>
-              <p className={`mt-1 text-[9px] text-(--theme-accent) ${LABEL}`}>{u.label}</p>
-            </div>
-          ))}
-        </Reveal>
-      )}
 
       {events.length > 0 && (
         <div id="pt-location" className="mt-10 px-5 text-center">
