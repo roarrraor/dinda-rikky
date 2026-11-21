@@ -47,6 +47,7 @@ export function Cover({
 }) {
   const reduced = useReducedMotion();
   const [opening, setOpening] = useState(false);
+  const [musicStarted, setMusicStarted] = useState(false);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const { envelopeClosed, envelopeOpen, envelopePocket, flowers } = ASSETS;
   const tag = hashtag?.trim().replace(/^#/, "");
@@ -61,6 +62,9 @@ export function Cover({
   function open() {
     if (opening) return;
     playClick();
+    // Lagu mulai setelah bunyi klik segel selesai (klik ~0.44 dtk) -> 0.6 dtk,
+    // jadi lagu masuk pas amplop mulai terbuka, bukan bareng bunyi klik.
+    setTimeout(() => setMusicStarted(true), 600);
     if (reduced) return onOpen();
     setOpening(true);
     // Urutan: flap buka (0.35-0.95) -> kertas naik (0.95-2.1) -> hold (2.1-2.8)
@@ -81,7 +85,7 @@ export function Cover({
         opened ? "overflow-x-clip" : "overflow-hidden"
       }`}
     >
-      <MusicProvider opened={opened} audioUrl={audioUrl}>
+      <MusicProvider opened={opened} audioUrl={audioUrl} startMusic={musicStarted}>
         {opened && children}
       </MusicProvider>
 

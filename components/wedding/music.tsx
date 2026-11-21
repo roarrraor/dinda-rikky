@@ -11,14 +11,17 @@ const Ctx = createContext<MusicCtx | null>(null);
 
 export const useMusic = () => useContext(Ctx);
 
-/** Pemutar musik latar. Otomatis jalan saat undangan dibuka (setelah gesture user). */
+/** Pemutar musik latar. Jalan saat `startMusic` true (setelah bunyi klik segel
+    selesai), bukan saat undangan tampil — biar lagu masuk setelah sfx buka amplop. */
 export function MusicProvider({
   opened,
   audioUrl,
+  startMusic,
   children,
 }: {
   opened: boolean;
   audioUrl?: string;
+  startMusic?: boolean;
   children: ReactNode;
 }) {
   const ref = useRef<HTMLAudioElement>(null);
@@ -26,9 +29,9 @@ export function MusicProvider({
 
   useEffect(() => {
     const el = ref.current;
-    if (!el || !opened) return;
+    if (!el || !startMusic) return;
     el.play().then(() => setPlaying(true)).catch(() => setPlaying(false));
-  }, [opened]);
+  }, [startMusic]);
 
   const toggle = useCallback(() => {
     const el = ref.current;
