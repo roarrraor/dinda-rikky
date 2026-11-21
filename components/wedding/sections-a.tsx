@@ -5,9 +5,10 @@ import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { useEffect, useState } from "react";
 import { ASSETS, COPY } from "@/lib/wedding/data";
 import { formatDate } from "@/lib/wedding/format";
+import { useMusic } from "./music";
 import { Art, Drop, GRASS, HAND, LABEL, Polaroid, Reveal, SCRIPT, Seal, Stagger, BODY, ScallopCard, KICKER } from "./primitives";
 
-/** Meja teh: kolase amplop, piring tanggal, kartu lokasi, polaroid */
+/** Meja teh: kolase amplop, piring tanggal, kartu lokasi, polaroid, angsa (tombol musik, tanpa teks) */
 export function TableSection({
   first,
   second,
@@ -21,7 +22,8 @@ export function TableSection({
   venue?: string;
   hashtag?: string | null;
 }) {
-  const { envelopeClosed, envelopeOpen, envelopePocket, plate, venue: venueArt, poses } = ASSETS;
+  const music = useMusic();
+  const { envelopeClosed, envelopeOpen, envelopePocket, plate, swan, venue: venueArt, poses } = ASSETS;
   const tag = hashtag?.trim().replace(/^#/, "");
   const flowers = (cls: string, delay: number) => <Art art="flowers" className={`z-30 ${cls}`} delay={delay} />;
 
@@ -127,6 +129,32 @@ export function TableSection({
           <Polaroid src={poses[0].src} alt={`${first} & ${second}`} />
         </Drop>
 
+        {/* angsa = tombol musik (gambarnya aja, tanpa teks "Tap to Music") */}
+        <Drop className="absolute top-[79%] left-[6%] z-20 w-[48%]" tilt={0} delay={2}>
+          <button
+            type="button"
+            onClick={() => music?.toggle()}
+            aria-label={COPY.music}
+            aria-pressed={!!music?.playing}
+            className="relative block w-full cursor-pointer"
+          >
+            <motion.span
+              className="block"
+              animate={music?.playing ? { rotate: [-2, 2, -2] } : { rotate: 0 }}
+              transition={{ duration: 2.4, repeat: Infinity, ease: "easeInOut" }}
+            >
+              <Image
+                src={swan.src}
+                alt=""
+                width={swan.width}
+                height={swan.height}
+                sizes="180px"
+                className="h-auto w-full drop-shadow-[0_8px_10px_rgb(0_0_0/0.25)]"
+              />
+            </motion.span>
+          </button>
+        </Drop>
+
         {flowers("top-[80%] -left-[3%] w-[15%]", 2.2)}
         <Art art="orchid" className="top-[78%] -right-[1%] z-30 w-[12%]" delay={2.3} />
       </div>
@@ -150,7 +178,7 @@ export function BurstSection({ date, first, second }: { date: string; first: str
   return (
     <section id="pt-burst" className="@container relative bg-(--theme-bg) px-6 pt-10 pb-12">
       <Reveal>
-        <div className="mx-auto w-[80cqw] bg-white p-[3.5%] pb-[12%] shadow-[0_14px_26px_-12px_rgb(63_74_44/0.45)] ring-1 ring-(--pt-sage)/40">
+        <div className="mx-auto w-[80cqw] bg-white p-[3.5%] shadow-[0_14px_26px_-12px_rgb(63_74_44/0.45)] ring-1 ring-(--pt-sage)/40">
           <div
             className="relative overflow-hidden"
             style={{ aspectRatio: `${poses[0].width} / ${poses[0].height}` }}
@@ -179,12 +207,15 @@ export function BurstSection({ date, first, second }: { date: string; first: str
               )}
             </AnimatePresence>
           </div>
-          <p className={`mt-[5%] text-center text-[10px] text-(--theme-muted) ${LABEL}`}>
-            {formatDate(date, "DD . MM . YYYY")}
-          </p>
-          <p className={`mt-1 text-center text-[22px] leading-none text-(--theme-primary) ${SCRIPT}`}>
-            {first} & {second}
-          </p>
+          {/* tanggal + nama di tengah-tengah strip bawah polaroid */}
+          <div className="flex min-h-[19cqw] flex-col items-center justify-center">
+            <p className={`text-center text-[10px] text-(--theme-muted) ${LABEL}`}>
+              {formatDate(date, "DD . MM . YYYY")}
+            </p>
+            <p className={`mt-1 text-center text-[22px] leading-none text-(--theme-primary) ${SCRIPT}`}>
+              {first} & {second}
+            </p>
+          </div>
         </div>
       </Reveal>
       <div aria-hidden className="mt-4 flex justify-center gap-1.5">
