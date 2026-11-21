@@ -80,3 +80,20 @@ body {
   background: #6f9440;
   border-radius: 999px;
 }
+
+/* Daftar chat ucapan: scrollbar vertikal hijau yang kelihatan supaya
+   tamu tahu list-nya bisa di-scroll. */
+.chat-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: #6f9440 #e6e0d2;
+}
+.chat-scroll::-webkit-scrollbar {
+  width: 6px;
+}
+.chat-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+.chat-scroll::-webkit-scrollbar-thumb {
+  background: #6f9440;
+  border-radius: 999px;
+}

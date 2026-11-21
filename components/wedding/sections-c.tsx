@@ -671,9 +671,11 @@ export function RsvpSection({
     } else if (hasPlayedRevealRef.current) {
       setVisibleCount(wishes.length);
       setTyping(false);
-      // Jangan auto-follow ke bawah — daftar tampil dari atas seperti biasa.
-      followRef.current = false;
-      requestAnimationFrame(() => chatRef.current?.scrollTo({ top: 0, behavior: "instant" }));
+      // Langsung ke chat terbaru (bawah) — seperti buka ulang chat WA.
+      followRef.current = true;
+      requestAnimationFrame(() =>
+        chatRef.current?.scrollTo({ top: chatRef.current.scrollHeight, behavior: "instant" })
+      );
     } else {
       hasPlayedRevealRef.current = true;
       setVisibleCount(0);
@@ -929,7 +931,7 @@ export function RsvpSection({
                     followRef.current =
                       el.scrollTop + el.clientHeight >= el.scrollHeight - 120;
                   }}
-                  className="flex-1 overflow-y-auto overscroll-contain bg-[#E7DFD3] px-3 pt-4 pb-4"
+                  className="chat-scroll flex-1 overflow-y-auto overscroll-contain bg-[#E7DFD3] px-3 pt-4 pb-4"
                 >
                   {orderedWishes.slice(0, visibleCount).map((w, i) => {
                     const mine = !!justSent && w.name === justSent.name && w.message === justSent.message;
@@ -1034,7 +1036,7 @@ export function RsvpSection({
                   )}
                 </div>
                 {done || alreadySent ? (
-                  <div className="flex items-center justify-center gap-2 border-t border-(--pt-sage)/50 bg-white px-4 py-3.5">
+                  <div className="flex items-center justify-center gap-2 border-t border-(--pt-sage) bg-white px-4 py-3.5 shadow-[0_-8px_20px_-8px_rgb(63_74_44/0.25)]">
                     <CheckCircle2 size={18} className="shrink-0 text-(--theme-primary)" />
                     <p className="font-system text-[14px] font-semibold text-(--theme-muted)">
                       {t.wishReceived}
@@ -1043,9 +1045,9 @@ export function RsvpSection({
                 ) : composing ? (
                   <form
                     onSubmit={onSubmit}
-                    className="max-h-[46dvh] shrink-0 overflow-y-auto border-t border-(--pt-sage)/50 bg-white px-4 pt-3 pb-3"
+                    className="max-h-[46dvh] shrink-0 overflow-y-auto border-t border-(--pt-sage) bg-white px-4 pb-3 shadow-[0_-8px_20px_-8px_rgb(63_74_44/0.25)]"
                   >
-                    <div className="mb-3 flex items-center justify-between">
+                    <div className="sticky top-0 z-10 -mx-4 flex items-center justify-between border-b border-(--pt-sage)/50 bg-white px-4 pt-3 pb-2.5">
                       <p className="font-system text-[15px] font-bold text-(--theme-text)">Tulis ucapan</p>
                       <button
                         type="button"
@@ -1250,7 +1252,7 @@ export function RsvpSection({
                     </div>
                   </form>
                 ) : (
-                  <div className="flex items-center gap-2 border-t border-(--pt-sage)/50 bg-white px-3 py-2.5">
+                  <div className="flex items-center gap-2 border-t border-(--pt-sage) bg-white px-3 py-2.5 shadow-[0_-8px_20px_-8px_rgb(63_74_44/0.25)]">
                     <button
                       type="button"
                       aria-label="Pilih stiker"
