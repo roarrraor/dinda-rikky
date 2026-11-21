@@ -9,7 +9,10 @@ export interface WeddingEvent {
   mapsUrl?: string;
 }
 
-/** Susun daftar acara (akad + resepsi) dari data pernikahan. */
+/** Susun daftar acara dari data pernikahan.
+ * Hanya akad nikah — tidak ada resepsi (Roar, 2026-11-21).
+ * Blok resepsi sengaja dihapus supaya acara resepsi tidak muncul
+ * walau pengaturan admin (Supabase) masih menyimpan nilai lamanya. */
 export function buildEvents(w: WeddingData): WeddingEvent[] {
   const events: WeddingEvent[] = [];
   if (w.akad || w.akadVenue) {
@@ -19,15 +22,6 @@ export function buildEvents(w: WeddingData): WeddingEvent[] {
       venue: w.akadVenue,
       address: w.akadAddress,
       mapsUrl: w.akadMapsUrl,
-    });
-  }
-  if (w.resepsi || w.resepsiVenue) {
-    events.push({
-      title: w.resepsiTitle,
-      time: w.resepsi,
-      venue: w.resepsiVenue,
-      address: w.resepsiAddress,
-      mapsUrl: w.mapsUrl,
     });
   }
   return events;
