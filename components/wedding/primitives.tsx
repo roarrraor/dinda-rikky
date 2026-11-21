@@ -181,7 +181,7 @@ export function Seal({ className = "" }: { className?: string }) {
           width={sealMonogram.width}
           height={sealMonogram.height}
           sizes="60px"
-          className="h-auto w-[48%] drop-shadow-[0_-1px_0_rgb(0_0_0/0.25)]"
+          className="h-auto w-[40%] drop-shadow-[0_-1px_0_rgb(0_0_0/0.25)]"
         />
       </span>
     </div>
