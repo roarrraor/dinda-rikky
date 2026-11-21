@@ -923,6 +923,10 @@ export function PhotoboothStudio({ caption }: { caption: PhotoboothCaption }) {
   const [tab, setTab] = useState<Tab>("frame");
   const [concept, setConcept] = useState<"Semua" | FrameConcept>("Semua");
   const [notice, setNotice] = useState<string | null>(null);
+  // berbagi ke galeri tamu (opt-in, default mati — pilihan per strip)
+  const [shareGallery, setShareGallery] = useState(false);
+  const [shared, setShared] = useState(false);
+  const [sharing, setSharing] = useState(false);
 
   // kamera
   const videoRef = useRef<HTMLVideoElement | null>(null);
@@ -1140,6 +1144,22 @@ export function PhotoboothStudio({ caption }: { caption: PhotoboothCaption }) {
     return new Promise((resolve) => canvas.toBlob((b) => resolve(b), "image/png"));
   };
 
+  // salinan JPEG kecil (540px) untuk diunggah ke galeri tamu
+  const buildShareDataUrl = async (): Promise<string | null> => {
+    try {
+      const canvas = document.createElement("canvas");
+      await renderStrip(canvas, { layout, shots, frame, imageFrame, font, shape: shapeId, filter, caption });
+      const targetW = 540;
+      const small = document.createElement("canvas");
+      small.width = targetW;
+      small.height = Math.round((targetW * canvas.height) / canvas.width);
+      small.getContext("2d")?.drawImage(canvas, 0, 0, small.width, small.height);
+      return small.toDataURL("image/jpeg", 0.85);
+    } catch {
+      return null;
+    }
+  };
+
   const saveStrip = async () => {
     const blob = await buildStripBlob();
     if (!blob) return;
@@ -1155,6 +1175,31 @@ export function PhotoboothStudio({ caption }: { caption: PhotoboothCaption }) {
       saveMyStrip(small.toDataURL("image/jpeg", 0.8));
     } catch {
       /* galeri lokal gagal: unduhan tetap jalan */
+    }
+    // bagikan ke galeri tamu — hanya kalau tamu mengaktifkannya
+    if (shareGallery && !shared) {
+      setSharing(true);
+      try {
+        const dataUrl = await buildShareDataUrl();
+        if (!dataUrl) throw new Error("render gagal");
+        const res = await fetch("/api/photobox/share", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ image: dataUrl }),
+        });
+        const json = await res.json().catch(() => null);
+        if (res.ok && json?.ok) {
+          setShared(true);
+          setNotice(T.sharedOk);
+        } else {
+          setNotice(T.sharedFail);
+        }
+      } catch {
+        setNotice(T.sharedFail);
+      } finally {
+        setSharing(false);
+      }
+      return;
     }
     setNotice(T.saved);
   };
@@ -1188,6 +1233,9 @@ export function PhotoboothStudio({ caption }: { caption: PhotoboothCaption }) {
     setTarget(0);
     setAutoOn(false);
     setNotice(null);
+    setShareGallery(false);
+    setShared(false);
+    setSharing(false);
     setStep("camera");
     if (camState !== "live") void startCamera(facing);
   };
@@ -1823,6 +1871,35 @@ export function PhotoboothStudio({ caption }: { caption: PhotoboothCaption }) {
           )}
 
           <div className="mt-8 flex flex-col items-center gap-3">
+            {/* pilihan berbagi ke galeri tamu (opt-in, default mati) */}
+            <button
+              type="button"
+              onClick={() => setShareGallery((v) => !v)}
+              disabled={shared || sharing}
+              aria-pressed={shareGallery}
+              className="flex w-full cursor-pointer items-center justify-between gap-3 rounded-2xl bg-white px-4 py-3 text-left shadow-[0_4px_14px_rgba(63,74,44,0.12)] disabled:cursor-default disabled:opacity-70"
+            >
+              <span>
+                <span className="block font-montserrat text-[14px] font-semibold text-(--theme-text)">
+                  {T.shareGallery}
+                </span>
+                <span className="mt-0.5 block font-montserrat text-[12px] leading-snug text-(--theme-muted)">
+                  {T.shareGalleryNote}
+                </span>
+              </span>
+              <span
+                className={`grid size-6 shrink-0 place-items-center rounded-md border-2 ${
+                  shareGallery
+                    ? "border-(--theme-primary) bg-(--theme-primary) text-white"
+                    : "border-(--pt-sage) bg-white text-transparent"
+                }`}
+              >
+                <Check size={16} />
+              </span>
+            </button>
+            {shared && (
+              <p className="font-montserrat text-[13px] font-medium text-(--theme-primary)">{T.sharedAlready}</p>
+            )}
             <div className="flex w-full items-center gap-3">
               <PtButton friendly onClick={() => void saveStrip()} className="flex-1">
                 <Download size={16} />
@@ -1862,8 +1939,25 @@ export function PhotoboothStudio({ caption }: { caption: PhotoboothCaption }) {
 
 export function PhotoboothWall({ onClose }: { onClose: () => void }) {
   const [strips, setStrips] = useState<SavedStrip[]>([]);
+  const [shared, setShared] = useState<{ url: string; createdAt: string }[]>([]);
+  const [sharedLoading, setSharedLoading] = useState(true);
   useEffect(() => {
     setStrips(loadMyStrips());
+    let alive = true;
+    fetch("/api/photobox/shared")
+      .then((r) => r.json())
+      .then((d) => {
+        if (alive) setShared(Array.isArray(d?.strips) ? d.strips : []);
+      })
+      .catch(() => {
+        if (alive) setShared([]);
+      })
+      .finally(() => {
+        if (alive) setSharedLoading(false);
+      });
+    return () => {
+      alive = false;
+    };
   }, []);
 
   return createPortal(
@@ -1913,6 +2007,41 @@ export function PhotoboothWall({ onClose }: { onClose: () => void }) {
             ))}
           </ul>
         )}
+        {/* Galeri tamu — strip yang dibagikan tamu lain ke server */}
+        <div className="mt-7 border-t border-(--pt-sage)/50 pt-5">
+          <h3 className="font-montserrat text-[22px] font-semibold text-(--theme-muted)">{T.guestGallery}</h3>
+          <p className={`mt-1 ${PB_BODY}`}>{T.guestGalleryNote}</p>
+          {sharedLoading ? (
+            <p className="mt-6 font-montserrat text-[16px] text-(--theme-muted)">{T.guestGalleryLoading}</p>
+          ) : shared.length === 0 ? (
+            <p className="mt-6 font-montserrat text-[16px] text-(--theme-muted)">{T.guestGalleryEmpty}</p>
+          ) : (
+            <ul className="mt-5 grid grid-cols-2 gap-3">
+              {shared.map((s) => (
+                <li key={s.url} className="overflow-hidden rounded-2xl border border-(--pt-sage)/50">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={s.url}
+                    alt="Strip photobooth yang dibagikan tamu"
+                    loading="lazy"
+                    className="w-full object-cover"
+                  />
+                  <span className="flex items-center justify-center gap-3 py-2">
+                    <a
+                      href={s.url}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="flex items-center gap-1 font-montserrat text-[14px] text-(--theme-primary)"
+                    >
+                      <Download size={13} />
+                      {T.download}
+                    </a>
+                  </span>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
         <PtButton friendly className="mt-5" onClick={onClose}>
           Tutup
         </PtButton>

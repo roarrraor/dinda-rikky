@@ -104,7 +104,7 @@ export const COPY = {
   photoboothGallery: "Lihat Foto Tamu",
   photoboothCta: "Coba Photobooth",
   photoboothLayoutsLabel: "4 pilihan tata letak, gratis buat semua tamu",
-  photoboothPrivacy: "Foto diproses di perangkatmu dan tidak dikirim ke server.",
+  photoboothPrivacy: "Foto diproses di perangkatmu. Hanya strip yang dibagikan yang tampil di galeri.",
   photoboothNote: "Berpose sebentar, bawa pulang ceritanya.",
   rsvp: "Mohon konfirmasi kehadiran serta titipkan doa terbaik untuk kami.",
   wishes: "Tuliskan doa dan ucapan terbaik untuk kami.",
