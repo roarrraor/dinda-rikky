@@ -617,6 +617,10 @@ export function RsvpSection({
   const [justSent, setJustSent] = useState<{ name: string; message: string } | null>(null);
   const chatRef = useRef<HTMLDivElement>(null);
   const typingTimer = useRef<number | null>(null);
+  // Transisi reveal chat hanya dimainkan sekali per halaman (Roar,
+  // 2026-11-22): buka kedua dan seterusnya tampilkan semua langsung,
+  // tanpa animasi satu-per-satu lagi, selama halaman tidak di-reload.
+  const hasPlayedRevealRef = useRef(false);
   // Ikuti pesan baru atau tidak: true selama replay berjalan; kalau tamu
   // sengaja scroll ke atas untuk membaca pesan lama, auto-follow berhenti.
   const followRef = useRef(true);
@@ -650,18 +654,28 @@ export function RsvpSection({
     };
   }, [sheetOpen]);
   // Saat sheet dibuka: kalau tamu baru saja kirim ucapan, tampilkan semua
-  // dan lompat ke bawah (biar dia langsung lihat ucapannya); kalau tidak,
-  // mulai dari nol — pesan-pesan muncul satu per satu seperti lagi ngechat.
+  // dan lompat ke bawah (biar dia langsung lihat ucapannya); kalau
+  // transisi reveal sudah pernah dimainkan, tampilkan semua langsung
+  // tanpa animasi; kalau belum, mulai dari nol — pesan-pesan muncul
+  // satu per satu seperti lagi ngechat.
   useEffect(() => {
     if (!sheetOpen) return;
     followRef.current = true;
     if (justSent) {
+      hasPlayedRevealRef.current = true;
       setVisibleCount(wishes.length);
       setTyping(false);
       requestAnimationFrame(() =>
         chatRef.current?.scrollTo({ top: chatRef.current.scrollHeight, behavior: "instant" })
       );
+    } else if (hasPlayedRevealRef.current) {
+      setVisibleCount(wishes.length);
+      setTyping(false);
+      // Jangan auto-follow ke bawah — daftar tampil dari atas seperti biasa.
+      followRef.current = false;
+      requestAnimationFrame(() => chatRef.current?.scrollTo({ top: 0, behavior: "instant" }));
     } else {
+      hasPlayedRevealRef.current = true;
       setVisibleCount(0);
       setTyping(false);
       requestAnimationFrame(() => chatRef.current?.scrollTo({ top: 0, behavior: "instant" }));
@@ -862,7 +876,7 @@ export function RsvpSection({
                 role="dialog"
                 aria-modal="true"
                 aria-label="Ucapan dan doa tamu"
-                className="fixed inset-x-0 bottom-0 z-[71] mx-auto flex h-[86dvh] w-full max-w-[480px] flex-col overflow-hidden rounded-t-[28px] bg-[#EFEAE3] shadow-2xl"
+                className="fixed inset-x-0 bottom-0 z-[71] mx-auto flex h-[100dvh] w-full max-w-[480px] flex-col overflow-hidden bg-[#EFEAE3] shadow-2xl"
                 style={paletteVars() as CSSProperties}
                 initial={{ y: "100%" }}
                 animate={{ y: 0 }}
