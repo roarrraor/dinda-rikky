@@ -812,14 +812,15 @@ export function RsvpSection({
       <Reveal className="text-center">
         {/* Layout melingkar ala referensi: gelembung di tengah, 7 hiasan
             mengorbit di sekelilingnya. Tanpa garis lingkaran, tanpa 2 link. */}
-        <div className="relative mx-auto h-[400px] w-full max-w-[400px]">
-          {/* Gelembung hijau di tengah — dibuat lebih ramping (220px) supaya
-              ornamen di kiri-kanan tidak menabrak / kepotong. */}
-          <div className="absolute top-1/2 left-1/2 w-[220px] -translate-x-1/2 -translate-y-1/2 -rotate-2 rounded-[28px] bg-[#7A8B4F] px-6 py-7 shadow-[0_14px_28px_-12px_rgb(63_74_44/0.55)]">
-            <p className="font-marcellus text-[36px] leading-none tracking-[0.08em] text-white">
+        <div className="relative mx-auto h-[520px] w-full max-w-[400px]">
+          {/* Gelembung hijau di tengah — ukuran disamakan dengan referensi:
+              bubble besar dan dominan, ornamen sekelilingnya juga besar
+              (rasio bubble : potret ~3.5:1 seperti contoh). */}
+          <div className="absolute top-1/2 left-1/2 w-[280px] -translate-x-1/2 -translate-y-1/2 -rotate-2 rounded-[28px] bg-[#7A8B4F] px-6 py-8 shadow-[0_14px_28px_-12px_rgb(63_74_44/0.55)]">
+            <p className="font-marcellus text-[40px] leading-none tracking-[0.08em] text-white">
               {showRsvp ? "RSVP" : t.wishesTitle}
             </p>
-            <p className="mx-auto mt-3 font-cormorant text-[15px] leading-relaxed text-white/95 italic">
+            <p className="mx-auto mt-3 font-cormorant text-[16px] leading-relaxed text-white/95 italic">
               {showRsvp ? COPY.rsvp : COPY.wishes} ✨
             </p>
             {/* Ekor gelembung */}
@@ -831,8 +832,8 @@ export function RsvpSection({
             alt="Kalender tanggal 20"
             width={ASSETS.rsvp.calendar.width}
             height={ASSETS.rsvp.calendar.height}
-            sizes="56px"
-            className="absolute top-[3%] left-[6%] h-14 w-auto -rotate-6 drop-shadow-[0_4px_8px_rgb(63_74_44/0.25)]"
+            sizes="80px"
+            className="absolute top-[3%] left-[5%] h-20 w-auto -rotate-6 drop-shadow-[0_4px_8px_rgb(63_74_44/0.25)]"
           />
           {/* Kue — kanan atas */}
           <Image
@@ -840,28 +841,28 @@ export function RsvpSection({
             alt="Kue pengantin"
             width={ASSETS.rsvp.cake.width}
             height={ASSETS.rsvp.cake.height}
-            sizes="48px"
-            className="absolute top-[2%] right-[7%] h-12 w-auto rotate-6 drop-shadow-[0_4px_8px_rgb(63_74_44/0.25)]"
+            sizes="64px"
+            className="absolute top-[2%] right-[6%] h-16 w-auto rotate-6 drop-shadow-[0_4px_8px_rgb(63_74_44/0.25)]"
           />
           {/* Potret pria sweater — kanan atas (pinggir) */}
-          <span className="absolute top-[26%] right-0 block size-12 shrink-0 overflow-hidden rounded-full shadow-[0_4px_10px_-4px_rgb(63_74_44/0.4)] ring-2 ring-white">
+          <span className="absolute top-[26%] right-0 block size-16 shrink-0 overflow-hidden rounded-full shadow-[0_4px_10px_-4px_rgb(63_74_44/0.4)] ring-2 ring-white">
             <Image
               src={ASSETS.rsvp.guests[2].src}
               alt=""
               width={ASSETS.rsvp.guests[2].width}
               height={ASSETS.rsvp.guests[2].height}
-              sizes="48px"
+              sizes="64px"
               className="h-full w-full object-cover"
             />
           </span>
           {/* Potret wanita — kanan */}
-          <span className="absolute top-[54%] right-0 block size-12 shrink-0 overflow-hidden rounded-full shadow-[0_4px_10px_-4px_rgb(63_74_44/0.4)] ring-2 ring-white">
+          <span className="absolute top-[54%] right-0 block size-16 shrink-0 overflow-hidden rounded-full shadow-[0_4px_10px_-4px_rgb(63_74_44/0.4)] ring-2 ring-white">
             <Image
               src={ASSETS.rsvp.guests[3].src}
               alt=""
               width={ASSETS.rsvp.guests[3].width}
               height={ASSETS.rsvp.guests[3].height}
-              sizes="48px"
+              sizes="64px"
               className="h-full w-full object-cover"
             />
           </span>
@@ -871,28 +872,28 @@ export function RsvpSection({
             alt="Party popper"
             width={ASSETS.rsvp.popper.width}
             height={ASSETS.rsvp.popper.height}
-            sizes="60px"
-            className="absolute right-[8%] bottom-[5%] h-14 w-auto rotate-12 drop-shadow-[0_4px_8px_rgb(63_74_44/0.25)]"
+            sizes="80px"
+            className="absolute right-[7%] bottom-[5%] h-20 w-auto rotate-12 drop-shadow-[0_4px_8px_rgb(63_74_44/0.25)]"
           />
           {/* Potret couple — kiri bawah */}
-          <span className="absolute bottom-[6%] left-[7%] block size-12 shrink-0 overflow-hidden rounded-full shadow-[0_4px_10px_-4px_rgb(63_74_44/0.4)] ring-2 ring-white">
+          <span className="absolute bottom-[6%] left-[6%] block size-16 shrink-0 overflow-hidden rounded-full shadow-[0_4px_10px_-4px_rgb(63_74_44/0.4)] ring-2 ring-white">
             <Image
               src={ASSETS.rsvp.guests[1].src}
               alt=""
               width={ASSETS.rsvp.guests[1].width}
               height={ASSETS.rsvp.guests[1].height}
-              sizes="48px"
+              sizes="64px"
               className="h-full w-full object-cover"
             />
           </span>
           {/* Potret pria keriting — kiri */}
-          <span className="absolute top-1/2 left-0 block size-12 shrink-0 overflow-hidden rounded-full shadow-[0_4px_10px_-4px_rgb(63_74_44/0.4)] ring-2 ring-white">
+          <span className="absolute top-1/2 left-0 block size-16 shrink-0 overflow-hidden rounded-full shadow-[0_4px_10px_-4px_rgb(63_74_44/0.4)] ring-2 ring-white">
             <Image
               src={ASSETS.rsvp.guests[0].src}
               alt=""
               width={ASSETS.rsvp.guests[0].width}
               height={ASSETS.rsvp.guests[0].height}
-              sizes="48px"
+              sizes="64px"
               className="h-full w-full object-cover"
             />
           </span>
