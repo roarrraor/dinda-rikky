@@ -80,27 +80,46 @@ export function DressCodeSection({
   note?: string;
   wear: { name: string; color: string }[];
 }) {
-  if (!note?.trim() && wear.length === 0) return null;
+  const illustration = ASSETS.dresscode;
+  if (!note?.trim() && wear.length === 0 && !illustration) return null;
   return (
-    <section id="pt-dresscode" className="@container relative px-6 pt-8 pb-10 text-center">
+    <section
+      id="pt-dresscode"
+      className="@container relative overflow-hidden bg-(--theme-text) px-6 pt-12 pb-14 text-center"
+    >
       <Reveal>
-        <SectionTitle>{COPY.dresscodeTitle}</SectionTitle>
-        {note?.trim() && <p className={`mt-3 whitespace-pre-line ${BODY}`}>{note}</p>}
+        <SectionTitle light>{COPY.dresscodeTitle}</SectionTitle>
+        {illustration && (
+          <div className="mx-auto mt-6 w-full max-w-[560px]">
+            <Image
+              src={illustration.src}
+              alt="Ilustrasi busana dress code: kebaya dan beskap bernuansa Cream, Milo, Coksu, dan Putih"
+              width={illustration.width}
+              height={illustration.height}
+              sizes="560px"
+              className="h-auto w-full"
+            />
+          </div>
+        )}
+        {note?.trim() && (
+          <p className="mx-auto mt-6 max-w-md whitespace-pre-line font-cormorant text-[16px] leading-relaxed text-(--theme-surface)">
+            {note}
+          </p>
+        )}
         {wear.length > 0 && (
-          <ul className="mt-6 flex flex-wrap justify-center gap-3">
+          <ul className="mt-8 flex flex-wrap justify-center gap-5">
             {wear.map((w) => (
-              <li
-                key={`${w.name}-${w.color}`}
-                title={w.name}
-                style={scallopMask(4)}
-                className="grid size-16 place-items-center bg-(--theme-surface)"
-              >
+              <li key={`${w.name}-${w.color}`} className="flex w-16 flex-col items-center gap-2">
                 <span
                   role="img"
                   aria-label={w.name}
-                  className="block size-11 rounded-full ring-2 ring-white"
+                  title={w.name}
+                  className="block size-12 rounded-full ring-2 ring-white/80"
                   style={{ backgroundColor: w.color }}
                 />
+                <span className="font-cormorant text-[13px] leading-none text-(--theme-surface)">
+                  {w.name}
+                </span>
               </li>
             ))}
           </ul>
