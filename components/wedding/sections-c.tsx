@@ -810,60 +810,92 @@ export function RsvpSection({
   return (
     <section id="pt-rsvp" className="@container relative overflow-hidden bg-[#FDF8EE] px-5 pt-12 pb-12">
       <Reveal className="text-center">
-        {/* Gelembung hijau RSVP ala referensi. Tanpa lingkaran berulang. */}
-        <div className="relative mx-auto w-full max-w-[420px]">
-          <div className="relative -rotate-2 rounded-[28px] bg-[#7A8B4F] px-6 py-8 shadow-[0_14px_28px_-12px_rgb(63_74_44/0.55)]">
-            <p className="font-marcellus text-[40px] leading-none tracking-[0.08em] text-white">
+        {/* Layout melingkar ala referensi: gelembung di tengah, 7 hiasan
+            mengorbit di sekelilingnya. Tanpa garis lingkaran, tanpa 2 link. */}
+        <div className="relative mx-auto h-[400px] w-full max-w-[400px]">
+          {/* Gelembung hijau di tengah — dibuat lebih ramping (220px) supaya
+              ornamen di kiri-kanan tidak menabrak / kepotong. */}
+          <div className="absolute top-1/2 left-1/2 w-[220px] -translate-x-1/2 -translate-y-1/2 -rotate-2 rounded-[28px] bg-[#7A8B4F] px-6 py-7 shadow-[0_14px_28px_-12px_rgb(63_74_44/0.55)]">
+            <p className="font-marcellus text-[36px] leading-none tracking-[0.08em] text-white">
               {showRsvp ? "RSVP" : t.wishesTitle}
             </p>
-            <p className="mx-auto mt-3 max-w-64 font-cormorant text-[17px] leading-relaxed text-white/95 italic">
+            <p className="mx-auto mt-3 font-cormorant text-[15px] leading-relaxed text-white/95 italic">
               {showRsvp ? COPY.rsvp : COPY.wishes} ✨
             </p>
             {/* Ekor gelembung */}
             <span aria-hidden className="absolute -bottom-[7px] left-10 block size-4 rotate-45 bg-[#7A8B4F]" />
           </div>
-        </div>
-        {/* 4 potret tamu (aset referensi) */}
-        <div className="mt-9 flex items-center justify-center gap-3">
-          {ASSETS.rsvp.guests.map((g, i) => (
-            <span key={i} className="block size-14 shrink-0 overflow-hidden rounded-full shadow-[0_4px_10px_-4px_rgb(63_74_44/0.4)] ring-2 ring-white">
-              <Image
-                src={g.src}
-                alt=""
-                width={g.width}
-                height={g.height}
-                sizes="56px"
-                className="h-full w-full object-cover"
-              />
-            </span>
-          ))}
-        </div>
-        {/* Kalender 20 + kue + party popper (aset referensi) */}
-        <div className="mt-5 flex items-end justify-center gap-6">
+          {/* Kalender 20 — kiri atas */}
           <Image
             src={ASSETS.rsvp.calendar.src}
             alt="Kalender tanggal 20"
             width={ASSETS.rsvp.calendar.width}
             height={ASSETS.rsvp.calendar.height}
-            sizes="70px"
-            className="h-20 w-auto"
+            sizes="56px"
+            className="absolute top-[3%] left-[6%] h-14 w-auto -rotate-6 drop-shadow-[0_4px_8px_rgb(63_74_44/0.25)]"
           />
+          {/* Kue — kanan atas */}
           <Image
             src={ASSETS.rsvp.cake.src}
             alt="Kue pengantin"
             width={ASSETS.rsvp.cake.width}
             height={ASSETS.rsvp.cake.height}
-            sizes="60px"
-            className="h-16 w-auto"
+            sizes="48px"
+            className="absolute top-[2%] right-[7%] h-12 w-auto rotate-6 drop-shadow-[0_4px_8px_rgb(63_74_44/0.25)]"
           />
+          {/* Potret pria sweater — kanan atas (pinggir) */}
+          <span className="absolute top-[26%] right-0 block size-12 shrink-0 overflow-hidden rounded-full shadow-[0_4px_10px_-4px_rgb(63_74_44/0.4)] ring-2 ring-white">
+            <Image
+              src={ASSETS.rsvp.guests[2].src}
+              alt=""
+              width={ASSETS.rsvp.guests[2].width}
+              height={ASSETS.rsvp.guests[2].height}
+              sizes="48px"
+              className="h-full w-full object-cover"
+            />
+          </span>
+          {/* Potret wanita — kanan */}
+          <span className="absolute top-[54%] right-0 block size-12 shrink-0 overflow-hidden rounded-full shadow-[0_4px_10px_-4px_rgb(63_74_44/0.4)] ring-2 ring-white">
+            <Image
+              src={ASSETS.rsvp.guests[3].src}
+              alt=""
+              width={ASSETS.rsvp.guests[3].width}
+              height={ASSETS.rsvp.guests[3].height}
+              sizes="48px"
+              className="h-full w-full object-cover"
+            />
+          </span>
+          {/* Party popper — kanan bawah */}
           <Image
             src={ASSETS.rsvp.popper.src}
             alt="Party popper"
             width={ASSETS.rsvp.popper.width}
             height={ASSETS.rsvp.popper.height}
-            sizes="90px"
-            className="h-20 w-auto"
+            sizes="60px"
+            className="absolute right-[8%] bottom-[5%] h-14 w-auto rotate-12 drop-shadow-[0_4px_8px_rgb(63_74_44/0.25)]"
           />
+          {/* Potret couple — kiri bawah */}
+          <span className="absolute bottom-[6%] left-[7%] block size-12 shrink-0 overflow-hidden rounded-full shadow-[0_4px_10px_-4px_rgb(63_74_44/0.4)] ring-2 ring-white">
+            <Image
+              src={ASSETS.rsvp.guests[1].src}
+              alt=""
+              width={ASSETS.rsvp.guests[1].width}
+              height={ASSETS.rsvp.guests[1].height}
+              sizes="48px"
+              className="h-full w-full object-cover"
+            />
+          </span>
+          {/* Potret pria keriting — kiri */}
+          <span className="absolute top-1/2 left-0 block size-12 shrink-0 overflow-hidden rounded-full shadow-[0_4px_10px_-4px_rgb(63_74_44/0.4)] ring-2 ring-white">
+            <Image
+              src={ASSETS.rsvp.guests[0].src}
+              alt=""
+              width={ASSETS.rsvp.guests[0].width}
+              height={ASSETS.rsvp.guests[0].height}
+              sizes="48px"
+              className="h-full w-full object-cover"
+            />
+          </span>
         </div>
       </Reveal>
 
