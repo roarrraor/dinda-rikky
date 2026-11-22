@@ -5,8 +5,8 @@ import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, typ
 import { createPortal } from "react-dom";
 import dayjs from "dayjs";
 import { AnimatePresence, motion } from "motion/react";
-import { Camera, Check, CheckCircle2, ChevronDown, ChevronRight, ChevronUp, Copy, Images, MessageCircle, Minus, Plus, Send, Smile, X } from "lucide-react";
-import { ASSETS, COPY, ID, paletteVars } from "@/lib/wedding/data";
+import { BookHeart, Cake, Camera, Check, CheckCircle2, ChevronDown, ChevronRight, ChevronUp, Copy, Images, MapPin, MessageCircle, Minus, PartyPopper, Plus, Send, Smile, X } from "lucide-react";
+import { ASSETS, COPY, ID, WEDDING, paletteVars } from "@/lib/wedding/data";
 import { allStickers, stickerSrc } from "@/lib/wedding/stickers";
 import { formatDate } from "@/lib/wedding/format";
 import { sanitizeRichText } from "@/lib/wedding/sanitize";
@@ -808,10 +808,47 @@ export function RsvpSection({
     }`;
 
   return (
-    <section id="pt-rsvp" className="@container relative px-5 pt-10 pb-10">
+    <section id="pt-rsvp" className="@container relative overflow-hidden bg-[#FDF8EE] px-5 pt-12 pb-12">
       <Reveal className="text-center">
-        <SectionTitle plain={showRsvp}>{showRsvp ? "RSVP" : t.wishesTitle}</SectionTitle>
-        <p className={`mx-auto mt-3 max-w-80 ${BODY}`}>{showRsvp ? COPY.rsvp : COPY.wishes}</p>
+        {/* Gelembung hijau RSVP ala referensi: judul + ajakan di dalam
+            gelembung, dikelilingi hiasan kecil. Tanpa lingkaran berulang. */}
+        <div className="relative mx-auto w-full max-w-[420px]">
+          {/* Kalender tanggal 20 */}
+          <div className="absolute -top-3 left-2 z-10 -rotate-6 rounded-lg bg-white px-2 pt-2 pb-1 shadow-[0_4px_10px_-4px_rgb(63_74_44/0.4)] ring-1 ring-(--pt-sage)/60">
+            <span className="absolute inset-x-0 top-0 h-1.5 rounded-t-lg bg-(--theme-accent)" />
+            <span className="block font-marcellus text-[20px] leading-none text-(--theme-text)">20</span>
+          </div>
+          {/* Kue pengantin */}
+          <div className="absolute -top-4 right-3 z-10 flex size-11 rotate-6 items-center justify-center rounded-full bg-[#F9CBD3] text-(--theme-text) shadow-[0_4px_10px_-4px_rgb(63_74_44/0.4)] ring-2 ring-white">
+            <Cake size={22} />
+          </div>
+          {/* Party popper */}
+          <div className="absolute top-[46%] -right-1 z-10 flex size-10 -rotate-12 items-center justify-center rounded-full bg-[#F5E6C8] text-(--theme-text) shadow-[0_4px_10px_-4px_rgb(63_74_44/0.4)] ring-2 ring-white">
+            <PartyPopper size={20} />
+          </div>
+          {/* Foto couple (kartun chibi Dinda & Rikky) */}
+          <div className="absolute -bottom-4 left-5 z-10 size-16 overflow-hidden rounded-full shadow-[0_4px_10px_-4px_rgb(63_74_44/0.4)] ring-[3px] ring-[#F9CBD3]">
+            <Image
+              src={ASSETS.poses[6].src}
+              alt="Dinda & Rikky"
+              width={ASSETS.poses[6].width}
+              height={ASSETS.poses[6].height}
+              sizes="64px"
+              className="h-full w-full object-cover object-top"
+            />
+          </div>
+          {/* Gelembung hijau */}
+          <div className="relative -rotate-2 rounded-[28px] bg-[#7A8B4F] px-6 py-8 shadow-[0_14px_28px_-12px_rgb(63_74_44/0.55)]">
+            <p className="font-marcellus text-[40px] leading-none tracking-[0.08em] text-white">
+              {showRsvp ? "RSVP" : t.wishesTitle}
+            </p>
+            <p className="mx-auto mt-3 max-w-64 font-cormorant text-[17px] leading-relaxed text-white/95 italic">
+              {showRsvp ? COPY.rsvp : COPY.wishes} ✨
+            </p>
+            {/* Ekor gelembung */}
+            <span aria-hidden className="absolute -bottom-[7px] left-10 block size-4 rotate-45 bg-[#7A8B4F]" />
+          </div>
+        </div>
       </Reveal>
 
       {(done || alreadySent) && (
@@ -876,6 +913,25 @@ export function RsvpSection({
           <ChevronRight size={22} className="shrink-0 text-(--theme-muted)" />
         </button>
       )}
+      {/* Tautan bawah ala referensi: Kisah Cinta Kami + Lokasi Acara */}
+      <div className="mt-7 flex flex-wrap items-center justify-center gap-x-7 gap-y-2">
+        <a
+          href="#pt-story"
+          className="inline-flex items-center gap-1.5 font-cormorant text-[16px] font-semibold text-(--theme-text) underline underline-offset-4"
+        >
+          <BookHeart size={17} />
+          Kisah Cinta Kami
+        </a>
+        <a
+          href={WEDDING.mapsUrl}
+          target="_blank"
+          rel="noreferrer"
+          className="inline-flex items-center gap-1.5 font-cormorant text-[16px] font-semibold text-(--theme-text) underline underline-offset-4"
+        >
+          <MapPin size={17} />
+          Lokasi Acara
+        </a>
+      </div>
       {mounted &&
         createPortal(
           <AnimatePresence>
