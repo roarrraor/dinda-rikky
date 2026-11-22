@@ -35,9 +35,9 @@ export const ASSETS = {
       asset("rsvp-p3-man-beige.webp", 340, 340),
       asset("rsvp-p4-woman.webp", 340, 340),
     ],
-    calendar: asset("rsvp-calendar.png", 282, 340),
-    cake: asset("rsvp-cake.png", 286, 320),
-    popper: asset("rsvp-popper.png", 410, 380),
+    calendar: asset("rsvp-calendar.png", 335, 356),
+    cake: asset("rsvp-cake.png", 298, 290),
+    popper: asset("rsvp-popper.png", 387, 337),
   },
   // Pose ilustrasi couple (10 kartun chibi Rikky & Dinda).
   poses: [
