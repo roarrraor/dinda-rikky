@@ -26,6 +26,19 @@ export const ASSETS = {
   teacup: asset("teacup.webp", 365, 323),
   grass: asset("grass.webp", 1000, 982),
   dresscode: asset("dresscode-illustration.png", 968, 751),
+  // Aset hiasan RSVP (dipotong dari referensi Roar): 4 potret bundar tamu,
+  // kalender tanggal 20, kue, dan party popper.
+  rsvp: {
+    guests: [
+      asset("rsvp-p1-man-curly.webp", 340, 340),
+      asset("rsvp-p2-couple.webp", 340, 340),
+      asset("rsvp-p3-man-beige.webp", 340, 340),
+      asset("rsvp-p4-woman.webp", 340, 340),
+    ],
+    calendar: asset("rsvp-calendar.png", 282, 340),
+    cake: asset("rsvp-cake.png", 286, 320),
+    popper: asset("rsvp-popper.png", 410, 380),
+  },
   // Pose ilustrasi couple (10 kartun chibi Rikky & Dinda).
   poses: [
     asset("pose-1.webp", 896, 1200),
