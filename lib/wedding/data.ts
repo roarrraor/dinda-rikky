@@ -25,7 +25,7 @@ export const ASSETS = {
   cosmos: asset("cosmos.webp", 196, 360),
   teacup: asset("teacup.webp", 365, 323),
   grass: asset("grass.webp", 1000, 982),
-  dresscode: asset("dresscode-illustration.png", 1066, 749),
+  dresscode: asset("dresscode-illustration.png", 968, 751),
   // Pose ilustrasi couple (10 kartun chibi Rikky & Dinda).
   poses: [
     asset("pose-1.webp", 896, 1200),
@@ -306,7 +306,7 @@ export const WEDDING: WeddingData = {
   quoteSource: null,
   isDressCode: true,
   dresscode:
-    "Kami akan sangat senang jika Bapak/Ibu/Saudara/i berkenan hadir dengan busana formal bernuansa Cream, Milo, Coksu, atau Putih.\n\nWanita dapat mengenakan kebaya dengan kain batik, dan pria dapat mengenakan beskap dengan blangkon serta kain batik. Kehadiran dengan busana terbaik akan menyempurnakan suasana di hari bahagia kami.",
+    "Kami akan sangat senang jika Bapak/Ibu/Saudara/i berkenan hadir dengan busana formal bernuansa Cream, Milo, Coksu, atau Putih.\n\nKehadiran dengan busana terbaik akan menyempurnakan suasana di hari bahagia kami.",
   dresscodeColors: {
     wear: [
       { name: "Cream", color: "#EFD6B8" },

@@ -85,10 +85,10 @@ export function DressCodeSection({
   return (
     <section
       id="pt-dresscode"
-      className="@container relative overflow-hidden bg-(--theme-text) px-6 pt-12 pb-14 text-center"
+      className="@container relative overflow-hidden bg-(--pt-leaf) px-6 pt-12 pb-14 text-center"
     >
       <Reveal>
-        <SectionTitle light>{COPY.dresscodeTitle}</SectionTitle>
+        <SectionTitle>{COPY.dresscodeTitle}</SectionTitle>
         {illustration && (
           <div className="mx-auto mt-6 w-full max-w-[560px]">
             <Image
@@ -102,9 +102,7 @@ export function DressCodeSection({
           </div>
         )}
         {note?.trim() && (
-          <p className="mx-auto mt-6 max-w-md whitespace-pre-line font-cormorant text-[16px] leading-relaxed text-(--theme-surface)">
-            {note}
-          </p>
+          <p className={`mx-auto mt-6 max-w-md whitespace-pre-line ${BODY}`}>{note}</p>
         )}
         {wear.length > 0 && (
           <ul className="mt-8 flex flex-wrap justify-center gap-5">
@@ -114,10 +112,10 @@ export function DressCodeSection({
                   role="img"
                   aria-label={w.name}
                   title={w.name}
-                  className="block size-12 rounded-full ring-2 ring-white/80"
+                  className="block size-12 rounded-full ring-2 ring-black/20"
                   style={{ backgroundColor: w.color }}
                 />
-                <span className="font-cormorant text-[13px] leading-none text-(--theme-surface)">
+                <span className="font-cormorant text-[13px] leading-none text-(--theme-text)">
                   {w.name}
                 </span>
               </li>
