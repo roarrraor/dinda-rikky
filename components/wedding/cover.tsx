@@ -10,9 +10,9 @@ import { EASE, HAND, LABEL, SCRIPT, Seal } from "./primitives";
 
 const ENVELOPE_BOTTOM = "calc(50cqh - 26cqw)";
 
-function playClick() {
+function playEnvelopeOpen() {
   try {
-    void new Audio("/assets/sfx/click.mp3").play().catch(() => {});
+    void new Audio("/assets/sfx/envelope-open.mp3").play().catch(() => {});
   } catch {
     /* ignore */
   }
@@ -61,10 +61,10 @@ export function Cover({
 
   function open() {
     if (opening) return;
-    playClick();
-    // Lagu mulai setelah bunyi klik segel selesai (klik ~0.44 dtk) -> 0.6 dtk,
-    // jadi lagu masuk pas amplop mulai terbuka, bukan bareng bunyi klik.
-    setTimeout(() => setMusicStarted(true), 600);
+    playEnvelopeOpen();
+    // Lagu mulai setelah bunyi buka amplop selesai (sfx ~1.8 dtk) -> 2 dtk,
+    // jadi lagu masuk pas amplop mulai terbuka, bukan bareng bunyi amplop.
+    setTimeout(() => setMusicStarted(true), 2000);
     if (reduced) return onOpen();
     setOpening(true);
     // Urutan: flap buka (0.35-0.95) -> kertas naik (0.95-2.1) -> hold (2.1-2.8)
