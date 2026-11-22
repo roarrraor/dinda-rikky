@@ -8,7 +8,7 @@ import { buildEvents } from "@/lib/wedding/events";
 import { resolveGuestName } from "@/lib/wedding/guests";
 import { Cover } from "./cover";
 import { BurstSection, SalamSection, TableSection } from "./sections-a";
-import { CoupleSection, RundownSection, SaveDateSection, type Person } from "./sections-b";
+import { CoupleSection, SaveDateSection, type Person } from "./sections-b";
 import {
   ClosingSection,
   DressCodeSection,
@@ -131,11 +131,10 @@ export function Wedding({ data, guestName }: { data: WeddingData; guestName?: st
             />
             <CoupleSection people={people} showPhotos={data.isCouplePhoto !== false} initials={initials} />
             <SaveDateSection date={data.date} title={`${first} & ${second}`} events={events} />
-            <RundownSection rundown={data.rundown} />
-            <StorySection story={data.story} />
             {data.isDressCode !== false && (
               <DressCodeSection note={data.dresscode} wear={data.dresscodeColors?.wear ?? []} />
             )}
+            <StorySection story={data.story} />
             <GallerySection photos={(data.photos ?? []).filter(Boolean)} />
             <GiftSection
               gifts={data.gifts}

@@ -303,8 +303,16 @@ export const WEDDING: WeddingData = {
   isQuote: true,
   quoteText: null,
   quoteSource: null,
-  isDressCode: false,
-  dresscode: "Batik Sogan & Royal Navy",
+  isDressCode: true,
+  dresscode:
+    "Kami akan sangat senang jika Bapak/Ibu/Saudara/i berkenan hadir dengan busana bernuansa hijau sage, krem, atau pink lembut.",
+  dresscodeColors: {
+    wear: [
+      { name: "Hijau Sage", color: "#9CAF88" },
+      { name: "Krem", color: "#F5EFE0" },
+      { name: "Pink Lembut", color: "#D9A5B3" },
+    ],
+  },
   qrisPhoto: "/assets/illustrations/qris.webp",
   giftAddress: "Jl. H. Pratama Wibowo No.12, Kebayoran Baru, Jakarta Selatan 12110",
   giftReceiver: groom,

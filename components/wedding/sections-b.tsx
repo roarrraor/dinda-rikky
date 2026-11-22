@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { motion } from "motion/react";
-import { CalendarPlus, Cake, Coffee, DoorOpen, Heart, Instagram, MapPin, Utensils, type LucideIcon } from "lucide-react";
+import { CalendarPlus, Cake, Coffee, DoorOpen, Heart, MapPin, Utensils, type LucideIcon } from "lucide-react";
 import { ASSETS, COPY, ID } from "@/lib/wedding/data";
 import { displayName, formatDate } from "@/lib/wedding/format";
 import { googleCalendarUrl } from "@/lib/wedding/calendar";
@@ -93,7 +93,6 @@ export interface Person {
 
 function PersonCard({ p, showPhoto, mirror }: { p: Person; showPhoto: boolean; mirror: boolean }) {
   const parents = [p.father, p.mother].filter(Boolean).join(" & ");
-  const ig = p.instagram?.trim().replace(/^@/, "");
 
   return (
     <div className="relative mx-auto w-[86cqw]">
@@ -106,7 +105,7 @@ function PersonCard({ p, showPhoto, mirror }: { p: Person; showPhoto: boolean; m
       )}
       <Reveal className={`relative ${showPhoto ? "-mt-[34cqw]" : ""}`}>
         <div
-          className={`relative rounded-t-full bg-(--pt-pink)/70 px-[12%] pb-[18cqw] text-center ${
+          className={`relative rounded-t-full bg-(--pt-pink)/70 px-[12%] pb-[10cqw] text-center ${
             showPhoto ? "pt-[38cqw]" : "pt-[18cqw]"
           }`}
         >
@@ -128,16 +127,6 @@ function PersonCard({ p, showPhoto, mirror }: { p: Person; showPhoto: boolean; m
                 <br />
                 {parents}
               </p>
-            )}
-            {ig && (
-              <a
-                href={`https://instagram.com/${ig}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-white px-3.5 py-1.5 font-cormorant text-[14px] leading-none font-semibold text-(--theme-primary) shadow-[0_3px_8px_-4px_rgb(63_74_44/0.4)]"
-              >
-                <Instagram size={13} />@{ig}
-              </a>
             )}
           </Stagger>
         </div>
