@@ -210,7 +210,7 @@ function WatercolorHeart({ className = "" }: { className?: string }) {
       initial={{ scale: 1.6, opacity: 0 }}
       whileInView={{ scale: 1, opacity: 1 }}
       viewport={{ once: true }}
-      transition={{ type: "spring", stiffness: 220, damping: 15, delay: 0.5 }}
+      transition={{ type: "spring", stiffness: 120, damping: 18, delay: 0.5 }}
     >
       <defs>
         <radialGradient id="pt-wash" cx="42%" cy="40%" r="65%">
@@ -453,10 +453,10 @@ export function RundownSection({
               return (
                 <motion.li
                   key={`${r.time}-${i}`}
-                  initial={{ opacity: 0, y: 10 }}
+                  initial={{ opacity: 0, y: 16 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
-                  transition={{ duration: 0.6, delay: 0.1, ease: EASE }}
+                  transition={{ duration: 0.9, delay: 0.1, ease: EASE }}
                 >
                   {i > 0 && <Chevrons className="mx-auto my-3 text-(--theme-accent)/70" />}
                   <p className="flex items-center justify-center gap-2 text-(--theme-primary)">

@@ -827,25 +827,32 @@ export function RsvpSection({
             <span aria-hidden className="absolute -bottom-[7px] left-10 block size-4 rotate-45 bg-[#7A8B4F]" />
           </div>
           {/* Kalender 20 — kiri atas */}
-          <Image
-            src={ASSETS.rsvp.calendar.src}
-            alt="Kalender tanggal 20"
-            width={ASSETS.rsvp.calendar.width}
-            height={ASSETS.rsvp.calendar.height}
-            sizes="80px"
-            className="absolute top-[3%] left-[5%] h-20 w-auto -rotate-6 drop-shadow-[0_4px_8px_rgb(63_74_44/0.25)]"
-          />
+          <span className="float-soft absolute top-[3%] left-[5%]" style={{ animationDuration: "3.8s" }}>
+            <Image
+              src={ASSETS.rsvp.calendar.src}
+              alt="Kalender tanggal 20"
+              width={ASSETS.rsvp.calendar.width}
+              height={ASSETS.rsvp.calendar.height}
+              sizes="80px"
+              className="h-20 w-auto -rotate-6 drop-shadow-[0_4px_8px_rgb(63_74_44/0.25)]"
+            />
+          </span>
           {/* Kue — kanan atas */}
-          <Image
-            src={ASSETS.rsvp.cake.src}
-            alt="Kue pengantin"
-            width={ASSETS.rsvp.cake.width}
-            height={ASSETS.rsvp.cake.height}
-            sizes="64px"
-            className="absolute top-[2%] right-[6%] h-16 w-auto rotate-6 drop-shadow-[0_4px_8px_rgb(63_74_44/0.25)]"
-          />
+          <span className="float-soft absolute top-[2%] right-[6%]" style={{ animationDuration: "4.3s", animationDelay: "0.7s" }}>
+            <Image
+              src={ASSETS.rsvp.cake.src}
+              alt="Kue pengantin"
+              width={ASSETS.rsvp.cake.width}
+              height={ASSETS.rsvp.cake.height}
+              sizes="64px"
+              className="h-16 w-auto rotate-6 drop-shadow-[0_4px_8px_rgb(63_74_44/0.25)]"
+            />
+          </span>
           {/* Potret pria sweater — kanan atas (pinggir) */}
-          <span className="absolute top-[26%] right-0 block size-16 shrink-0 overflow-hidden rounded-full shadow-[0_4px_10px_-4px_rgb(63_74_44/0.4)] ring-2 ring-white">
+          <span
+            className="float-soft absolute top-[26%] right-0 block size-16 shrink-0 overflow-hidden rounded-full shadow-[0_4px_10px_-4px_rgb(63_74_44/0.4)] ring-2 ring-white"
+            style={{ animationDuration: "3.4s", animationDelay: "0.3s" }}
+          >
             <Image
               src={ASSETS.rsvp.guests[2].src}
               alt=""
@@ -856,7 +863,10 @@ export function RsvpSection({
             />
           </span>
           {/* Potret wanita — kanan */}
-          <span className="absolute top-[54%] right-0 block size-16 shrink-0 overflow-hidden rounded-full shadow-[0_4px_10px_-4px_rgb(63_74_44/0.4)] ring-2 ring-white">
+          <span
+            className="float-soft absolute top-[54%] right-0 block size-16 shrink-0 overflow-hidden rounded-full shadow-[0_4px_10px_-4px_rgb(63_74_44/0.4)] ring-2 ring-white"
+            style={{ animationDuration: "4.1s", animationDelay: "1.1s" }}
+          >
             <Image
               src={ASSETS.rsvp.guests[3].src}
               alt=""
@@ -867,16 +877,21 @@ export function RsvpSection({
             />
           </span>
           {/* Party popper — kanan bawah */}
-          <Image
-            src={ASSETS.rsvp.popper.src}
-            alt="Party popper"
-            width={ASSETS.rsvp.popper.width}
-            height={ASSETS.rsvp.popper.height}
-            sizes="80px"
-            className="absolute right-[7%] bottom-[5%] h-20 w-auto rotate-12 drop-shadow-[0_4px_8px_rgb(63_74_44/0.25)]"
-          />
+          <span className="float-soft absolute right-[7%] bottom-[5%]" style={{ animationDuration: "3.6s", animationDelay: "0.5s" }}>
+            <Image
+              src={ASSETS.rsvp.popper.src}
+              alt="Party popper"
+              width={ASSETS.rsvp.popper.width}
+              height={ASSETS.rsvp.popper.height}
+              sizes="80px"
+              className="h-20 w-auto rotate-12 drop-shadow-[0_4px_8px_rgb(63_74_44/0.25)]"
+            />
+          </span>
           {/* Potret couple — kiri bawah */}
-          <span className="absolute bottom-[6%] left-[6%] block size-16 shrink-0 overflow-hidden rounded-full shadow-[0_4px_10px_-4px_rgb(63_74_44/0.4)] ring-2 ring-white">
+          <span
+            className="float-soft absolute bottom-[6%] left-[6%] block size-16 shrink-0 overflow-hidden rounded-full shadow-[0_4px_10px_-4px_rgb(63_74_44/0.4)] ring-2 ring-white"
+            style={{ animationDuration: "4.4s", animationDelay: "0.9s" }}
+          >
             <Image
               src={ASSETS.rsvp.guests[1].src}
               alt=""
@@ -887,7 +902,10 @@ export function RsvpSection({
             />
           </span>
           {/* Potret pria keriting — kiri */}
-          <span className="absolute top-1/2 left-0 block size-16 shrink-0 overflow-hidden rounded-full shadow-[0_4px_10px_-4px_rgb(63_74_44/0.4)] ring-2 ring-white">
+          <span
+            className="float-soft absolute top-1/2 left-0 block size-16 shrink-0 overflow-hidden rounded-full shadow-[0_4px_10px_-4px_rgb(63_74_44/0.4)] ring-2 ring-white"
+            style={{ animationDuration: "3.9s", animationDelay: "0.2s" }}
+          >
             <Image
               src={ASSETS.rsvp.guests[0].src}
               alt=""
