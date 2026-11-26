@@ -1434,6 +1434,7 @@ function GiftCard({
   value,
   copy,
   small = false,
+  qr,
   className = "",
 }: {
   label: string;
@@ -1441,9 +1442,11 @@ function GiftCard({
   value: string;
   copy: string;
   small?: boolean;
+  qr?: string;
   className?: string;
 }) {
   const [copied, setCopied] = useState(false);
+  const [zoom, setZoom] = useState(false);
   const copyBtn = (
     <button
       type="button"
@@ -1459,6 +1462,41 @@ function GiftCard({
       {copied ? ID.gift.copied : ID.gift.copy}
     </button>
   );
+
+  if (qr) {
+    // Kartu QRIS: kode QR + nama merchant, ketuk untuk perbesar.
+    return (
+      <div
+        className={`relative overflow-hidden rounded-[20px] bg-[#FBF7EC] text-left shadow-[0_10px_22px_-12px_rgb(63_74_44/0.55)] ring-1 ring-(--pt-sage)/40 ${className}`}
+      >
+        <div aria-hidden className="h-7" style={GINGHAM} />
+        <div className="flex h-[calc(100%-28px)] flex-col justify-between px-5 pt-3.5 pb-5">
+          <div className="flex items-center justify-between gap-3">
+            <p className="pt-1 font-cormorant text-[15px] font-semibold uppercase tracking-[0.16em] text-(--theme-primary)">
+              Scan untuk berbagi kasih
+            </p>
+            <p className="font-cormorant text-[26px] leading-none font-semibold text-(--theme-text)">{label}</p>
+          </div>
+          <button
+            type="button"
+            onClick={() => setZoom(true)}
+            aria-label={ID.gift.zoomQris}
+            className="mx-auto block cursor-zoom-in bg-white p-1.5 ring-1 ring-(--pt-sage)/60"
+          >
+            <Image src={qr} alt="QRIS" width={132} height={132} className="size-[132px]" />
+          </button>
+          <div className="flex items-end justify-between gap-3">
+            <div className="min-w-0">
+              <p className="text-[10px] uppercase tracking-[0.18em] text-(--theme-text)">Atas Nama</p>
+              {name && <p className="mt-0.5 truncate font-cormorant text-[20px] leading-tight">{name}</p>}
+            </div>
+            <p className="pb-1 font-cormorant text-[15px] font-semibold text-(--theme-muted)">Ketuk untuk perbesar</p>
+          </div>
+        </div>
+        {zoom && <Lightbox src={qr} alt="QRIS" onClose={() => setZoom(false)} />}
+      </div>
+    );
+  }
 
   if (small) {
     // Kartu kirim kado: pita + nama penerima + alamat, semburat pink di sudut.
@@ -1525,7 +1563,7 @@ function GiftCard({
 function GiftStack({
   cards,
 }: {
-  cards: { label: string; name?: string; value: string; copy: string; small?: boolean }[];
+  cards: { label: string; name?: string; value: string; copy: string; small?: boolean; qr?: string }[];
 }) {
   const n = cards.length;
   const [index, setIndex] = useState(0);
@@ -1623,10 +1661,12 @@ function GiftStack({
 
 export function GiftSection({
   gifts,
+  qrisPhoto,
   giftAddress,
   giftReceiver,
 }: {
   gifts?: { bank: string; accountNumber: string; accountName?: string }[];
+  qrisPhoto?: string;
   giftAddress?: string;
   giftReceiver?: string;
 }) {
@@ -1640,6 +1680,18 @@ export function GiftSection({
       copy: g.accountNumber,
       small: false,
     })),
+    ...(qrisPhoto
+      ? [
+          {
+            label: "QRIS",
+            name: "BARADE DESIGN - ART",
+            value: "",
+            copy: "",
+            small: false,
+            qr: qrisPhoto,
+          },
+        ]
+      : []),
     ...(address
       ? [
           {
@@ -1652,7 +1704,7 @@ export function GiftSection({
         ]
       : []),
   ];
-  if (accounts.length === 0 && !address) return null;
+  if (accounts.length === 0 && !address && !qrisPhoto) return null;
 
   return (
     <section id="pt-gift" className="@container relative bg-(--pt-leaf) px-6 pt-10 pb-12 text-center">

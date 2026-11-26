@@ -138,6 +138,7 @@ export function Wedding({ data, guestName }: { data: WeddingData; guestName?: st
             <GallerySection photos={(data.photos ?? []).filter(Boolean)} />
             <GiftSection
               gifts={data.gifts}
+              qrisPhoto={data.qrisPhoto}
               giftAddress={data.giftAddress}
               giftReceiver={data.giftReceiver}
             />

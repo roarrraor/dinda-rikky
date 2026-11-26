@@ -335,8 +335,8 @@ export const WEDDING: WeddingData = {
   story: story.map((s) => ({ ...s, photoUrl: null })),
   photos: galleryPhotos,
   gifts: [
-    { bank: "BCA", accountNumber: "1234567890", accountName: groom },
-    { bank: "Mandiri", accountNumber: "0987654321", accountName: bride },
+    { bank: "BCA", accountNumber: "8105364110", accountName: groom },
+    { bank: "BCA", accountNumber: "1251027329", accountName: bride },
   ],
   rundown: [
     { time: "08:00 WIB", label: "Kedatangan Tamu & Registrasi", icon: "arrive" },
