@@ -1464,33 +1464,33 @@ function GiftCard({
   );
 
   if (qr) {
-    // Kartu QRIS: kode QR + nama merchant, ketuk untuk perbesar.
+    // Kartu QRIS: kode QR di kiri + nama merchant di kanan, ketuk untuk perbesar.
     return (
       <div
         className={`relative overflow-hidden rounded-[20px] bg-[#FBF7EC] text-left shadow-[0_10px_22px_-12px_rgb(63_74_44/0.55)] ring-1 ring-(--pt-sage)/40 ${className}`}
       >
         <div aria-hidden className="h-7" style={GINGHAM} />
-        <div className="flex h-[calc(100%-28px)] flex-col justify-between px-5 pt-3.5 pb-5">
+        <div className="flex h-[calc(100%-28px)] flex-col justify-between px-5 pt-2.5 pb-4">
           <div className="flex items-center justify-between gap-3">
-            <p className="pt-1 font-cormorant text-[15px] font-semibold uppercase tracking-[0.16em] text-(--theme-primary)">
+            <p className="font-cormorant text-[15px] font-semibold uppercase tracking-[0.16em] text-(--theme-primary)">
               Scan untuk berbagi kasih
             </p>
             <p className="font-cormorant text-[26px] leading-none font-semibold text-(--theme-text)">{label}</p>
           </div>
-          <button
-            type="button"
-            onClick={() => setZoom(true)}
-            aria-label={ID.gift.zoomQris}
-            className="mx-auto block cursor-zoom-in bg-white p-1.5 ring-1 ring-(--pt-sage)/60"
-          >
-            <Image src={qr} alt="QRIS" width={132} height={132} className="size-[132px]" />
-          </button>
-          <div className="flex items-end justify-between gap-3">
+          <div className="flex items-center gap-4">
+            <button
+              type="button"
+              onClick={() => setZoom(true)}
+              aria-label={ID.gift.zoomQris}
+              className="block shrink-0 cursor-zoom-in bg-white p-1 ring-1 ring-(--pt-sage)/60"
+            >
+              <Image src={qr} alt="QRIS" width={140} height={140} className="size-[140px]" />
+            </button>
             <div className="min-w-0">
               <p className="text-[10px] uppercase tracking-[0.18em] text-(--theme-text)">Atas Nama</p>
-              {name && <p className="mt-0.5 truncate font-cormorant text-[20px] leading-tight">{name}</p>}
+              {name && <p className="mt-0.5 font-cormorant text-[19px] leading-snug">{name}</p>}
+              <p className="mt-2 font-cormorant text-[15px] font-semibold text-(--theme-muted)">Ketuk untuk perbesar</p>
             </div>
-            <p className="pb-1 font-cormorant text-[15px] font-semibold text-(--theme-muted)">Ketuk untuk perbesar</p>
           </div>
         </div>
         {zoom && <Lightbox src={qr} alt="QRIS" onClose={() => setZoom(false)} />}
