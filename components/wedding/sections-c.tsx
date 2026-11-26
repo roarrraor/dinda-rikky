@@ -1672,14 +1672,18 @@ export function GiftSection({
 }) {
   const accounts = (gifts ?? []).filter((g) => g.accountNumber?.trim());
   const address = giftAddress?.trim();
+  // Urutan kartu (Roar 2026-11-26): 1 QRIS, 2 BCA Rikky, 3 Kirim Kado, 4 BCA Dinda.
+  const rikky = accounts.find((g) => g.accountName?.includes("Rikky"));
+  const dinda = accounts.find((g) => g.accountName?.includes("Dinda"));
+  const others = accounts.filter((g) => g !== rikky && g !== dinda);
+  const toCard = (g: { bank: string; accountNumber: string; accountName?: string }) => ({
+    label: g.bank,
+    name: g.accountName,
+    value: g.accountNumber,
+    copy: g.accountNumber,
+    small: false,
+  });
   const cards = [
-    ...accounts.map((g) => ({
-      label: g.bank,
-      name: g.accountName,
-      value: g.accountNumber,
-      copy: g.accountNumber,
-      small: false,
-    })),
     ...(qrisPhoto
       ? [
           {
@@ -1692,6 +1696,7 @@ export function GiftSection({
           },
         ]
       : []),
+    ...(rikky ? [toCard(rikky)] : []),
     ...(address
       ? [
           {
@@ -1703,6 +1708,8 @@ export function GiftSection({
           },
         ]
       : []),
+    ...(dinda ? [toCard(dinda)] : []),
+    ...others.map(toCard),
   ];
   if (accounts.length === 0 && !address && !qrisPhoto) return null;
 
